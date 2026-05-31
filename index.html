@@ -69,9 +69,7 @@
     font-size: 1.1rem;
     font-weight: 900;
     color: #fff;
-    letter-spacing: 12px;
-    text-transform: uppercase;
-    text-shadow: 0 0 20px rgba(139,0,0,0.8);
+    letter-spacing: 4px;
   }
 
   .nav-links { display: flex; gap: 0; list-style: none; }
@@ -681,23 +679,7 @@
     await deleteDoc(doc(db, 'pendingFichas', fichaId));
   };
 
-  
-// ===== NOTIFICAÇÃO FICHAS PENDENTES =====
-function checkPendingNotification() {
-  const logo = document.getElementById('navLogoImg');
-  if(!logo) return;
-  if(pendingFichas.length > 0) {
-    logo.style.animation = 'pulse 0.6s ease-in-out infinite';
-    logo.style.filter = 'drop-shadow(0 0 14px rgba(204,0,0,1))';
-    logo.title = pendingFichas.length + ' ficha(s) aguardando aprovação!';
-  } else {
-    logo.style.animation = 'pulse 4s ease-in-out infinite';
-    logo.style.filter = 'drop-shadow(0 0 6px rgba(139,0,0,0.6))';
-    logo.title = '';
-  }
-}
-
-// ===== ADMIN AUTH VIA FIRESTORE =====
+  // ===== ADMIN AUTH VIA FIRESTORE =====
   window._hashPassword = async function(pass) {
     const enc = new TextEncoder().encode(pass);
     const buf = await crypto.subtle.digest('SHA-256', enc);
@@ -758,20 +740,6 @@ function checkPendingNotification() {
     return key;
   };
 
-  // Bootstrap admins Andy e Ali if not exist
-  async function bootstrapAdmins() {
-    const admins = [
-      {user: 'andy', pass: 'cegodosolhos'},
-      {user: 'ali', pass: 'euamocavalos'},
-      {user: 'twik', pass: 'MestreRP'},
-      {user: 'ryu', pass: 'StaffA'},
-    ];
-    for(const a of admins) {
-      const exists = await window._adminExistsFirebase(a.user);
-      if(!exists) await window._setAdminPasswordFirebase(a.user, a.pass);
-    }
-  }
-  bootstrapAdmins();
   loadFromFirestore();
 </script>
 </head>
@@ -2145,6 +2113,7 @@ function viewPendingFicha(id) {
             <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${f.name||'—'}</span></div>
             ${f.cucuruchoNome?`<div class="profile-info-item"><span class="label">NOME IN-GAME</span><span class="value">${f.cucuruchoNome}</span></div>`:''}
             <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${f.player||'—'}</span></div>
+            <div class="profile-info-item"><span class="label">NASC. PLAYER</span><span class="value">${f.nascimento_player||'—'}</span></div>
             <div class="profile-info-item"><span class="label">IDADE PLAYER</span><span class="value">${f.idade_player||'—'}</span></div>
             <div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${f.nascimento||'—'}</span></div>
             <div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${f.idade?f.idade+' anos':'—'}</span></div>
