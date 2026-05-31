@@ -1175,6 +1175,7 @@
       <div class="form-success" id="fichaSuccess">
         <h3>FICHA RECEBIDA</h3>
         <p>Sua ficha foi enviada e está aguardando aprovação da administração.<br><br>Você será notificado assim que for analisada.</p>
+        <button onclick="resetFichaForm()" style="margin-top:2rem;padding:0.8rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='var(--red-bright)'" onmouseout="this.style.background='var(--red)'">← VOLTAR AO INÍCIO</button>
       </div>
     </div>
   </div>
@@ -1337,7 +1338,14 @@ function showPage(id) {
   window.scrollTo(0,0);
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') renderPending();
-  if(id==='ficha') { buildAttrsForm(); initDateMasks(); }
+  if(id==='ficha') {
+    // Se a tela de sucesso estava aberta, reseta o form
+    if(document.getElementById('fichaSuccess').style.display === 'block' && !window._editingFichaId) {
+      document.getElementById('fichaForm').style.display = 'block';
+      document.getElementById('fichaSuccess').style.display = 'none';
+    }
+    buildAttrsForm(); buildSkillsForm(); initDateMasks();
+  }
 }
 
 function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
@@ -1544,6 +1552,11 @@ async function submitFicha() {
   const nome = document.getElementById('f_nome').value.trim();
   const player = document.getElementById('f_player').value.trim();
   if(!nome || !player) { alert('Preencha ao menos o nome do personagem e do player.'); return; }
+  // Validar se personagem foi selecionado no popup
+  if(!selectedCharId && !window._editingFichaId) {
+    alert('Selecione um personagem clicando em "ESCOLHER".');
+    return;
+  }
   const imgVal = document.getElementById('f_imagem').value.trim();
   const errEl = document.getElementById('f_imagem_err');
   const errEl2 = document.getElementById('f_imagem_err2');
@@ -1608,6 +1621,8 @@ async function submitFicha() {
   window._submitFichaFirebase(ficha).then(() => {
     document.getElementById('fichaForm').style.display = 'none';
     document.getElementById('fichaSuccess').style.display = 'block';
+    // Scroll para o topo da seção
+    window.scrollTo(0, 0);
   }).catch(err => {
     alert('Erro ao enviar ficha. Tente novamente.');
     console.error(err);
@@ -1661,8 +1676,8 @@ function renderPending() {
       </div>
       <div class="pending-actions">
         <button class="btn-approve" onclick="viewPendingFicha('${f.id}')">👁 VER</button>
-        <button class="btn-approve" onclick="(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await approveFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✓ APROVAR';}})(this)">✓ APROVAR</button>
-        <button class="btn-reject" onclick="(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await rejectFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✗ REJEITAR';}})(this)">✗ REJEITAR</button>
+        <button class="btn-approve" onclick="if(confirm('Aprovar a ficha de ${f.player}?')){(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await approveFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✓ APROVAR';}})(this)}">✓ APROVAR</button>
+        <button class="btn-reject" onclick="if(confirm('Rejeitar a ficha de ${f.player}? Esta ação não pode ser desfeita.')){(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await rejectFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✗ REJEITAR';}})(this)}">✗ REJEITAR</button>
       </div>
     </div>`).join('');
 }
@@ -1672,7 +1687,17 @@ async function approveFicha(id) {
   if(!ficha) return false;
   const { id: _localId, ...fichaData } = ficha;
   try {
-    await window._approveFichaFirebase({...fichaData, pending:false}, id);
+    if(fichaData.editRequest && fichaData.originalId) {
+      // Edição: atualiza a ficha original no Firestore em vez de criar nova
+      const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const db = window._db;
+      const { editRequest, originalId, pending, ...cleanData } = fichaData;
+      await updateDoc(doc(db, 'approvedChars', originalId), {...cleanData, pending: false});
+      // Remove da fila de pendentes
+      await window._rejectFichaFirebase(id);
+    } else {
+      await window._approveFichaFirebase({...fichaData, pending:false}, id);
+    }
     return true;
   } catch(err) {
     console.error('Erro ao aprovar:', err);
@@ -1945,7 +1970,22 @@ async function adminRejeitar(id, btn) {
 
 function gerarSenhaEdicao(charId, playerName) {
   window._generateEditKey(charId).then(key => {
-    alert('Senha de edição para ' + playerName + ': ' + key + '\n\nEnvie essa senha para o player via Discord.');
+    // Modal estilizado em vez de alert()
+    const existingModal = document.getElementById('senhaModal');
+    if(existingModal) existingModal.remove();
+    const modal = document.createElement('div');
+    modal.id = 'senhaModal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:2rem';
+    modal.innerHTML = `
+      <div style="background:var(--bg2);border:1px solid var(--red);padding:2.5rem;max-width:460px;width:100%;text-align:center">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem">// SENHA GERADA //</div>
+        <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:#fff;margin-bottom:0.5rem">${playerName.toUpperCase()}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:2rem;color:var(--red-bright);letter-spacing:6px;padding:1.5rem;background:var(--bg3);border:1px solid var(--red);margin:1.5rem 0;cursor:pointer;user-select:all" title="Clique para copiar" onclick="navigator.clipboard.writeText('${key}').then(()=>{this.style.color='#4caf50';setTimeout(()=>this.style.color='var(--red-bright)',1200)})">${key}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem">Clique na senha para copiar. Envie ao player via Discord.</div>
+        <button onclick="document.getElementById('senhaModal').remove()" style="padding:0.7rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">FECHAR</button>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
   });
 }
 
@@ -1955,15 +1995,58 @@ function renderApprovedAdmin() {
   if(!list) return;
   if(!approvedChars.length) { list.innerHTML = '<div class="empty-state">NENHUM PERSONAGEM APROVADO</div>'; return; }
   list.innerHTML = approvedChars.map(f => `
-    <div class="pending-card">
+    <div class="pending-card" id="apc_${f.id}">
       <div class="pending-info">
-        <h4>${(f.name||'?').toUpperCase()}</h4>
-        <p>// Player: ${f.player||'?'}</p>
+        <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' — '+f.cucuruchoNome:''}</h4>
+        <p>// Player: ${f.player||'?'} // Personagem: ${f.name} // Status: ${(f.gameStatus||'vivo').toUpperCase()}</p>
       </div>
       <div class="pending-actions">
-        <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${f.player||f.name}')">🔑 GERAR SENHA</button>
+        <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${(f.player||f.name).replace(/'/g,"\\'")}')">🔑 GERAR SENHA</button>
+        <button class="btn-reject" onclick="deleteApprovedChar('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}')">🗑 EXCLUIR</button>
       </div>
     </div>`).join('');
+}
+
+async function deleteApprovedChar(id, name) {
+  if(!confirm('Excluir o personagem "' + name + '"? Esta ação não pode ser desfeita.')) return;
+  try {
+    const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    await deleteDoc(doc(window._db, 'approvedChars', id));
+  } catch(e) {
+    alert('Erro ao excluir. Verifique o console.');
+    console.error(e);
+  }
+}
+
+// ===== RESET FICHA =====
+function resetFichaForm() {
+  // Reseta campos de texto
+  ['f_nome','f_player','f_nascimento_player','f_idade_player','f_nascimento','f_idade','f_imagem','f_fisico','f_personalidade','f_backstory','f_cucurucho_nome'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  // Reseta atributos
+  attrValues = {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
+  buildAttrsForm();
+  // Reseta perícias
+  selectedSkills = new Set();
+  buildSkillsForm();
+  // Reseta seleção de personagem
+  selectedCharId = null;
+  // Reseta modo edição
+  window._editingFichaId = null;
+  window._editingSenha = null;
+  // Reseta UI
+  document.getElementById('submitBtn').textContent = '▶ ENVIAR FICHA PARA APROVAÇÃO';
+  document.getElementById('fichaEditNotice').style.display = 'none';
+  document.getElementById('f_cucurucho_nome_group').style.display = 'none';
+  document.getElementById('f_nome_label').textContent = 'Personagem *';
+  document.getElementById('f_imagem_err').style.display = 'none';
+  document.getElementById('f_imagem_err2').style.display = 'none';
+  // Volta para a tela do formulário
+  document.getElementById('fichaForm').style.display = 'block';
+  document.getElementById('fichaSuccess').style.display = 'none';
+  showPage('home');
 }
 
 // ===== INIT =====
