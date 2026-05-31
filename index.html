@@ -584,7 +584,7 @@
     position: absolute;
     top: -4px; right: -4px;
     width: 12px; height: 12px;
-    background: var(--red-bright);
+    background: #4caf50;
     border-radius: 50%;
     border: 2px solid var(--bg);
     animation: badgePulse 1s ease-in-out infinite;
@@ -597,7 +597,7 @@
   .nav-logo-wrap { position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; }
   @keyframes logoPulseNotify {
     0%, 100% { filter: drop-shadow(0 0 6px rgba(139,0,0,0.6)); }
-    50% { filter: drop-shadow(0 0 22px rgba(204,0,0,1)); }
+    50% { filter: drop-shadow(0 0 22px rgba(76,175,80,1)); }
   }
   .nav-logo-notify img { animation: logoPulseNotify 0.8s ease-in-out infinite !important; }
 
@@ -644,19 +644,8 @@
     onSnapshot(collection(db, 'pendingFichas'), snap => {
       window.pendingFichas = snap.docs.map(d => ({id: d.id, ...d.data()}));
       if(typeof renderPending === 'function') renderPending();
-      // Notificação visual na logo
-      const badge = document.getElementById('adminNotifyBadge');
-      const logoWrap = document.getElementById('navLogoWrap2');
-      if(badge && logoWrap) {
-        if(window.pendingFichas.length > 0) {
-          badge.style.display = 'block';
-          logoWrap.classList.add('nav-logo-notify');
-          badge.title = window.pendingFichas.length + ' ficha(s) aguardando aprovação';
-        } else {
-          badge.style.display = 'none';
-          logoWrap.classList.remove('nav-logo-notify');
-        }
-      }
+      // Atualiza notificação só se admin estiver logado
+      if(window._adminLogado) updateAdminNotify();
     });
 
     // Aprovados
@@ -1237,62 +1226,62 @@
 <script>
 // ===== DADOS =====
 const CHARS_DATA = [
-  {id:'badboyhalo',name:'BadBoyHalo',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'badboyhalo',name:'BadBoyHalo',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
   {id:'dantdm',name:'DanTDM',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
   {id:'fitmc',name:'FitMC',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
-  {id:'foolish',name:'Foolish',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'foolish',name:'Foolish',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
   {id:'ironmouse',name:'Ironmouse',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
-  {id:'jaiden',name:'Jaiden',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'jaiden',name:'Jaiden',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
   {id:'lenay',name:'Lenay',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
   {id:'nihachu',name:'Nihachu',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
-  {id:'philza',name:'Philza',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
-  {id:'slimecicle',name:'Slimecicle',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
-  {id:'tinakitten',name:'TinaKitten',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
-  {id:'tubbo',name:'Tubbo',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'philza',name:'Philza',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'slimecicle',name:'Slimecicle',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'tinakitten',name:'TinaKitten',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'tubbo',name:'Tubbo',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
   {id:'carre',name:'Carre',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'elmariana',name:'ElMariana',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'elmariana',name:'ElMariana',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'german',name:'German',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'luzu',name:'Luzu',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'maximus',name:'Maximus',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'missasinfonia',name:'Missasinfonia',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'missasinfonia',name:'Missasinfonia',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'polispol',name:'Polispol',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'quackity',name:'Quackity',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'quackity',name:'Quackity',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'rivers',name:'Rivers',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'roier',name:'Roier',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'roier',name:'Roier',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'rubius',name:'Rubius',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'spreen',name:'Spreen',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'spreen',name:'Spreen',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'vegetta',name:'Vegetta',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'willyrex',name:'Willyrex',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'bagi',name:'Bagi',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
-  {id:'cellbit',name:'Cellbit',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
-  {id:'felps',name:'Felps',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
-  {id:'mike',name:'Mike',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
-  {id:'pac',name:'Pac',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'bagi',name:'Bagi',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
+  {id:'cellbit',name:'Cellbit',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
+  {id:'felps',name:'Felps',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
+  {id:'mike',name:'Mike',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
+  {id:'pac',name:'Pac',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
   {id:'antoine',name:'Antoine',lang:'frances',status:'disponivel',gameStatus:'vivo'},
   {id:'aypierre',name:'Aypierre',lang:'frances',status:'disponivel',gameStatus:'vivo'},
-  {id:'baghera',name:'Baghera',lang:'frances',status:'ocupado',gameStatus:'vivo'},
-  {id:'etoiles',name:'Etoiles',lang:'frances',status:'ocupado',gameStatus:'vivo'},
+  {id:'baghera',name:'Baghera',lang:'frances',status:'disponivel',gameStatus:'vivo'},
+  {id:'etoiles',name:'Etoiles',lang:'frances',status:'disponivel',gameStatus:'vivo'},
   {id:'kameto',name:'Kameto',lang:'frances',status:'disponivel',gameStatus:'vivo'},
   {id:'bjacau',name:'Bjacau',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
   {id:'jungryeok',name:'Jungryeok',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
   {id:'yangdding',name:'Yangdding',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
   {id:'kongkong',name:'Kongkong',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
-  {id:'bobby',name:'Bobby',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'bobby',name:'Bobby',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
   {id:'chayanne',name:'Chayanne',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
   {id:'chunsik',name:'Chunsik',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
   {id:'dapper',name:'Dapper',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'empanada',name:'Empanada',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
-  {id:'gegg',name:'Gegg',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
-  {id:'juanaflippa',name:'Juanaflippa',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
-  {id:'leonarda',name:'Leonarda',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'empanada',name:'Empanada',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'gegg',name:'Gegg',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'juanaflippa',name:'Juanaflippa',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'leonarda',name:'Leonarda',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
   {id:'pepito',name:'Pepito',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'pomme',name:'Pomme',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
-  {id:'ramon',name:'Ramón',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
-  {id:'richarlyson',name:'Richarlyson',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
-  {id:'sunnysideup',name:'Sunnysideup',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
-  {id:'tallulah',name:'Tallulah',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
-  {id:'tilin',name:'Tilin',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
-  {id:'trump',name:'Trump',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'pomme',name:'Pomme',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'ramon',name:'Ramón',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'richarlyson',name:'Richarlyson',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'sunnysideup',name:'Sunnysideup',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'tallulah',name:'Tallulah',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'tilin',name:'Tilin',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'trump',name:'Trump',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
   {id:'cucurucho_ali',name:'Cucurucho Ali',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
   {id:'cucurucho_andy',name:'Cucurucho Andy',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
   {id:'cucurucho_twik',name:'Cucurucho Twik',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
@@ -1515,8 +1504,10 @@ function submitFicha() {
     return;
   }
   errEl.style.display = 'none';
+  const charData = CHARS_DATA.find(c => c.id === selectedCharId);
   const ficha = {
     id: Date.now().toString(),
+    charId: selectedCharId || '',
     name: nome, player,
     nascimento_player: document.getElementById('f_nascimento_player').value,
     idade_player: document.getElementById('f_idade_player').value,
@@ -1529,7 +1520,7 @@ function submitFicha() {
     backstory: document.getElementById('f_backstory').value,
     attrs: {...attrValues},
     skills: [...selectedSkills],
-    gameStatus: 'vivo', status: 'disponivel', lang: 'custom', history: [], pending: true
+    gameStatus: 'vivo', status: 'disponivel', lang: charData?.lang || 'custom', history: [], pending: true
   };
   // Edit mode
   if(window._editingFichaId) {
@@ -1546,10 +1537,26 @@ function submitFicha() {
 }
 
 // ===== ADMIN =====
+function updateAdminNotify() {
+  const badge = document.getElementById('adminNotifyBadge');
+  const logoWrap = document.getElementById('navLogoWrap2');
+  if(!badge || !logoWrap) return;
+  if(window.pendingFichas && window.pendingFichas.length > 0) {
+    badge.style.display = 'block';
+    logoWrap.classList.add('nav-logo-notify');
+    badge.title = window.pendingFichas.length + ' ficha(s) aguardando aprovação';
+  } else {
+    badge.style.display = 'none';
+    logoWrap.classList.remove('nav-logo-notify');
+  }
+}
+
 function checkAdmin() {
   const u = document.getElementById('adminUser').value.trim();
   const p = document.getElementById('adminPass').value;
   if(ADMINS.find(a => a.user.toLowerCase()===u.toLowerCase() && a.pass===p)) {
+    window._adminLogado = true;
+    updateAdminNotify();
     showPage('admin-panel'); renderPending();
   } else {
     document.getElementById('adminError').style.display = 'block';
@@ -1634,8 +1641,15 @@ function closeCharPopup() {
   document.getElementById('charSelectPopup').style.display = 'none';
 }
 
+function getCharStatus(charId) {
+  // Aprovado = ocupado
+  if(approvedChars.find(c => c.charId === charId || c.id === charId)) return 'ocupado';
+  // Pendente = reservado
+  if(pendingFichas.find(f => f.charId === charId)) return 'reservado';
+  return 'disponivel';
+}
+
 function renderPopupChars() {
-  const all = [...CHARS_DATA, ...approvedChars];
   const cats = [
     {key:'ingles', label:'🇺🇸 INGLÊS'},
     {key:'espanhol', label:'🇪🇸 ESPANHOL'},
@@ -1647,25 +1661,30 @@ function renderPopupChars() {
   ];
   const container = document.getElementById('popupCharList');
   container.innerHTML = cats.map(cat => {
-    const chars = all.filter(c => c.lang === cat.key);
+    const chars = CHARS_DATA.filter(c => c.lang === cat.key);
     if(!chars.length) return '';
     return `<div style="margin-bottom:1.5rem">
       <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)">${cat.label}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        ${chars.map(c => `
-          <div onclick="selectChar('${c.id}','${c.name}','${c.lang}')" style="padding:0.8rem;background:var(--bg3);border:1px solid ${c.status==='ocupado'?'var(--red)':'var(--border)'};cursor:${c.status==='ocupado'?'not-allowed':'pointer'};opacity:${c.status==='ocupado'?'0.5':'1'};transition:all 0.2s" ${c.status!=='ocupado'?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
-            <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:${c.status==='ocupado'?'var(--text-dim)':'#fff'}">${c.name}</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:${c.status==='ocupado'?'var(--red-bright)':'#4caf50'}">${c.status==='ocupado'?'🔴 OCUPADO':'🟢 DISPONÍVEL'}</div>
-          </div>`).join('')}
+        ${chars.map(c => {
+          const st = getCharStatus(c.id);
+          const bloqueado = st !== 'disponivel';
+          const cor = st==='ocupado'?'var(--red)': st==='reservado'?'#ff9800':'var(--border)';
+          const label = st==='ocupado'?'🔴 OCUPADO': st==='reservado'?'🟡 RESERVADO':'🟢 DISPONÍVEL';
+          const labelCor = st==='ocupado'?'var(--red-bright)': st==='reservado'?'#ff9800':'#4caf50';
+          return `<div onclick="selectChar('${c.id}','${c.name}','${c.lang}')" style="padding:0.8rem;background:var(--bg3);border:1px solid ${cor};cursor:${bloqueado?'not-allowed':'pointer'};opacity:${bloqueado?'0.5':'1'};transition:all 0.2s" ${!bloqueado?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
+            <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:${bloqueado?'var(--text-dim)':'#fff'}">${c.name}</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:${labelCor}">${label}</div>
+          </div>`;
+        }).join('')}
       </div>
     </div>`;
   }).join('');
 }
 
 function selectChar(id, name, lang) {
-  const all = [...CHARS_DATA, ...approvedChars];
-  const c = all.find(x => x.id === id);
-  if(c && c.status === 'ocupado') return;
+  const st = getCharStatus(id);
+  if(st !== 'disponivel') return;
   selectedCharId = id;
   document.getElementById('f_nome').value = name;
   // Se cucurucho, muda label
