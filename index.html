@@ -1248,7 +1248,8 @@
       </div>
     </li>
     <li><a href="#" onclick="showPage('federacao')" id="nav-federacao">Federação</a></li>
-    <li><a href="#" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
+    <li><a href="#" onclick="showPage('registro')" id="nav-registro">Registro</a></li>
+    <li id="nav-ficha-li" style="display:none"><a href="#" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
     <li><a href="#" onclick="showPage('minha-area')" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
     <li><a href="#" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
@@ -1288,10 +1289,50 @@
       <h3>A FEDERAÇÃO</h3>
       <p>A organização que administra a ilha. O que se sabe, o que se suspeita, e o que permanece em silêncio.</p>
     </div>
-    <div class="highlight-card" onclick="showPage('ficha')">
+    <div class="highlight-card" onclick="showPage('registro')">
       <div class="icon">📋</div>
-      <h3>ENVIAR FICHA</h3>
-      <p>Quer fazer parte da história? Preencha sua ficha de personagem e aguarde aprovação.</p>
+      <h3>REGISTRO</h3>
+      <p>Quer fazer parte da história? Veja como criar sua conta, enviar sua ficha e começar a jogar.</p>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTRO -->
+<div id="registro" class="page">
+  <div class="section-header">
+    <div class="section-label">// COMO PARTICIPAR //</div>
+    <h1 class="section-title">REGISTRO</h1>
+  </div>
+  <div class="section-content" style="max-width:700px;margin:0 auto">
+    <div class="rules-block" style="border-top:3px solid var(--red)">
+      <h2>📋 COMO FUNCIONA</h2>
+      <p style="font-size:0.95rem;line-height:1.9;color:var(--text)">Para participar do PARANOIA RP você precisa criar uma conta no site, escolher um personagem disponível, preencher sua ficha e aguardar a aprovação da staff. Todo o processo é feito aqui mesmo — sem precisar abrir ticket para começar.</p>
+    </div>
+    <div class="rules-block">
+      <h2>① CRIE SUA CONTA</h2>
+      <div class="rule-item"><span class="rule-label">ONDE</span><span>Clique em <strong style="color:var(--silver-bright)">Minha Área</strong> na barra de navegação.</span></div>
+      <div class="rule-item"><span class="rule-label">COMO</span><span>Escolha um nome de usuário e uma senha. Guarde bem — você vai precisar para logar sempre que quiser acessar sua área.</span></div>
+      <div class="rule-item"><span class="rule-label">ATENÇÃO</span><span style="color:#ff9800">Se esquecer sua senha, precisará abrir um ticket no Discord para que a staff redefina para você.</span></div>
+    </div>
+    <div class="rules-block">
+      <h2>② ENVIE SUA FICHA</h2>
+      <div class="rule-item"><span class="rule-label">PERSONAGEM</span><span>Após logar, a aba <strong style="color:var(--silver-bright)">Enviar Ficha</strong> aparece na nav. Clique em <strong style="color:var(--silver-bright)">ESCOLHER</strong> para ver os personagens disponíveis e selecione o que deseja interpretar.</span></div>
+      <div class="rule-item"><span class="rule-label">PREENCHIMENTO</span><span>Preencha todos os campos — físico, personalidade, backstory, atributos (5 pontos para distribuir) e 8 perícias. A foto deve ser uma URL do Imgur.</span></div>
+      <div class="rule-item"><span class="rule-label">RESERVA</span><span>Ao enviar, o personagem fica automaticamente <strong style="color:#f5a623">🟡 RESERVADO</strong> até a staff analisar.</span></div>
+    </div>
+    <div class="rules-block">
+      <h2>③ AGUARDE A APROVAÇÃO</h2>
+      <div class="rule-item"><span class="rule-label">PRAZO</span><span>A staff analisa as fichas assim que possível. Acompanhe o status em <strong style="color:var(--silver-bright)">Minha Área</strong>.</span></div>
+      <div class="rule-item"><span class="rule-label">APROVADA</span><span style="color:#4caf50">Seu personagem aparece na página de Personagens e você já pode começar a jogar!</span></div>
+      <div class="rule-item"><span class="rule-label">REJEITADA</span><span style="color:var(--red-bright)">Você receberá uma notificação com o motivo em Minha Área. Corrija e reenvie.</span></div>
+    </div>
+    <div class="rules-block">
+      <h2>✎ EDITAR SUA FICHA</h2>
+      <div class="rule-item"><span class="rule-label">COMO</span><span>Se precisar editar sua ficha depois de aprovada, abra um ticket no Discord solicitando uma senha de edição. Com ela, acesse <strong style="color:var(--silver-bright)">Minha Área → Editar Ficha</strong>.</span></div>
+      <div class="rule-item"><span class="rule-label">REVISÃO</span><span>Toda edição passa por aprovação da staff antes de ser publicada.</span></div>
+    </div>
+    <div style="text-align:center;margin-top:2rem">
+      <button class="submit-btn" style="max-width:300px;margin:0 auto" onclick="showPage('minha-area')">▶ IR PARA MINHA ÁREA</button>
     </div>
   </div>
 </div>
@@ -2110,6 +2151,7 @@ function showPage(id) {
   if(id==='player-panel') { if(!window._playerLogado) { showPage('minha-area'); return; } loadPlayerPanel(); }
   if(id==='minha-area' && window._playerLogado) { showPage('player-panel'); return; }
   if(id==='ficha') {
+    if(!window._playerLogado) { showPage('minha-area'); return; }
     // Atualiza aviso de login do player
     const notice = document.getElementById('fichaPlayerNotice');
     const nomeEl = document.getElementById('fichaPlayerNome');
@@ -3136,6 +3178,7 @@ async function doPlayerLogin() {
       window._playerLogado = true;
       window._playerUser = u;
       document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
+      document.getElementById('nav-ficha-li').style.display = 'block';
       showPage('player-panel');
       loadPlayerPanel();
     } else {
@@ -3164,6 +3207,7 @@ async function doPlayerCadastro() {
     window._playerLogado = true;
     window._playerUser = u;
     document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
+    document.getElementById('nav-ficha-li').style.display = 'block';
     showToast('✓ Conta criada! Bem-vindo, ' + u, 'success');
     showPage('player-panel');
     loadPlayerPanel();
@@ -3180,6 +3224,7 @@ async function doPlayerCadastro() {
 function playerLogout() {
   window._playerLogado = false;
   window._playerUser = '';
+  document.getElementById('nav-ficha-li').style.display = 'none';
   showPage('minha-area');
   document.getElementById('playerLoginUser').value = '';
   document.getElementById('playerLoginPass').value = '';
