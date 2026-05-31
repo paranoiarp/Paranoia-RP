@@ -2194,10 +2194,6 @@ function showPage(id) {
   if(nav) nav.classList.add('active');
   document.getElementById('navLinks').classList.remove('open');
   setTimeout(() => window.scrollTo({top:0, behavior:'instant'}), 0);
-  // Atualiza URL sem disparar hashchange — replaceState não dispara o evento
-  try {
-    if(location.hash !== '#' + id) history.pushState(null, '', '#' + id);
-  } catch(e) {}
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
   if(id==='player-panel') { if(!window._playerLogado) { showPage('minha-area'); return; } loadPlayerPanel(); }
@@ -2234,13 +2230,6 @@ function showPage(id) {
 }
 
 function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
-
-// Botão voltar/avançar do browser
-const _VALID_PAGES = new Set(['home','historia','regras','sistema','personagens','federacao','ficha','admin-gate','admin-panel','minha-area','player-panel','char-profile','lore-chegada','fed-secret','registro']);
-window.addEventListener('popstate', () => {
-  const id = location.hash.replace('#','') || 'home';
-  if(_VALID_PAGES.has(id)) showPage(id);
-});
 
 
 // Touch support para dropdowns da nav no mobile
