@@ -1559,6 +1559,31 @@
         </div>
         <div id="cfg_msg" style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
       </div>
+      <div class="form-section" style="margin-top:2rem">
+        <h3>GERENCIAR SENHAS DE ADMINS</h3>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">Redefina a senha de qualquer admin. Use para recuperar acesso ou cadastrar novos admins.</p>
+        <div style="display:flex;flex-direction:column;gap:0.8rem;max-width:500px">
+          <div class="form-group">
+            <label>USUÁRIO ADMIN</label>
+            <select id="cfg_adminTarget" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Inter',sans-serif;font-size:0.95rem;outline:none;width:100%">
+              <option value="twik">Twik</option>
+              <option value="ryu">Ryu</option>
+              <option value="andy">Andy</option>
+              <option value="ali">Ali</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>NOVA SENHA</label>
+            <input type="password" id="cfg_adminNewPass" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="form-group">
+            <label>CONFIRMAR SENHA</label>
+            <input type="password" id="cfg_adminConfirmPass" placeholder="Repita a senha">
+          </div>
+          <div id="cfg_admin_msg" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;display:none"></div>
+          <button class="submit-btn" onclick="redefinirSenhaAdmin()">REDEFINIR SENHA</button>
+        </div>
+      </div>
     </div>
 
     <div id="senha-admin" class="admin-content">
@@ -2175,6 +2200,22 @@ async function rejectFicha(id) {
     console.error('Erro ao rejeitar:', err);
     return false;
   }
+}
+
+async function redefinirSenhaAdmin() {
+  const target = document.getElementById('cfg_adminTarget').value;
+  const nova = document.getElementById('cfg_adminNewPass').value;
+  const confirm = document.getElementById('cfg_adminConfirmPass').value;
+  const msg = document.getElementById('cfg_admin_msg');
+  msg.style.display = 'none';
+  if(nova.length < 6) { msg.style.color='var(--red-bright)'; msg.textContent='⚠ Senha deve ter ao menos 6 caracteres.'; msg.style.display='block'; return; }
+  if(nova !== confirm) { msg.style.color='var(--red-bright)'; msg.textContent='⚠ Senhas não coincidem.'; msg.style.display='block'; return; }
+  await window._setAdminPasswordFirebase(target, nova);
+  msg.style.color='#4caf50';
+  msg.textContent=`✓ Senha de ${target} redefinida com sucesso!`;
+  msg.style.display='block';
+  document.getElementById('cfg_adminNewPass').value='';
+  document.getElementById('cfg_adminConfirmPass').value='';
 }
 
 function saveFedPassword() {
