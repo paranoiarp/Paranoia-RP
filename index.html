@@ -1135,9 +1135,9 @@
             <div class="form-group full" id="f_cucurucho_nome_group" style="display:none;grid-column:1/-1"><label>Nome do Cucurucho (como será chamado in-game) *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho, Cucurucho 03..."></div>
             <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
             <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
-            <div class="form-group"><label>Idade do Player</label><input type="number" id="f_idade_player" placeholder="Ex: 25"></div>
+            <div class="form-group"><label>Idade do Player</label><input type="text" id="f_idade_player" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
             <div class="form-group"><label>Data de Nascimento do Personagem</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA"></div>
-            <div class="form-group"><label>Idade do Personagem</label><input type="number" id="f_idade" placeholder="Ex: 25"></div>
+            <div class="form-group"><label>Idade do Personagem</label><input type="text" id="f_idade" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
             <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div></div>
           </div>
         </div>
@@ -1404,9 +1404,9 @@ function showCharProfile(id) {
       </div>
       <div class="profile-info-box">
         <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${c.name}</span></div>
-        ${c.player?`<div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.player}</span></div>`:''}
+        <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.player||'—'}</span></div>
         ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
-        ${c.idade?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${c.idade} anos</span></div>`:''}
+        ${(()=>{const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
         ${c.lang==='cucurucho' ? `<div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>` : `<div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>`}
         <div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${c.status==='ocupado'?'var(--red-bright)':'#4caf50'}">${c.status==='ocupado'?'OCUPADA':'DISPONÍVEL'}</span></div>
       </div>
@@ -1497,6 +1497,17 @@ function updateSkillsDisplay() {
   document.getElementById('skillsLeft').textContent = MAX_SKILLS - selectedSkills.size;
 }
 
+// ===== IDADE AUTOMÁTICA =====
+function calcAge(dateStr) {
+  if(!dateStr || dateStr.length < 10) return '';
+  const [d,m,y] = dateStr.split('/').map(Number);
+  if(!d||!m||!y||y<1900) return '';
+  const today = new Date();
+  let age = today.getFullYear() - y;
+  if(today.getMonth()+1 < m || (today.getMonth()+1===m && today.getDate()<d)) age--;
+  return age >= 0 ? String(age) : '';
+}
+
 // ===== MÁSCARA DE DATA =====
 function maskDate(input) {
   input.addEventListener('input', function() {
@@ -1512,7 +1523,19 @@ function maskDate(input) {
   input.setAttribute('maxlength', '10');
 }
 function initDateMasks() {
-  ['f_nascimento_player','f_nascimento'].forEach(id => { const el = document.getElementById(id); if(el) maskDate(el); });
+  const pairs = [
+    ['f_nascimento_player', 'f_idade_player'],
+    ['f_nascimento', 'f_idade']
+  ];
+  pairs.forEach(([dateId, ageId]) => {
+    const el = document.getElementById(dateId);
+    if(!el) return;
+    maskDate(el);
+    el.addEventListener('input', function() {
+      const ageEl = document.getElementById(ageId);
+      if(ageEl) ageEl.value = calcAge(this.value);
+    });
+  });
 }
 
 // ===== SUBMIT =====
