@@ -684,6 +684,74 @@
 
   .empty-state { text-align: center; padding: 3rem; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 2px; border: 1px dashed var(--border); }
 
+  /* FOTO ADMIN CARDS */
+  .foto-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    transition: border-color 0.2s;
+  }
+  .foto-card:hover { border-color: var(--red); }
+  .foto-card-img {
+    width: 100%; aspect-ratio: 1/1; object-fit: cover;
+    background: var(--bg3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .foto-card-img img { width:100%; height:100%; object-fit:cover; display:block; }
+  .foto-card-name {
+    font-family: 'Orbitron', monospace; font-size: 0.7rem;
+    letter-spacing: 2px; color: var(--silver-bright);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .foto-card-lang {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.6rem;
+    color: var(--text-dim); letter-spacing: 1px;
+  }
+  .foto-card-input {
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); padding: 0.5rem 0.7rem;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+    outline: none; width: 100%; transition: border-color 0.2s;
+  }
+  .foto-card-input:focus { border-color: var(--red); }
+  .foto-card-btn {
+    padding: 0.5rem; background: var(--red); border: 1px solid var(--red-bright);
+    color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 2px; cursor: pointer; transition: all 0.2s; width: 100%;
+  }
+  .foto-card-btn:hover { background: var(--red-bright); }
+  .foto-card-btn.ok { background: #1a4a1a; border-color: #4caf50; color: #4caf50; }
+
+  /* FICHA — preview de imagem do personagem */
+  .ficha-char-preview {
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    margin-top: 0.5rem;
+  }
+  .ficha-char-preview img {
+    width: 60px; height: 60px; object-fit: cover;
+    border: 1px solid var(--border);
+  }
+  .ficha-char-preview-placeholder {
+    width: 60px; height: 60px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; background: var(--bg2); border: 1px solid var(--border);
+  }
+  .ficha-char-preview-info {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+    color: var(--text-dim); letter-spacing: 1px; line-height: 1.8;
+  }
+  .ficha-char-preview-info strong { color: var(--silver-bright); }
+
   /* NOTIFICAÇÃO ADMIN */
   .admin-notify-badge {
     position: absolute;
@@ -754,6 +822,7 @@
       // Atualiza notificação só se admin estiver logado
       if(window._adminLogado) updateAdminNotify();
       if(window._notifyPending) window._notifyPending();
+      if(typeof buildNavPersonagensMenu === 'function') buildNavPersonagensMenu();
     });
 
     // Aprovados
@@ -763,6 +832,7 @@
       if(typeof renderChars === 'function') renderChars('all');
       if(typeof renderApprovedAdmin === 'function') renderApprovedAdmin();
       if(typeof renderPopupChars === 'function') renderPopupChars();
+      if(typeof buildNavPersonagensMenu === 'function') buildNavPersonagensMenu();
     });
   }
 
@@ -874,6 +944,17 @@
   }
   bootstrapAdmins();
   loadFromFirestore();
+
+  // Sincroniza fotos pré-cadastradas em tempo real
+  onSnapshot(collection(db, 'charPhotos'), snap => {
+    window._charPhotos = {};
+    snap.docs.forEach(d => { window._charPhotos[d.id] = d.data().imageUrl || ''; });
+    if(typeof renderChars === 'function') renderChars('all');
+    if(typeof renderFotosAdmin === 'function') {
+      const tab = document.getElementById('fotos-admin');
+      if(tab && tab.classList.contains('active')) renderFotosAdmin();
+    }
+  });
 </script>
 </head>
 <body>
@@ -1355,7 +1436,12 @@
         <div class="form-section">
           <h3>INFORMAÇÕES BÁSICAS</h3>
           <div class="form-grid">
-            <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em escolher..." readonly style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div></div>
+            <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em escolher..." readonly style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div>
+              <div class="ficha-char-preview" id="fichaCharPreview">
+                <div id="fichaCharPreviewThumb"></div>
+                <div class="ficha-char-preview-info" id="fichaCharPreviewInfo"></div>
+              </div>
+            </div>
             <div class="form-group full" id="f_cucurucho_nome_group" style="display:none;grid-column:1/-1"><label>Nome do Cucurucho (como será chamado in-game) *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho, Cucurucho 03..."></div>
             <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
             <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
@@ -1435,12 +1521,46 @@
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="showAdminTab('pendentes',this)">FICHAS PENDENTES</button>
       <button class="admin-tab" onclick="showAdminTab('personagens-admin',this)">PERSONAGENS</button>
+      <button class="admin-tab" onclick="showAdminTab('fotos-admin',this);renderFotosAdmin()">🖼 FOTOS</button>
       <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
       <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
       <button class="admin-tab" onclick="showAdminTab('senha-admin',this)">🔐 MINHA SENHA</button>
     </div>
     <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
     <div id="personagens-admin" class="admin-content"><div id="approvedList"><div class="empty-state">CARREGANDO...</div></div></div>
+
+    <!-- ABA FOTOS -->
+    <div id="fotos-admin" class="admin-content">
+      <div class="form-section">
+        <h3>GERENCIAR FOTOS DOS PERSONAGENS</h3>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;line-height:1.8;margin-bottom:1.5rem">
+          Cadastre ou atualize a foto de qualquer personagem independente de ficha.<br>
+          A imagem será exibida na página de personagens e no formulário de inscrição.<br>
+          Use URLs do Imgur (https://i.imgur.com/...).
+        </p>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">
+          <div class="form-group" style="flex:1;min-width:200px">
+            <label>FILTRAR PERSONAGEM</label>
+            <input type="text" id="fotosSearchInput" placeholder="Digite o nome..." oninput="filtrarFotosAdmin(this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Inter',sans-serif;font-size:0.95rem;outline:none;width:100%">
+          </div>
+          <div class="form-group" style="flex:1;min-width:160px">
+            <label>FILTRAR POR IDIOMA</label>
+            <select id="fotosLangFilter" onchange="filtrarFotosAdmin(document.getElementById('fotosSearchInput').value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Inter',sans-serif;font-size:0.95rem;outline:none;width:100%">
+              <option value="">TODOS</option>
+              <option value="ingles">🇺🇸 Inglês</option>
+              <option value="espanhol">🇪🇸 Espanhol</option>
+              <option value="portugues">🇧🇷 Português</option>
+              <option value="frances">🇫🇷 Francês</option>
+              <option value="coreano">🇰🇷 Coreano</option>
+              <option value="huevito">🥚 Huevitos</option>
+              <option value="cucurucho">🎭 Cucuruchos</option>
+            </select>
+          </div>
+        </div>
+        <div id="fotosAdminGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem"></div>
+      </div>
+    </div>
+
     <div id="fed-admin" class="admin-content"><div class="empty-state">GERENCIAMENTO DA FEDERAÇÃO — EM BREVE</div></div>
     <div id="config" class="admin-content">
       <div class="form-section">
@@ -1618,8 +1738,11 @@ function renderChars(filter) {
   grid.innerHTML = list.map(c => {
     // Para approved chars, o id de clique é o charId original (se existir) ou o doc id
     const clickId = c.charId || c.id;
+    const prePhoto = window._charPhotos && window._charPhotos[clickId];
     const img = c.imageUrl
       ? `<img src="${c.imageUrl}" alt="${c.name}">`
+      : prePhoto
+      ? `<img src="${prePhoto}" alt="${c.name}">`
       : c.minecraft
       ? `<img src="https://mc-heads.net/body/${c.minecraft}/80" alt="${c.name}">`
       : `<span>👤</span>`;
@@ -1649,8 +1772,11 @@ function showCharProfile(id) {
   if(!c) return;
   const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
   const sl = c.gameStatus || 'DESCONHECIDO';
+  const prePhoto = window._charPhotos && window._charPhotos[id];
   const imgHtml = c.imageUrl
     ? `<img src="${c.imageUrl}" alt="${c.name}" class="profile-img">`
+    : prePhoto
+    ? `<img src="${prePhoto}" alt="${c.name}" class="profile-img">`
     : c.minecraft
     ? `<img src="https://mc-heads.net/body/${c.minecraft}/300" alt="${c.name}" class="profile-img">`
     : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
@@ -2182,6 +2308,7 @@ function selectChar(id, name, lang) {
   const st = getCharStatus(id);
   if(st !== 'disponivel') return;
   selectedCharId = id;
+  window._selectedCharId = id;
   document.getElementById('f_nome').value = name;
   // Se cucurucho, muda label e mostra campo de nome real
   if(lang === 'cucurucho') {
@@ -2192,6 +2319,8 @@ function selectChar(id, name, lang) {
     document.getElementById('f_cucurucho_nome_group').style.display = 'none';
     document.getElementById('f_cucurucho_nome').value = '';
   }
+  // Exibe preview do personagem com foto pré-cadastrada (se houver)
+  showFichaCharPreview(id);
   closeCharPopup();
 }
 
@@ -2241,9 +2370,12 @@ function openEditForm(playerName, senha) {
   if(ficha.skills) { selectedSkills = new Set(ficha.skills); buildSkillsForm(); }
   // selectedCharId = charId original (para validação do popup)
   selectedCharId = ficha.charId || ficha.id;
+  window._selectedCharId = selectedCharId;
   // _editingFichaId = doc ID do Firestore (para updateDoc na aprovação)
   window._editingFichaId = ficha.id;
   window._editingSenha = senha;
+  // Mostra preview do personagem com foto pré-cadastrada
+  showFichaCharPreview(selectedCharId);
   // Muda botão
   document.getElementById('submitBtn').textContent = '▶ ENVIAR EDIÇÃO PARA APROVAÇÃO';
   document.getElementById('fichaEditNotice').style.display = 'block';
@@ -2429,6 +2561,9 @@ function resetFichaForm() {
   buildSkillsForm();
   // Reseta seleção de personagem
   selectedCharId = null;
+  window._selectedCharId = null;
+  const fichaPreview = document.getElementById('fichaCharPreview');
+  if(fichaPreview) fichaPreview.style.display = 'none';
   // Reseta modo edição
   window._editingFichaId = null;
   window._editingSenha = null;
@@ -2484,6 +2619,119 @@ function buildNavPersonagensMenu() {
       </a>`;
     }).join('');
   });
+}
+
+// ===== FOTOS ADMIN =====
+
+// Cache de fotos pré-cadastradas (charId → imageUrl), carregado do Firestore
+window._charPhotos = {};
+
+// Carrega todas as fotos pré-cadastradas do Firestore
+async function loadCharPhotos() {
+  try {
+    const { getDocs, collection } = window._fbModules;
+    const snap = await getDocs(collection(window._db, 'charPhotos'));
+    snap.docs.forEach(d => { window._charPhotos[d.id] = d.data().imageUrl || ''; });
+  } catch(e) { console.warn('Erro ao carregar charPhotos', e); }
+}
+loadCharPhotos();
+
+// Renderiza o grid de fotos no painel admin
+function renderFotosAdmin() {
+  const q = document.getElementById('fotosSearchInput')?.value || '';
+  const lang = document.getElementById('fotosLangFilter')?.value || '';
+  filtrarFotosAdmin(q, lang);
+}
+
+function filtrarFotosAdmin(q = '', lang = '') {
+  if(!lang) lang = document.getElementById('fotosLangFilter')?.value || '';
+  const grid = document.getElementById('fotosAdminGrid');
+  if(!grid) return;
+  const term = q.toLowerCase();
+  const list = CHARS_DATA.filter(c =>
+    (!term || c.name.toLowerCase().includes(term)) &&
+    (!lang || c.lang === lang)
+  );
+  if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
+  grid.innerHTML = list.map(c => {
+    const url = window._charPhotos[c.id] || '';
+    const imgHtml = url
+      ? `<img src="${url}" alt="${c.name}" onerror="this.parentElement.innerHTML='👤'">`
+      : '👤';
+    const langLabel = {ingles:'🇺🇸',espanhol:'🇪🇸',portugues:'🇧🇷',frances:'🇫🇷',coreano:'🇰🇷',huevito:'🥚',cucurucho:'🎭'}[c.lang] || '';
+    return `<div class="foto-card" id="fotoCard_${c.id}">
+      <div class="foto-card-img">${imgHtml}</div>
+      <div class="foto-card-name">${c.name.toUpperCase()}</div>
+      <div class="foto-card-lang">${langLabel} ${c.lang.toUpperCase()}</div>
+      <input class="foto-card-input" id="fotoInput_${c.id}" type="text" placeholder="https://i.imgur.com/..." value="${url}">
+      <button class="foto-card-btn" id="fotoBtn_${c.id}" onclick="salvarFotoAdmin('${c.id}')">💾 SALVAR FOTO</button>
+    </div>`;
+  }).join('');
+}
+
+async function salvarFotoAdmin(charId) {
+  const input = document.getElementById('fotoInput_' + charId);
+  const btn = document.getElementById('fotoBtn_' + charId);
+  const card = document.getElementById('fotoCard_' + charId);
+  if(!input || !btn) return;
+  const url = input.value.trim();
+  if(url && !url.startsWith('https://i.imgur.com/')) {
+    input.style.borderColor = 'var(--red-bright)';
+    input.title = 'Use apenas URLs do Imgur (https://i.imgur.com/...)';
+    setTimeout(() => { input.style.borderColor = ''; input.title = ''; }, 2000);
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '⏳ SALVANDO...';
+  try {
+    const { doc, setDoc, deleteDoc } = window._fbModules;
+    if(url) {
+      await setDoc(doc(window._db, 'charPhotos', charId), { charId, imageUrl: url });
+      window._charPhotos[charId] = url;
+    } else {
+      await deleteDoc(doc(window._db, 'charPhotos', charId));
+      window._charPhotos[charId] = '';
+    }
+    // Atualiza preview no card
+    const imgDiv = card.querySelector('.foto-card-img');
+    if(imgDiv) imgDiv.innerHTML = url ? `<img src="${url}" alt="" onerror="this.parentElement.innerHTML='👤'">` : '👤';
+    btn.classList.add('ok');
+    btn.textContent = '✓ SALVO!';
+    setTimeout(() => { btn.classList.remove('ok'); btn.textContent = '💾 SALVAR FOTO'; btn.disabled = false; }, 1800);
+    // Atualiza preview na ficha se esse char estiver selecionado
+    if(window._selectedCharId === charId) showFichaCharPreview(charId);
+  } catch(e) {
+    btn.textContent = '✗ ERRO';
+    btn.style.background = 'var(--bg3)';
+    console.error(e);
+    setTimeout(() => { btn.textContent = '💾 SALVAR FOTO'; btn.style.background = ''; btn.disabled = false; }, 2000);
+  }
+}
+
+// Exibe preview do personagem no formulário de ficha
+function showFichaCharPreview(charId) {
+  const preview = document.getElementById('fichaCharPreview');
+  const thumb = document.getElementById('fichaCharPreviewThumb');
+  const info = document.getElementById('fichaCharPreviewInfo');
+  if(!preview || !thumb || !info) return;
+  const c = CHARS_DATA.find(x => x.id === charId);
+  if(!c) { preview.style.display = 'none'; return; }
+  const url = window._charPhotos[charId];
+  if(url) {
+    thumb.innerHTML = `<img src="${url}" alt="${c.name}" onerror="this.parentElement.innerHTML='<div class=\\'ficha-char-preview-placeholder\\'>👤</div>'">`;
+    thumb.className = '';
+  } else if(c.minecraft) {
+    thumb.innerHTML = `<img src="https://mc-heads.net/avatar/${c.minecraft}/60" alt="${c.name}" onerror="this.parentElement.innerHTML='<div class=\\'ficha-char-preview-placeholder\\'>👤</div>'">`;
+    thumb.className = '';
+  } else {
+    thumb.innerHTML = '';
+    thumb.className = 'ficha-char-preview-placeholder';
+    thumb.textContent = '👤';
+  }
+  const langLabel = {ingles:'🇺🇸 Inglês',espanhol:'🇪🇸 Espanhol',portugues:'🇧🇷 Português',frances:'🇫🇷 Francês',coreano:'🇰🇷 Coreano',huevito:'🥚 Huevito',cucurucho:'🎭 Cucurucho'}[c.lang] || c.lang;
+  const hasPhoto = !!url;
+  info.innerHTML = `<strong>${c.name.toUpperCase()}</strong><br>${langLabel}<br><span style="color:${hasPhoto?'#4caf50':'var(--text-dim)'}">● ${hasPhoto ? 'Foto pré-cadastrada pela equipe' : 'Sem foto pré-cadastrada'}</span>`;
+  preview.style.display = 'flex';
 }
 
 // ===== INIT =====
