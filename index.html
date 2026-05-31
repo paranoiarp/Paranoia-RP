@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PARANOIA — Ilha Quesadilla</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;700;900&display=swap');
 
   :root {
     --red: #8B0000;
@@ -24,7 +24,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Inter', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -199,9 +199,9 @@
   .hero-desc {
     max-width: 600px;
     font-size: 1.1rem;
-    line-height: 1.8;
+    line-height: 1.9;
     color: var(--silver);
-    font-weight: 300;
+    font-weight: 400;
   }
 
   .scroll-indicator {
@@ -267,7 +267,7 @@
     margin-bottom: 0.8rem;
   }
 
-  .highlight-card p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.6; font-weight: 300; }
+  .highlight-card p { font-size: 1rem; color: var(--text-dim); line-height: 1.7; font-weight: 400; }
 
   /* SECTION */
   .section-header {
@@ -309,7 +309,7 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .lore-text { font-size: 1.05rem; line-height: 1.9; color: var(--text); font-weight: 300; max-width: 800px; }
+  .lore-text { font-size: 1.05rem; line-height: 2; color: var(--text); font-weight: 400; max-width: 800px; }
   .lore-text p { margin-bottom: 1.2rem; }
 
   .event-card {
@@ -333,7 +333,7 @@
   }
 
   .event-title { font-family: 'Orbitron', monospace; font-size: 0.9rem; letter-spacing: 2px; color: var(--silver-bright); }
-  .event-text { font-size: 1rem; line-height: 1.8; color: var(--text-dim); font-weight: 300; }
+  .event-text { font-size: 1.05rem; line-height: 2; color: var(--text); font-weight: 400; }
   .event-text p { margin-bottom: 0.8rem; }
 
   /* REGRAS */
@@ -361,8 +361,8 @@
   .rule-item {
     padding: 0.8rem 0;
     border-bottom: 1px solid var(--border);
-    font-size: 0.95rem;
-    line-height: 1.7;
+    font-size: 1rem;
+    line-height: 1.75;
     color: var(--text);
     display: flex;
     gap: 1rem;
@@ -469,7 +469,7 @@
   .profile-info-item .value { color: var(--silver-bright); font-weight: 500; }
   .profile-section { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
   .profile-section h3 { font-family: 'Orbitron', monospace; font-size: 0.75rem; letter-spacing: 3px; color: var(--red-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
-  .profile-section p { font-size: 0.95rem; line-height: 1.8; color: var(--text); font-weight: 300; }
+  .profile-section p { font-size: 1rem; line-height: 1.9; color: var(--text); font-weight: 400; }
 
   .attrs-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.8rem; margin-bottom: 2rem; }
   .attr-box { background: var(--bg3); border: 1px solid var(--border); padding: 1rem 0.5rem; text-align: center; }
@@ -493,7 +493,7 @@
   .fed-motto span { color: var(--red-bright); }
   .fed-block { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
   .fed-block h2 { font-family: 'Orbitron', monospace; font-size: 0.85rem; letter-spacing: 3px; color: var(--silver-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
-  .fed-block p { font-size: 1rem; line-height: 1.9; color: var(--text); font-weight: 300; margin-bottom: 1rem; }
+  .fed-block p { font-size: 1rem; line-height: 2; color: var(--text); font-weight: 400; margin-bottom: 1rem; }
   .hierarchy-tree { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; line-height: 2.2; color: var(--text-dim); }
   .hierarchy-tree .top { color: var(--red-bright); }
   .hierarchy-tree .mid { color: var(--silver); padding-left: 1.5rem; }
@@ -520,7 +520,7 @@
   .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
   .form-group.full { grid-column: 1 / -1; }
   .form-group label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; }
-  .form-group input, .form-group textarea, .form-group select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 0.7rem 1rem; font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; width: 100%; }
+  .form-group input, .form-group textarea, .form-group select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 0.7rem 1rem; font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; width: 100%; }
   .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--red); }
   .form-group textarea { resize: vertical; min-height: 100px; }
   .form-group select option { background: var(--bg3); }
@@ -562,7 +562,7 @@
   /* ADMIN */
   .admin-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 2rem; }
   .admin-tabs { display: flex; gap: 0; margin-bottom: 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-  .admin-tab { padding: 0.8rem 1.5rem; background: none; border: none; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .admin-tab { padding: 0.8rem 1.5rem; background: none; border: none; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 2px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
   .admin-tab:hover, .admin-tab.active { color: var(--red-bright); border-bottom-color: var(--red); }
   .admin-content { display: none; }
   .admin-content.active { display: block; }
