@@ -1509,6 +1509,12 @@ function submitFicha() {
     return;
   }
   errEl.style.display = 'none';
+  // Validar atributos — obrigar distribuir todos os pontos
+  const pontosUsados = getUsedPoints();
+  if(pontosUsados < MAX_ATTR_POINTS) {
+    alert(`Distribua todos os ${MAX_ATTR_POINTS} pontos de atributo antes de enviar. Você usou ${pontosUsados} de ${MAX_ATTR_POINTS}.`);
+    return;
+  }
   const charData = CHARS_DATA.find(c => c.id === selectedCharId);
   const cucuruchoNome = document.getElementById('f_cucurucho_nome').value.trim();
   if(charData?.lang === 'cucurucho' && !cucuruchoNome) {
@@ -1516,7 +1522,6 @@ function submitFicha() {
     return;
   }
   const ficha = {
-    id: Date.now().toString(),
     charId: selectedCharId || '',
     cucuruchoNome: cucuruchoNome || '',
     name: nome, player,
@@ -1598,8 +1603,8 @@ function renderPending() {
       </div>
       <div class="pending-actions">
         <button class="btn-approve" onclick="viewPendingFicha('${f.id}')">👁 VER</button>
-        <button class="btn-approve" onclick="approveFicha('${f.id}')">✓ APROVAR</button>
-        <button class="btn-reject" onclick="rejectFicha('${f.id}')">✗ REJEITAR</button>
+        <button class="btn-approve" onclick="this.disabled=true;this.textContent='⏳';approveFicha('${f.id}')">✓ APROVAR</button>
+        <button class="btn-reject" onclick="this.disabled=true;this.textContent='⏳';rejectFicha('${f.id}')">✗ REJEITAR</button>
       </div>
     </div>`).join('');
 }
@@ -1769,26 +1774,96 @@ function openEditForm(playerName, senha) {
 function viewPendingFicha(id) {
   const f = (window.pendingFichas||[]).find(x => x.id === id);
   if(!f) return;
-  const info = `
-PERSONAGEM: ${f.name}
-PLAYER: ${f.player}
-NASC. PLAYER: ${f.nascimento_player||'—'}
-IDADE PLAYER: ${f.idade_player||'—'}
-NASC. PERSONAGEM: ${f.nascimento||'—'}
-IDADE PERSONAGEM: ${f.idade||'—'}
-FOTO: ${f.imageUrl||'—'}
 
-FÍSICO: ${f.fisico||'—'}
+  const attrsHtml = f.attrs
+    ? `<div class="attrs-grid">${Object.entries(f.attrs).map(([k,v])=>`<div class="attr-box"><span class="attr-name">${k}</span><span class="attr-val">${v}</span></div>`).join('')}</div>`
+    : '<p style="color:var(--text-dim);font-size:0.85rem">Atributos não definidos.</p>';
 
-PERSONALIDADE: ${f.personalidade||'—'}
+  const skillsHtml = f.skills && f.skills.length
+    ? `<div class="skills-grid">${f.skills.map(s=>`<div class="skill-item"><span class="skill-name">${s}</span><span class="skill-val">✓</span></div>`).join('')}</div>`
+    : '<p style="color:var(--text-dim);font-size:0.85rem">Nenhuma perícia definida.</p>';
 
-BACKSTORY: ${f.backstory||'—'}
+  const imgHtml = f.imageUrl
+    ? `<img src="${f.imageUrl}" alt="${f.name}" class="profile-img">`
+    : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
 
-ATRIBUTOS: ${JSON.stringify(f.attrs||{})}
-PERÍCIAS: ${(f.skills||[]).join(', ')}
-${f.editRequest ? '\n⚠ EDIÇÃO DE FICHA EXISTENTE' : ''}
-  `.trim();
-  alert(info);
+  const modal = document.createElement('div');
+  modal.id = 'fichaPreviewModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:80px 2rem 2rem;display:flex;align-items:flex-start;justify-content:center';
+  modal.innerHTML = `
+    <div style="max-width:1100px;width:100%;margin:auto">
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--red)">
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// FICHA PENDENTE — REVISÃO ADMIN //</div>
+          <h2 style="font-family:'Orbitron',monospace;font-size:1.4rem;color:#fff;letter-spacing:4px">${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' <span style="color:var(--silver);font-size:1rem">— '+f.cucuruchoNome+'</span>':''}</h2>
+          ${f.editRequest?`<div style="margin-top:0.5rem;display:inline-block;padding:0.2rem 0.8rem;background:rgba(139,0,0,0.3);border:1px solid var(--red);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:2px">⚠ EDIÇÃO DE FICHA EXISTENTE</div>`:''}
+        </div>
+        <button onclick="document.getElementById('fichaPreviewModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.6rem 1.2rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='#fff'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">✕ FECHAR</button>
+      </div>
+
+      <!-- Layout igual ao perfil público -->
+      <div class="profile-layout">
+        <!-- Sidebar -->
+        <div class="profile-sidebar">
+          <div class="profile-img-container">${imgHtml}</div>
+          <div class="profile-status-box">
+            <div class="profile-status-label">// TIPO //</div>
+            <div class="status-badge status-pendente" style="font-size:0.75rem;padding:0.4rem 1rem">${f.editRequest?'EDIÇÃO':'NOVA FICHA'}</div>
+          </div>
+          <div class="profile-info-box">
+            <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${f.name||'—'}</span></div>
+            ${f.cucuruchoNome?`<div class="profile-info-item"><span class="label">NOME IN-GAME</span><span class="value">${f.cucuruchoNome}</span></div>`:''}
+            <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${f.player||'—'}</span></div>
+            <div class="profile-info-item"><span class="label">NASC. PLAYER</span><span class="value">${f.nascimento_player||'—'}</span></div>
+            <div class="profile-info-item"><span class="label">IDADE PLAYER</span><span class="value">${f.idade_player||'—'}</span></div>
+            <div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${f.nascimento||'—'}</span></div>
+            <div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${f.idade?f.idade+' anos':'—'}</span></div>
+            <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${(f.lang||'—').toUpperCase()}</span></div>
+          </div>
+        </div>
+
+        <!-- Main -->
+        <div class="profile-main">
+          ${f.fisico||f.personalidade?`
+          <div class="profile-section">
+            <h3>CARACTERÍSTICAS</h3>
+            ${f.fisico?`<p style="margin-bottom:1rem"><strong style="color:var(--silver)">Físico:</strong><br>${f.fisico}</p>`:''}
+            ${f.personalidade?`<p><strong style="color:var(--silver)">Personalidade:</strong><br>${f.personalidade}</p>`:''}
+          </div>`:''}
+          ${f.backstory?`<div class="profile-section"><h3>HISTÓRIA</h3><p>${f.backstory}</p></div>`:''}
+          <div class="profile-section">
+            <h3>SISTEMA</h3>
+            <div style="margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">ATRIBUTOS</div>
+            ${attrsHtml}
+            <div style="margin:1rem 0;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PERÍCIAS</div>
+            ${skillsHtml}
+          </div>
+        </div>
+      </div>
+
+      <!-- Ações -->
+      <div style="display:flex;gap:0.8rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <button id="btnAprovar_${f.id}" class="btn-approve" onclick="adminAprovar('${f.id}',this)" style="flex:1;padding:1rem;font-size:0.9rem;letter-spacing:2px">✓ APROVAR FICHA</button>
+        <button id="btnRejeitar_${f.id}" class="btn-reject" onclick="adminRejeitar('${f.id}',this)" style="flex:1;padding:1rem;font-size:0.9rem;letter-spacing:2px">✗ REJEITAR FICHA</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
+}
+
+function adminAprovar(id, btn) {
+  btn.disabled = true;
+  btn.textContent = '⏳ APROVANDO...';
+  approveFicha(id);
+  setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 800);
+}
+
+function adminRejeitar(id, btn) {
+  btn.disabled = true;
+  btn.textContent = '⏳ REJEITANDO...';
+  rejectFicha(id);
+  setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 800);
 }
 
 function gerarSenhaEdicao(charId, playerName) {
