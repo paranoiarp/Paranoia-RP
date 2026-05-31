@@ -579,6 +579,28 @@
 
   .empty-state { text-align: center; padding: 3rem; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 2px; border: 1px dashed var(--border); }
 
+  /* NOTIFICAÇÃO ADMIN */
+  .admin-notify-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    width: 12px; height: 12px;
+    background: var(--red-bright);
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    animation: badgePulse 1s ease-in-out infinite;
+    display: none;
+  }
+  @keyframes badgePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.7; }
+  }
+  .nav-logo-wrap { position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  @keyframes logoPulseNotify {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(139,0,0,0.6)); }
+    50% { filter: drop-shadow(0 0 22px rgba(204,0,0,1)); }
+  }
+  .nav-logo-notify img { animation: logoPulseNotify 0.8s ease-in-out infinite !important; }
+
   @media (max-width: 768px) {
     .nav-links { display: none; flex-direction: column; position: absolute; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
     .nav-links.open { display: flex; }
@@ -622,6 +644,19 @@
     onSnapshot(collection(db, 'pendingFichas'), snap => {
       window.pendingFichas = snap.docs.map(d => ({id: d.id, ...d.data()}));
       if(typeof renderPending === 'function') renderPending();
+      // Notificação visual na logo
+      const badge = document.getElementById('adminNotifyBadge');
+      const logoWrap = document.getElementById('navLogoWrap2');
+      if(badge && logoWrap) {
+        if(window.pendingFichas.length > 0) {
+          badge.style.display = 'block';
+          logoWrap.classList.add('nav-logo-notify');
+          badge.title = window.pendingFichas.length + ' ficha(s) aguardando aprovação';
+        } else {
+          badge.style.display = 'none';
+          logoWrap.classList.remove('nav-logo-notify');
+        }
+      }
     });
 
     // Aprovados
@@ -689,14 +724,16 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo" onclick="showPage('home')">
+  <div class="nav-logo-wrap" onclick="showPage('home')" id="navLogoWrap2">
     <img src="https://i.imgur.com/OSV9nga.png" id="navLogoImg" alt="PARANOIA" style="width:38px;height:38px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 6px rgba(139,0,0,0.6))">
+    <div class="admin-notify-badge" id="adminNotifyBadge"></div>
     <span>PARANOIA</span>
   </div>
   <ul class="nav-links" id="navLinks">
     <li><a href="#" onclick="showPage('home')" id="nav-home" class="active">Início</a></li>
     <li><a href="#" onclick="showPage('historia')" id="nav-historia">História</a></li>
     <li><a href="#" onclick="showPage('regras')" id="nav-regras">Regras</a></li>
+    <li><a href="#" onclick="showPage('sistema')" id="nav-sistema">Sistema</a></li>
     <li><a href="#" onclick="showPage('personagens')" id="nav-personagens">Personagens</a></li>
     <li><a href="#" onclick="showPage('federacao')" id="nav-federacao">Federação</a></li>
     <li><a href="#" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
@@ -836,6 +873,149 @@
       <div class="punishment-item"><strong>BAN PERMANENTE</strong>Você é banido permanentemente do servidor.</div>
       <div style="margin-top:1rem;padding:1rem;background:var(--bg3);border-left:2px solid var(--text-dim);font-size:0.85rem;color:var(--text-dim)">Cabe aos Administradores a decisão de qual punição aplicar. É proibido evadir punições. Três punições no mesmo mês acarretam em ban.</div>
     </div>
+  </div>
+</div>
+
+<!-- SISTEMA DO RP -->
+<div id="sistema" class="page">
+  <div class="section-header">
+    <div class="section-label">// MANUAL DE REGRAS //</div>
+    <h1 class="section-title">SISTEMA DO RP</h1>
+  </div>
+  <div class="section-content">
+
+    <!-- INICIATIVA -->
+    <div class="rules-block" style="border-top:3px solid var(--red)">
+      <h2>🎲 DADOS DE INICIATIVA <span>INÍCIO DO COMBATE</span></h2>
+      <div class="rule-item">
+        <span class="rule-label">PADRÃO</span>
+        <span><strong style="color:var(--silver-bright)">1d20</strong> — Aplicado a todos os participantes do combate.</span>
+      </div>
+      <div class="rule-item">
+        <span class="rule-label">VANTAGEM</span>
+        <span><strong style="color:var(--silver-bright)">2d20</strong> (utiliza-se o maior resultado) — Ocorre apenas se o jogador identificar o perigo antes do combate, com validação do mestre.</span>
+      </div>
+    </div>
+
+    <!-- DANO -->
+    <div class="rules-block">
+      <h2>⚔️ DADOS DE DANO <span>ARMAS E BRIGA</span></h2>
+      <div class="rule-item"><span class="rule-label">BRIGA</span><span><strong style="color:var(--silver-bright)">1d5 + FOR</strong> — Desarmado, usa o valor de Força do personagem.</span></div>
+      <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">CORPO A CORPO (ARMADO)</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
+          ${['Madeira → 1d4','Pedra → 1d5','Ferro → 1d6','Diamante → 1d7','Netherite → 1d8'].map(i=>`<div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">${i}</div>`).join('')}
+        </div>
+      </div>
+      <div style="padding:0.8rem 0">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">DISTÂNCIA</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
+          ${['Arco → 1d6','Besta → 1d7'].map(i=>`<div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">${i}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- DEFESA -->
+    <div class="rules-block">
+      <h2>🛡️ DADOS DE DEFESA <span>ESCUDO E ARMADURA</span></h2>
+      <div class="rule-item">
+        <span class="rule-label">ESCUDO</span>
+        <span><strong style="color:var(--silver-bright)">1d3</strong> — Defesa ativa. Requer declaração de ação no turno.<br>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim)">
+          Resultado 3 → Bloqueio Total (dano anulado) &nbsp;|&nbsp;
+          Resultado 2 → Bloqueio Parcial (dano reduzido à metade) &nbsp;|&nbsp;
+          Resultado 1 → Falha (dano passa para armadura)
+        </span></span>
+      </div>
+      <div class="rule-item">
+        <span class="rule-label">ARMADURA</span>
+        <span>Defesa passiva. Requer anúncio prévio de que está equipada.<br>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim)">
+          Ferro → reduz 1d4 &nbsp;|&nbsp; Diamante → reduz 1d6 &nbsp;|&nbsp; Netherite → reduz 1d7
+        </span></span>
+      </div>
+    </div>
+
+    <!-- FLUXO DE TURNO -->
+    <div class="rules-block">
+      <h2>🔄 FLUXO DE TURNO <span>COMBATE</span></h2>
+      <div class="rule-item"><span class="rule-label">AÇÕES</span><span><strong style="color:var(--silver-bright)">1 Ação Principal + 1 Ação Secundária</strong> + Narrativa livre por turno.</span></div>
+      <div class="rule-item">
+        <span class="rule-label">RESOLUÇÃO</span>
+        <span>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;line-height:2.2;color:var(--text-dim)">
+            <span style="color:var(--red-bright)">1.</span> Ataque acerta &nbsp;→&nbsp;
+            <span style="color:var(--red-bright)">2.</span> Escudo (1d3) tenta defender &nbsp;→&nbsp;
+            <span style="color:var(--red-bright)">3.</span> Dano restante vai à armadura &nbsp;→&nbsp;
+            <span style="color:var(--red-bright)">4.</span> Armadura reduz &nbsp;→&nbsp;
+            <span style="color:var(--red-bright)">5.</span> Resultado final é subtraído do HP
+          </div>
+        </span>
+      </div>
+    </div>
+
+    <!-- HP E ESTADOS -->
+    <div class="rules-block">
+      <h2>❤️ VIDA E ESTADOS <span>HP BASE: 20</span></h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem;margin-bottom:1rem">
+        <div style="padding:1rem;background:var(--bg3);border:1px solid #4caf50;text-align:center">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#4caf50;letter-spacing:1px;margin-bottom:0.3rem">NORMAL</div>
+          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">20 – 15</div>
+        </div>
+        <div style="padding:1rem;background:var(--bg3);border:1px solid #ff9800;text-align:center">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#ff9800;letter-spacing:1px;margin-bottom:0.3rem">FERIDO</div>
+          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">14 – 10</div>
+        </div>
+        <div style="padding:1rem;background:var(--bg3);border:1px solid #f44336;text-align:center">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#f44336;letter-spacing:1px;margin-bottom:0.3rem">GRAVE</div>
+          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">9 – 5</div>
+        </div>
+        <div style="padding:1rem;background:rgba(139,0,0,0.3);border:1px solid var(--red-bright);text-align:center">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.3rem">CRÍTICO</div>
+          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">4 – 1</div>
+        </div>
+        <div style="padding:1rem;background:rgba(0,0,0,0.5);border:1px solid #444;text-align:center">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#666;letter-spacing:1px;margin-bottom:0.3rem">INCONSCIENTE</div>
+          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:#555">0</div>
+        </div>
+      </div>
+      <div class="rule-item">
+        <span class="rule-label">IMPACTO</span>
+        <span>Receber mais de <strong style="color:var(--silver-bright)">10 de dano</strong> em um único ataque: personagem fica <strong style="color:var(--red-bright)">incapacitado por 2 turnos</strong> (sem atacar ou usar escudo). O mestre pode ajustar.</span>
+      </div>
+    </div>
+
+    <!-- MORTE E ESTABILIZAÇÃO -->
+    <div class="rules-block">
+      <h2>💀 MORTE E ESTABILIZAÇÃO <span>0 HP</span></h2>
+      <div class="rule-item"><span class="rule-label">TEMPO</span><span>O personagem tem até <strong style="color:var(--silver-bright)">3 rodadas</strong> após chegar a 0 HP.</span></div>
+      <div class="rule-item"><span class="rule-label">AÇÃO</span><span>Um aliado deve usar seu turno para realizar um <strong style="color:var(--silver-bright)">Teste de Medicina</strong> — ficando vulnerável a ataques.</span></div>
+      <div class="rule-item"><span class="rule-label">SUCESSO</span><span>Estabilização rola <strong style="color:var(--silver-bright)">1d6</strong> de HP recuperado instantaneamente.</span></div>
+      <div class="rule-item" style="color:var(--red-bright)"><span class="rule-label">FALHA</span><span>Se as 3 rodadas passarem sem estabilização — <strong style="color:var(--red-bright)">o personagem morre.</strong></span></div>
+    </div>
+
+    <!-- DURABILIDADE -->
+    <div class="rules-block">
+      <h2>🔧 DURABILIDADE DE ITENS <span>DESGASTE</span></h2>
+      <div class="rule-item"><span class="rule-label">GATILHO</span><span>Cada dano que ultrapassar a absorção do item exige um <strong style="color:var(--silver-bright)">Teste de Resistência</strong> (ex: 1d6).</span></div>
+      <div class="rule-item">
+        <span class="rule-label">ESTADOS</span>
+        <span>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.4rem">
+            ${['Inteiro','Danificado','Muito Danificado','Quebrado'].map((s,i)=>`<span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:${['#4caf50','#ff9800','#f44336','#666'][i]}">${s}</span>`).join('<span style="color:var(--text-dim);align-self:center">→</span>')}
+          </div>
+        </span>
+      </div>
+    </div>
+
+    <!-- RESPAWN -->
+    <div class="rules-block">
+      <h2>🔁 RESPAWN <span>APÓS A MORTE</span></h2>
+      <div class="rule-item"><span class="rule-label">TEMPO</span><span><strong style="color:var(--silver-bright)">3 horas reais</strong> após o fim do combate.</span></div>
+      <div class="rule-item"><span class="rule-label">LOCAL</span><span>Spawn do servidor, casa do jogador ou local definido pelo mestre.</span></div>
+      <div class="rule-item"><span class="rule-label">PENALIDADES</span><span>Perda total de inventário, retorno tardio e impactos narrativos.</span></div>
+    </div>
+
   </div>
 </div>
 
@@ -1230,8 +1410,6 @@ function showCharProfile(id) {
       <div class="profile-info-box">
         <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${c.name}</span></div>
         ${c.player?`<div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.player}</span></div>`:''}
-        ${c.nascimento_player?`<div class="profile-info-item"><span class="label">NASC. PLAYER</span><span class="value">${c.nascimento_player}</span></div>`:''}
-        ${c.idade_player?`<div class="profile-info-item"><span class="label">IDADE PLAYER</span><span class="value">${c.idade_player} anos</span></div>`:''}
         ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
         ${c.idade?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${c.idade} anos</span></div>`:''}
         <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>
