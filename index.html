@@ -774,6 +774,78 @@
   }
   .nav-logo-notify img { animation: logoPulseNotify 0.8s ease-in-out infinite !important; }
 
+  .admin-tab-badge {
+    display: inline-block;
+    background: var(--red);
+    color: #fff;
+    font-size: 0.6rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    margin-left: 0.4rem;
+    font-family: 'Share Tech Mono', monospace;
+    vertical-align: middle;
+  }
+
+  /* TOAST */
+  #toastContainer {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red-bright);
+    padding: 0.9rem 1.4rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: var(--silver-bright);
+    min-width: 260px;
+    max-width: 380px;
+    animation: toastIn 0.25s ease forwards;
+    pointer-events: auto;
+  }
+  .toast.toast-success { border-left-color: #4caf50; }
+  .toast.toast-error { border-left-color: var(--red-bright); }
+  .toast.toast-info { border-left-color: var(--silver); }
+  .toast.toast-out { animation: toastOut 0.25s ease forwards; }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(20px); }
+  }
+
+  /* PAGE FADE */
+  .page { opacity: 0; transition: opacity 0.2s ease; }
+  .page.active { opacity: 1; }
+
+  /* CHAR CARD SCANLINE HOVER */
+  .char-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(139,0,0,0.03) 3px,
+      rgba(139,0,0,0.03) 4px
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .char-card:hover::after { opacity: 1; }
+
   @media (max-width: 768px) {
     .nav-links { display: none; flex-direction: column; position: absolute; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
     .nav-links.open { display: flex; }
@@ -968,6 +1040,8 @@
 </script>
 </head>
 <body>
+
+<div id="toastContainer"></div>
 
 <!-- NAV -->
 <nav>
@@ -1420,7 +1494,11 @@
     <div class="access-error" id="fedError">⚠ AUTORIZAÇÃO NEGADA — CREDENCIAIS INVÁLIDAS</div>
   </div>
   <div id="fedContent" style="display:none;max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
-    <div class="empty-state">ÁREA DA FEDERAÇÃO — CONTEÚDO SERÁ ADICIONADO PELA ADMINISTRAÇÃO</div>
+    <div class="empty-state" style="font-family:'Share Tech Mono',monospace;letter-spacing:2px;line-height:2">
+      <div style="color:var(--red-bright);font-size:1.5rem;margin-bottom:1rem">⚠</div>
+      ARQUIVOS CLASSIFICADOS<br>
+      <span style="color:var(--text-dim);font-size:0.75rem">AGUARDANDO LIBERAÇÃO PELA ADMINISTRAÇÃO</span>
+    </div>
   </div>
 </div>
 
@@ -1530,7 +1608,7 @@
   </div>
   <div style="max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
     <div class="admin-tabs">
-      <button class="admin-tab active" onclick="showAdminTab('pendentes',this)">FICHAS PENDENTES</button>
+      <button class="admin-tab active" onclick="showAdminTab('pendentes',this)">FICHAS PENDENTES <span class="admin-tab-badge" id="pendentesTabBadge" style="display:none"></span></button>
       <button class="admin-tab" onclick="showAdminTab('personagens-admin',this)">PERSONAGENS</button>
       <button class="admin-tab" onclick="showAdminTab('fotos-admin',this);renderFotosAdmin()">🖼 FOTOS</button>
       <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
@@ -1751,7 +1829,11 @@ function showLorePage(slug) { showPage('lore-' + slug); }
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById(id);
-  if(p) p.classList.add('active');
+  if(p) {
+    // force reflow para a transição funcionar
+    void p.offsetWidth;
+    p.classList.add('active');
+  }
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   const nav = document.getElementById('nav-'+id) || (id.startsWith('lore-') ? document.getElementById('nav-historia') : null);
   if(nav) nav.classList.add('active');
@@ -2001,10 +2083,10 @@ function initDateMasks() {
 async function submitFicha() {
   const nome = document.getElementById('f_nome').value.trim();
   const player = document.getElementById('f_player').value.trim();
-  if(!nome || !player) { alert('Preencha ao menos o nome do personagem e do player.'); return; }
+  if(!nome || !player) { showToast('⚠ Preencha ao menos o nome do personagem e do player.', 'error'); return; }
   // Validar se personagem foi selecionado no popup
   if(!selectedCharId && !window._editingFichaId) {
-    alert('Selecione um personagem clicando em "ESCOLHER".');
+    showToast('⚠ Selecione um personagem clicando em "ESCOLHER".', 'error');
     return;
   }
   const imgVal = document.getElementById('f_imagem').value.trim();
@@ -2033,17 +2115,17 @@ async function submitFicha() {
   // Validar atributos — obrigar distribuir todos os pontos
   const pontosUsados = getUsedPoints();
   if(pontosUsados < MAX_ATTR_POINTS) {
-    alert(`Distribua todos os ${MAX_ATTR_POINTS} pontos de atributo antes de enviar. Você usou ${pontosUsados} de ${MAX_ATTR_POINTS}.`);
+    showToast(`⚠ Distribua todos os ${MAX_ATTR_POINTS} pontos de atributo. Você usou ${pontosUsados} de ${MAX_ATTR_POINTS}.`, 'error');
     return;
   }
   const charData = CHARS_DATA.find(c => c.id === selectedCharId);
   const cucuruchoNome = document.getElementById('f_cucurucho_nome').value.trim();
   if(charData?.lang === 'cucurucho' && !cucuruchoNome) {
-    alert('Preencha o nome do Cucurucho.');
+    showToast('⚠ Preencha o nome do Cucurucho.', 'error');
     return;
   }
   if(selectedSkills.size < MAX_SKILLS) {
-    alert(`Selecione ${MAX_SKILLS} perícias antes de enviar. Você selecionou ${selectedSkills.size} de ${MAX_SKILLS}.`);
+    showToast(`⚠ Selecione ${MAX_SKILLS} perícias. Você selecionou ${selectedSkills.size} de ${MAX_SKILLS}.`, 'error');
     return;
   }
   const ficha = {
@@ -2069,7 +2151,7 @@ async function submitFicha() {
     ficha.originalId = window._editingFichaId;
   }
   if(!window._submitFichaFirebase) {
-    alert('Conexão com o banco de dados ainda está carregando. Aguarde um momento e tente novamente.');
+    showToast('⚠ Conexão ainda carregando. Aguarde um momento e tente novamente.', 'error');
     return;
   }
   window._submitFichaFirebase(ficha).then(() => {
@@ -2078,7 +2160,7 @@ async function submitFicha() {
     // Scroll para o topo da seção
     window.scrollTo(0, 0);
   }).catch(err => {
-    alert('Erro ao enviar ficha. Tente novamente.');
+    showToast('✗ Erro ao enviar ficha. Tente novamente.', 'error');
     console.error(err);
   });
 }
@@ -2197,6 +2279,9 @@ function renderPending() {
   const list = document.getElementById('pendingList');
   if(!list) return;
   const fichas = window.pendingFichas || [];
+  // Atualiza badge da aba
+  const badge = document.getElementById('pendentesTabBadge');
+  if(badge) { badge.textContent = fichas.length; badge.style.display = fichas.length ? 'inline-block' : 'none'; }
   if(!fichas.length) { list.innerHTML = '<div class="empty-state">NENHUMA FICHA PENDENTE</div>'; return; }
   list.innerHTML = fichas.map(f => `
     <div class="pending-card" id="pc_${f.id}">
@@ -2207,7 +2292,7 @@ function renderPending() {
       <div class="pending-actions">
         <button class="btn-approve" onclick="viewPendingFicha('${f.id}')">👁 VER</button>
         <button class="btn-approve" onclick="if(confirm('Aprovar a ficha de ${f.player}?')){(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await approveFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✓ APROVAR';}})(this)}">✓ APROVAR</button>
-        <button class="btn-reject" onclick="if(confirm('Rejeitar a ficha de ${f.player}? Esta ação não pode ser desfeita.')){(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await rejectFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✗ REJEITAR';}})(this)}">✗ REJEITAR</button>
+        <button class="btn-reject" onclick="adminRejeitar('${f.id}',this)">✗ REJEITAR</button>
       </div>
     </div>`).join('');
 }
@@ -2452,7 +2537,7 @@ async function showEditFicha() {
     if(player) {
       openEditForm(player, senha);
     } else {
-      alert('Senha inválida. Solicite acesso via ticket no Discord.');
+      showToast('⚠ Senha inválida. Solicite acesso via ticket no Discord.', 'error');
     }
   });
 }
@@ -2461,7 +2546,7 @@ function openEditForm(playerName, senha) {
   // Busca ficha aprovada do player
   const ficha = approvedChars.find(c => c.player && c.player.toLowerCase() === playerName.toLowerCase());
   if(!ficha) {
-    alert('Nenhuma ficha aprovada encontrada para ' + playerName);
+    showToast('⚠ Nenhuma ficha aprovada encontrada para ' + playerName, 'error');
     return;
   }
   // Garante que fichaSuccess não está visível
@@ -2586,7 +2671,7 @@ async function adminAprovar(id, btn) {
     } else {
       btn.disabled = false;
       btn.textContent = '✓ APROVAR';
-      alert('Erro ao aprovar. Verifique o console.');
+      showToast('✗ Erro ao aprovar. Verifique o console.', 'error');
     }
   });
 }
@@ -2629,7 +2714,7 @@ async function confirmarRejeicao(id) {
     document.getElementById('fichaPreviewModal')?.remove();
   } catch(err) {
     btn.disabled = false; btn.textContent = '✗ CONFIRMAR REJEIÇÃO';
-    alert('Erro ao rejeitar.');
+    showToast('✗ Erro ao rejeitar. Tente novamente.', 'error');
   }
 }
 
@@ -2678,7 +2763,7 @@ async function deleteApprovedChar(id, name) {
       const { doc, deleteDoc } = window._fbModules;
       await deleteDoc(doc(window._db, 'approvedChars', id));
     } catch(e) {
-      alert('Erro ao excluir. Verifique o console.');
+      showToast('✗ Erro ao excluir. Verifique o console.', 'error');
       console.error(e);
     }
   });
@@ -2858,6 +2943,19 @@ function showFichaCharPreview(charId) {
   const hasPhoto = !!url;
   info.innerHTML = `<strong>${c.name.toUpperCase()}</strong><br>${langLabel}<br><span style="color:${hasPhoto?'#4caf50':'var(--text-dim)'}">● ${hasPhoto ? 'Foto pré-cadastrada pela equipe' : 'Sem foto pré-cadastrada'}</span>`;
   preview.style.display = 'flex';
+}
+
+// ===== TOAST =====
+function showToast(msg, type = 'info', duration = 3500) {
+  const container = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('toast-out');
+    t.addEventListener('animationend', () => t.remove());
+  }, duration);
 }
 
 // ===== INIT =====
