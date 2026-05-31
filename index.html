@@ -32,7 +32,6 @@
     overflow-x: hidden;
   }
   nav { position: relative; z-index: 100; }
-  .page { position: relative; z-index: 1; }
 
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -222,7 +221,7 @@
   }
 
   /* PAGES */
-  .page { display: none; padding-top: 60px; min-height: 100vh; }
+  .page { display: none; padding-top: 60px; min-height: 100vh; position: relative; z-index: 1; }
   .page.active { display: block; opacity: 0; animation: pageFadeIn 0.2s ease forwards; }
   #home { flex-direction: column; }
   #home.active { display: flex; }
