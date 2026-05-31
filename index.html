@@ -818,6 +818,7 @@
       window.pendingFichas = snap.docs.map(d => ({id: d.id, ...d.data()}));
       pendingFichas = window.pendingFichas;
       if(typeof renderPending === 'function') renderPending();
+      if(typeof renderChars === 'function') renderChars('all');
       if(typeof renderPopupChars === 'function') renderPopupChars();
       // Atualiza notificação só se admin estiver logado
       if(window._adminLogado) updateAdminNotify();
@@ -1621,6 +1622,7 @@ const CHARS_DATA = [
   {id:'mike',name:'Mike',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
   {id:'pac',name:'Pac',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
   {id:'forever',name:'Forever',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
+  {id:'jinki',name:'Jinki',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
   {id:'antoine',name:'Antoine',lang:'frances',status:'disponivel',gameStatus:'vivo'},
   {id:'aypierre',name:'Aypierre',lang:'frances',status:'disponivel',gameStatus:'vivo'},
   {id:'baghera',name:'Baghera',lang:'frances',status:'disponivel',gameStatus:'vivo'},
