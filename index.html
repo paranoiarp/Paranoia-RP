@@ -901,23 +901,23 @@
       <div class="nav-dropdown-menu" id="navPersonagensMenu">
         <a href="#" onclick="showPage('personagens')"><img src="https://i.imgur.com/OSV9nga.png" class="nav-logo-img" alt=""> Ver Todos</a>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('ingles',document.querySelector('.filter-btn:nth-child(4)'))">🇺🇸 Inglês</a>
+          <a href="#" onclick="showPage('personagens');filterChars('ingles',document.querySelector('.filter-btn:nth-child(4)'))"><img src="https://flagcdn.com/16x12/us.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Inglês</a>
           <div class="nav-submenu" id="navSubIngles"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('espanhol',document.querySelector('.filter-btn:nth-child(5)'))">🇲🇽 Espanhol</a>
+          <a href="#" onclick="showPage('personagens');filterChars('espanhol',document.querySelector('.filter-btn:nth-child(5)'))"><img src="https://flagcdn.com/16x12/es.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Espanhol</a>
           <div class="nav-submenu" id="navSubEspanhol"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('portugues',document.querySelector('.filter-btn:nth-child(6)'))">🇧🇷 Português</a>
+          <a href="#" onclick="showPage('personagens');filterChars('portugues',document.querySelector('.filter-btn:nth-child(6)'))"><img src="https://flagcdn.com/16x12/br.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Português</a>
           <div class="nav-submenu" id="navSubPortugues"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('frances',document.querySelector('.filter-btn:nth-child(7)'))">🇫🇷 Francês</a>
+          <a href="#" onclick="showPage('personagens');filterChars('frances',document.querySelector('.filter-btn:nth-child(7)'))"><img src="https://flagcdn.com/16x12/fr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Francês</a>
           <div class="nav-submenu" id="navSubFrances"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('coreano',document.querySelector('.filter-btn:nth-child(8)'))">🇰🇷 Coreano</a>
+          <a href="#" onclick="showPage('personagens');filterChars('coreano',document.querySelector('.filter-btn:nth-child(8)'))"><img src="https://flagcdn.com/16x12/kr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Coreano</a>
           <div class="nav-submenu" id="navSubCoreano"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
@@ -2472,7 +2472,7 @@ function buildNavPersonagensMenu() {
   Object.entries(map).forEach(([lang, elId]) => {
     const el = document.getElementById(elId);
     if(!el) return;
-    const chars = CHARS_DATA.filter(c => c.lang === lang);
+    const chars = CHARS_DATA.filter(c => c.lang === lang).slice().sort((a,b) => a.name.localeCompare(b.name));
     el.innerHTML = chars.map(c => {
       const st = getCharStatus(c.id);
       const color = st === 'disponivel' ? '#4caf50' : st === 'reservado' ? '#f5a623' : '#cc0000';
