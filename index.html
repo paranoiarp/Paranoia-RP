@@ -220,11 +220,9 @@
   /* PAGES */
   .page { display: none; padding-top: 60px; min-height: 100vh; }
   .page.active { display: block; opacity: 0; animation: pageFadeIn 0.2s ease forwards; }
+  #home { flex-direction: column; }
   #home.active { display: flex; }
   @keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .page.active { display: block; }
-  #home { display: none; flex-direction: column; }
-  #home.active { display: flex; }
 
   /* HERO */
   .hero {
@@ -1046,7 +1044,7 @@
 <!-- NAV -->
 <nav>
   <div class="nav-logo-wrap" onclick="showPage('home')" id="navLogoWrap2">
-    <img src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" id="navLogoImg" alt="PARANOIA" style="width:38px;height:38px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 6px rgba(139,0,0,0.6))">
+    <img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" id="navLogoImg" alt="PARANOIA" style="width:38px;height:38px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 6px rgba(139,0,0,0.6))">
     <div class="admin-notify-badge" id="adminNotifyBadge"></div>
     <span style="font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:#fff;letter-spacing:12px;text-shadow:0 0 40px rgba(139,0,0,0.8);text-transform:uppercase;-webkit-font-smoothing:antialiased">PARANOIA</span>
   </div>
@@ -1055,8 +1053,8 @@
     <li class="nav-dropdown">
       <a href="#" onclick="showPage('historia')" id="nav-historia">História</a>
       <div class="nav-dropdown-menu">
-        <a href="#" onclick="showPage('historia')"><img src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Sinopse</a>
-        <a href="#" onclick="showLorePage('chegada')"><img src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> A Chegada de Trem</a>
+        <a href="#" onclick="showPage('historia')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Sinopse</a>
+        <a href="#" onclick="showLorePage('chegada')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> A Chegada de Trem</a>
       </div>
     </li>
     <li><a href="#" onclick="showPage('regras')" id="nav-regras">Regras</a></li>
@@ -1064,25 +1062,25 @@
     <li class="nav-dropdown" id="nav-personagens-li">
       <a href="#" onclick="showPage('personagens')" id="nav-personagens">Personagens</a>
       <div class="nav-dropdown-menu" id="navPersonagensMenu">
-        <a href="#" onclick="showPage('personagens')"><img src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Ver Todos</a>
+        <a href="#" onclick="showPage('personagens')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Ver Todos</a>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('ingles',document.querySelector('.filter-btn:nth-child(4)'))"><img src="https://flagcdn.com/16x12/us.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Inglês</a>
+          <a href="#" onclick="showPage('personagens');filterChars('ingles',document.querySelector('.filter-btn:nth-child(4)'))"><img loading="lazy" src="https://flagcdn.com/16x12/us.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Inglês</a>
           <div class="nav-submenu" id="navSubIngles"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('espanhol',document.querySelector('.filter-btn:nth-child(5)'))"><img src="https://flagcdn.com/16x12/es.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Espanhol</a>
+          <a href="#" onclick="showPage('personagens');filterChars('espanhol',document.querySelector('.filter-btn:nth-child(5)'))"><img loading="lazy" src="https://flagcdn.com/16x12/es.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Espanhol</a>
           <div class="nav-submenu" id="navSubEspanhol"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('portugues',document.querySelector('.filter-btn:nth-child(6)'))"><img src="https://flagcdn.com/16x12/br.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Português</a>
+          <a href="#" onclick="showPage('personagens');filterChars('portugues',document.querySelector('.filter-btn:nth-child(6)'))"><img loading="lazy" src="https://flagcdn.com/16x12/br.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Português</a>
           <div class="nav-submenu" id="navSubPortugues"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('frances',document.querySelector('.filter-btn:nth-child(7)'))"><img src="https://flagcdn.com/16x12/fr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Francês</a>
+          <a href="#" onclick="showPage('personagens');filterChars('frances',document.querySelector('.filter-btn:nth-child(7)'))"><img loading="lazy" src="https://flagcdn.com/16x12/fr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Francês</a>
           <div class="nav-submenu" id="navSubFrances"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('coreano',document.querySelector('.filter-btn:nth-child(8)'))"><img src="https://flagcdn.com/16x12/kr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Coreano</a>
+          <a href="#" onclick="showPage('personagens');filterChars('coreano',document.querySelector('.filter-btn:nth-child(8)'))"><img loading="lazy" src="https://flagcdn.com/16x12/kr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Coreano</a>
           <div class="nav-submenu" id="navSubCoreano"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
@@ -1177,7 +1175,7 @@
 <div id="lore-chegada" class="page">
   <div style="max-width:1100px;margin:0 auto;padding:0 0 4rem">
     <button class="lore-back-btn" onclick="showPage('historia')">← VOLTAR</button>
-    <img src="https://i.imgur.com/xzMJ2Ij.png" alt="A Chegada de Trem" class="lore-page-banner">
+    <img loading="lazy" src="https://i.imgur.com/xzMJ2Ij.png" alt="A Chegada de Trem" class="lore-page-banner">
     <div style="padding:0 2rem">
       <h1 class="lore-page-title">A Chegada de Trem</h1>
       <div class="lore-text event-text">
@@ -1413,11 +1411,11 @@
       <button class="filter-btn" onclick="filterChars('ocupado',this)">🔴 OCUPADOS</button>
       <button class="filter-btn" onclick="filterChars('reservado',this)">🟡 RESERVADOS</button>
       <button class="filter-btn" onclick="filterChars('disponivel',this)">🟢 DISPONÍVEIS</button>
-      <button class="filter-btn" onclick="filterChars('ingles',this)"><img src="https://flagcdn.com/20x15/us.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS</button>
-      <button class="filter-btn" onclick="filterChars('espanhol',this)"><img src="https://flagcdn.com/20x15/es.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> ESPANHOL</button>
-      <button class="filter-btn" onclick="filterChars('portugues',this)"><img src="https://flagcdn.com/20x15/br.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> PORTUGUÊS</button>
-      <button class="filter-btn" onclick="filterChars('frances',this)"><img src="https://flagcdn.com/20x15/fr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS</button>
-      <button class="filter-btn" onclick="filterChars('coreano',this)"><img src="https://flagcdn.com/20x15/kr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO</button>
+      <button class="filter-btn" onclick="filterChars('ingles',this)"><img loading="lazy" src="https://flagcdn.com/20x15/us.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS</button>
+      <button class="filter-btn" onclick="filterChars('espanhol',this)"><img loading="lazy" src="https://flagcdn.com/20x15/es.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> ESPANHOL</button>
+      <button class="filter-btn" onclick="filterChars('portugues',this)"><img loading="lazy" src="https://flagcdn.com/20x15/br.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> PORTUGUÊS</button>
+      <button class="filter-btn" onclick="filterChars('frances',this)"><img loading="lazy" src="https://flagcdn.com/20x15/fr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS</button>
+      <button class="filter-btn" onclick="filterChars('coreano',this)"><img loading="lazy" src="https://flagcdn.com/20x15/kr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO</button>
       <button class="filter-btn" onclick="filterChars('huevito',this)">🥚 HUEVITOS</button>
       <button class="filter-btn" onclick="filterChars('cucurucho',this)">🎭 CUCURUCHOS</button>
     </div>
@@ -1439,7 +1437,7 @@
   </div>
   <div class="section-content">
     <div class="fed-header">
-      <img src="https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png" id="fedHeaderLogo" style="width:280px;height:280px;object-fit:contain;filter:invert(1) brightness(2);mix-blend-mode:screen;margin:0 auto 1.5rem;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
+      <img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png" id="fedHeaderLogo" style="width:280px;height:280px;object-fit:contain;filter:invert(1) brightness(2);mix-blend-mode:screen;margin:0 auto 1.5rem;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
       <div class="fed-motto">
         <span>"Esperamos que aproveite a ilha."</span><br>
         <span>"We hope you enjoy the island."</span><br>
@@ -1870,7 +1868,7 @@ function renderChars(filter) {
       : prePhoto
       ? `<img src="${prePhoto}" alt="${c.name}">`
       : c.minecraft
-      ? `<img src="https://mc-heads.net/body/${c.minecraft}/80" alt="${c.name}">`
+      ? `<img loading="lazy" src="https://mc-heads.net/body/${c.minecraft}/80" alt="${c.name}">`
       : `<span>👤</span>`;
     // Usa getCharStatus para refletir pendentes (reservado) em tempo real
     const realStatus = c.status === 'ocupado' ? 'ocupado' : getCharStatus(clickId);
@@ -1891,7 +1889,7 @@ function renderChars(filter) {
 
 function filterChars(f, btn) {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
   renderChars(f);
 }
 
@@ -1909,7 +1907,7 @@ function showCharProfile(id) {
     : prePhoto
     ? `<img src="${prePhoto}" alt="${c.name}" class="profile-img">`
     : c.minecraft
-    ? `<img src="https://mc-heads.net/body/${c.minecraft}/300" alt="${c.name}" class="profile-img">`
+    ? `<img loading="lazy" src="https://mc-heads.net/body/${c.minecraft}/300" alt="${c.name}" class="profile-img">`
     : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
 
   const attrsHtml = c.attrs
@@ -2466,11 +2464,11 @@ function getCharStatus(charId) {
 
 function renderPopupChars() {
   const cats = [
-    {key:'ingles', label:'<img src="https://flagcdn.com/20x15/us.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS'},
+    {key:'ingles', label:'<img loading="lazy" src="https://flagcdn.com/20x15/us.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS'},
     {key:'espanhol', label:'🇪🇸 ESPANHOL'},
-    {key:'portugues', label:'<img src="https://flagcdn.com/20x15/br.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> PORTUGUÊS'},
-    {key:'frances', label:'<img src="https://flagcdn.com/20x15/fr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS'},
-    {key:'coreano', label:'<img src="https://flagcdn.com/20x15/kr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO'},
+    {key:'portugues', label:'<img loading="lazy" src="https://flagcdn.com/20x15/br.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> PORTUGUÊS'},
+    {key:'frances', label:'<img loading="lazy" src="https://flagcdn.com/20x15/fr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS'},
+    {key:'coreano', label:'<img loading="lazy" src="https://flagcdn.com/20x15/kr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO'},
     {key:'huevito', label:'🥚 HUEVITOS'},
     {key:'cucurucho', label:'🎭 CUCURUCHOS'},
   ];
@@ -2928,7 +2926,7 @@ function showFichaCharPreview(charId) {
     thumb.innerHTML = `<img src="${url}" alt="${c.name}" onerror="this.parentElement.innerHTML='<div class=\\'ficha-char-preview-placeholder\\'>👤</div>'">`;
     thumb.className = '';
   } else if(c.minecraft) {
-    thumb.innerHTML = `<img src="https://mc-heads.net/avatar/${c.minecraft}/60" alt="${c.name}" onerror="this.parentElement.innerHTML='<div class=\\'ficha-char-preview-placeholder\\'>👤</div>'">`;
+    thumb.innerHTML = `<img loading="lazy" src="https://mc-heads.net/avatar/${c.minecraft}/60" alt="${c.name}" onerror="this.parentElement.innerHTML='<div class=\\'ficha-char-preview-placeholder\\'>👤</div>'">`;
     thumb.className = '';
   } else {
     thumb.innerHTML = '';
