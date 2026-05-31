@@ -1800,7 +1800,7 @@ function showCharProfile(id) {
         ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
         ${(()=>{const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
         ${c.lang==='cucurucho' ? `<div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>` : `<div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>`}
-        <div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${c.status==='ocupado'?'var(--red-bright)':'#4caf50'}">${c.status==='ocupado'?'OCUPADA':'DISPONÍVEL'}</span></div>
+        ${(()=>{const st=getCharStatus(id);const cor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';const label=st==='ocupado'?'OCUPADA':st==='reservado'?'RESERVADO':'DISPONÍVEL';return `<div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${cor}">${label}</span></div>`;})()}
       </div>
     </div>
     <div class="profile-main">
