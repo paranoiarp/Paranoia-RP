@@ -2195,7 +2195,7 @@ function showPage(id, pushState = true) {
   document.getElementById('navLinks').classList.remove('open');
   setTimeout(() => window.scrollTo({top:0, behavior:'instant'}), 0);
   if(pushState) {
-    try { history.pushState({page: id}, '', '#' + id); } catch(e) {}
+    try { location.hash = id; } catch(e) {}
   }
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
@@ -2234,13 +2234,12 @@ function showPage(id, pushState = true) {
 
 function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
 
-// Seta do navegador
-window.addEventListener('popstate', (e) => {
-  const page = (e.state && e.state.page) || 'home';
-  showPage(page, false);
+// Navegação por hash — funciona no GitHub Pages e suporta botão voltar
+window.addEventListener('hashchange', () => {
+  const id = location.hash.replace('#', '') || 'home';
+  const validPages = ['home','historia','regras','sistema','personagens','federacao','ficha','admin-gate','admin-panel','minha-area','player-panel','char-profile','lore-chegada','fed-secret'];
+  if(validPages.includes(id)) showPage(id, false);
 });
-// Registra estado inicial
-try { history.replaceState({page: 'home'}, '', '#home'); } catch(e) {}
 
 // Touch support para dropdowns da nav no mobile
 document.addEventListener('click', (e) => {
