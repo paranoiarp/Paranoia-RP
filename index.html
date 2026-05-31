@@ -3023,6 +3023,7 @@ async function doPlayerLogin() {
   const p = document.getElementById('playerLoginPass').value;
   const errEl = document.getElementById('playerLoginError');
   errEl.style.display = 'none';
+  if(!window._checkPlayerFirebase) { errEl.textContent = '⚠ Conexão ainda carregando. Aguarde um segundo e tente novamente.'; errEl.style.display='block'; return; }
   if(!u || !p) { errEl.textContent = '⚠ PREENCHA USUÁRIO E SENHA'; errEl.style.display = 'block'; return; }
   try {
     const ok = await window._checkPlayerFirebase(u, p);
@@ -3037,7 +3038,7 @@ async function doPlayerLogin() {
       errEl.style.display = 'block';
     }
   } catch(e) {
-    errEl.textContent = '⚠ ERRO DE CONEXÃO';
+    errEl.textContent = '⚠ ERRO: ' + (e.message || 'verifique o console (F12).');
     errEl.style.display = 'block';
   }
 }
@@ -3048,10 +3049,10 @@ async function doPlayerCadastro() {
   const p2 = document.getElementById('playerCadPass2').value;
   const errEl = document.getElementById('playerCadError');
   errEl.style.display = 'none';
+  if(!window._registerPlayerFirebase) { errEl.textContent = '⚠ Conexão ainda carregando. Aguarde um segundo e tente novamente.'; errEl.style.display='block'; return; }
   if(!u || u.length < 3) { errEl.textContent = '⚠ Usuário deve ter pelo menos 3 caracteres.'; errEl.style.display='block'; return; }
   if(p.length < 6) { errEl.textContent = '⚠ Senha deve ter pelo menos 6 caracteres.'; errEl.style.display='block'; return; }
   if(p !== p2) { errEl.textContent = '⚠ Senhas não coincidem.'; errEl.style.display='block'; return; }
-  // Validate password: all lowercase
   if(/[A-Z]/.test(p)) { errEl.textContent = '⚠ Use apenas letras minúsculas na senha.'; errEl.style.display='block'; return; }
   try {
     await window._registerPlayerFirebase(u, p);
@@ -3065,7 +3066,7 @@ async function doPlayerCadastro() {
     if(e.message === 'USERNAME_TAKEN') {
       errEl.textContent = '⚠ Este usuário já está em uso. Escolha outro.';
     } else {
-      errEl.textContent = '⚠ Erro ao criar conta. Tente novamente.';
+      errEl.textContent = '⚠ Erro ao criar conta: ' + (e.message || 'verifique o console (F12).');
     }
     errEl.style.display = 'block';
   }
