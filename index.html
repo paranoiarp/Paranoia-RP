@@ -2141,9 +2141,22 @@ function renderChars(filter) {
   } else if(filter !== 'all') {
     list = list.filter(c => c.lang === filter);
   }
+  // Ordenar: disponíveis primeiro, reservados depois, ocupados por último
+  const order = { disponivel: 0, reservado: 1, ocupado: 2 };
+  list.sort((a, b) => {
+    const sa = order[getCharStatus(a.charId || a.id)] ?? 1;
+    const sb = order[getCharStatus(b.charId || b.id)] ?? 1;
+    if(sa !== sb) return sa - sb;
+    return (a.name||'').localeCompare(b.name||'');
+  });
   if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
-  grid.innerHTML = list.map(c => {
-    // Para approved chars, o id de clique é o charId original (se existir) ou o doc id
+  // Legenda de status
+  const legenda = `<div style="grid-column:1/-1;display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:0.5rem;padding:0.7rem 1rem;background:var(--bg3);border:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:1px;color:var(--text-dim)">
+    <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#4caf50;box-shadow:0 0 5px #4caf50;margin-right:6px;vertical-align:middle"></span>DISPONÍVEL</span>
+    <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#f5a623;box-shadow:0 0 5px #f5a623;margin-right:6px;vertical-align:middle"></span>RESERVADO — ficha enviada, aguardando aprovação</span>
+    <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#cc0000;box-shadow:0 0 5px #cc0000;margin-right:6px;vertical-align:middle"></span>OCUPADO — personagem em jogo</span>
+  </div>`;
+  grid.innerHTML = legenda + list.map(c => {
     const clickId = c.charId || c.id;
     const prePhoto = window._charPhotos && window._charPhotos[clickId];
     const img = c.imageUrl
@@ -2153,10 +2166,8 @@ function renderChars(filter) {
       : c.minecraft
       ? `<img loading="lazy" src="https://mc-heads.net/body/${c.minecraft}/80" alt="${c.name}">`
       : `<span>👤</span>`;
-    // Usa getCharStatus para refletir pendentes (reservado) em tempo real
     const realStatus = c.status === 'ocupado' ? 'ocupado' : getCharStatus(clickId);
     const dotClass = realStatus === 'disponivel' ? 'available' : 'occupied';
-    // Bolinha amarela para reservado
     const dotStyle = realStatus === 'reservado' ? 'style="background:#f5a623;box-shadow:0 0 6px #f5a623"' : '';
     const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
     const sl = c.gameStatus || 'PENDENTE';
