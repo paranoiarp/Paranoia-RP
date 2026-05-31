@@ -595,7 +595,7 @@
   .history-date { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--red-bright); letter-spacing: 1px; margin-bottom: 0.3rem; }
   .history-desc { font-size: 0.9rem; color: var(--text-dim); }
 
-  /* FEDERAÇÃO */
+  /* THE FEDERATION */
   .fed-header { background: var(--bg2); border: 1px solid var(--border); border-top: 3px solid var(--red); padding: 3rem 2rem; text-align: center; margin-bottom: 2rem; position: relative; overflow: hidden; }
   .fed-header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(139,0,0,0.08) 0%, transparent 70%); }
   .fed-motto { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 1.5rem; position: relative; z-index: 1; line-height: 2.2; }
@@ -1242,12 +1242,12 @@
           <div class="nav-submenu" id="navSubHuevito"><!-- preenchido por JS --></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('cucurucho',document.querySelector('.filter-btn:nth-child(10)'))">🎭 Cucuruchos</a>
+          <a href="#" onclick="showPage('personagens');filterChars('cucurucho',document.querySelector('.filter-btn:nth-child(10)'))">🏛 The Federation</a>
           <div class="nav-submenu" id="navSubCucurucho"><!-- preenchido por JS --></div>
         </div>
       </div>
     </li>
-    <li><a href="#" onclick="showPage('federacao')" id="nav-federacao">Federação</a></li>
+    <li><a href="#" onclick="showPage('federacao')" id="nav-federacao">The Federation</a></li>
     <li><a href="#" onclick="showPage('registro')" id="nav-registro">Registro</a></li>
     <li id="nav-ficha-li" style="display:none"><a href="#" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
     <li><a href="#" onclick="showPage('minha-area')" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
@@ -1286,7 +1286,7 @@
     </div>
     <div class="highlight-card" onclick="showPage('federacao')">
       <div class="icon">🏛️</div>
-      <h3>A FEDERAÇÃO</h3>
+      <h3>THE FEDERATION</h3>
       <p>A organização que administra a ilha. O que se sabe, o que se suspeita, e o que permanece em silêncio.</p>
     </div>
     <div class="highlight-card" onclick="showPage('registro')">
@@ -1469,7 +1469,7 @@
 
       <!-- ESPADAS -->
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">⚔ ESPADAS — Arma equilibrada e versátil</div>
+        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">⚔ ESPADAS <span style="color:var(--text-dim);font-size:0.75rem">— Arma equilibrada e versátil</span></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d2</div>
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d4</div>
@@ -1481,7 +1481,7 @@
 
       <!-- MACHADOS -->
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">🪓 MACHADOS — Golpes pesados e alto dano</div>
+        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🪓 MACHADOS <span style="color:var(--text-dim);font-size:0.75rem">— Golpes pesados e alto dano</span></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d4</div>
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d5</div>
@@ -1493,7 +1493,7 @@
 
       <!-- FOICES -->
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">🌙 FOICES — A mais poderosa, grande potencial ofensivo</div>
+        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🌙 FOICES <span style="color:var(--text-dim);font-size:0.75rem">— A mais poderosa, grande potencial ofensivo</span></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d5</div>
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d6</div>
@@ -1505,7 +1505,7 @@
 
       <!-- ADAGA -->
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">🗡 ADAGA — Discreta, ideal para furtividade e emboscadas</div>
+        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🗡 ADAGA <span style="color:var(--text-dim);font-size:0.75rem">— Discreta, ideal para furtividade e emboscadas</span></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Diamante → 1d6</div>
         </div>
@@ -1513,7 +1513,7 @@
 
       <!-- DISTÂNCIA -->
       <div style="padding:0.8rem 0">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">🏹 DISTÂNCIA</div>
+        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🏹 DISTÂNCIA</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Arco → 1d6</div>
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Besta → 1d7</div>
@@ -1607,14 +1607,14 @@
       <div class="rule-item">
         <span class="rule-label">ESTADOS</span>
         <span>
-          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.4rem">
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#4caf50">Inteiro</span>
-            <span style="color:var(--text-dim);align-self:center">→</span>
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#ff9800">Danificado</span>
-            <span style="color:var(--text-dim);align-self:center">→</span>
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#f44336">Muito Danificado</span>
-            <span style="color:var(--text-dim);align-self:center">→</span>
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#666">Quebrado</span>
+          <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.6rem;align-items:center">
+            <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #4caf50;color:#4caf50;background:rgba(76,175,80,0.08)">Inteiro</span>
+            <span style="color:var(--text-dim);font-size:1rem;align-self:center">→</span>
+            <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #ff9800;color:#ff9800;background:rgba(255,152,0,0.08)">Danificado</span>
+            <span style="color:var(--text-dim);font-size:1rem;align-self:center">→</span>
+            <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #f44336;color:#f44336;background:rgba(244,67,54,0.08)">Muito Danificado</span>
+            <span style="color:var(--text-dim);font-size:1rem;align-self:center">→</span>
+            <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #666;color:#999;background:rgba(100,100,100,0.08)">Quebrado</span>
           </div>
         </span>
       </div>
@@ -1649,7 +1649,7 @@
       <button class="filter-btn" onclick="filterChars('frances',this)"><img loading="lazy" src="https://flagcdn.com/20x15/fr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS</button>
       <button class="filter-btn" onclick="filterChars('coreano',this)"><img loading="lazy" src="https://flagcdn.com/20x15/kr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO</button>
       <button class="filter-btn" onclick="filterChars('huevito',this)">🥚 HUEVITOS</button>
-      <button class="filter-btn" onclick="filterChars('cucurucho',this)">🎭 CUCURUCHOS</button>
+      <button class="filter-btn" id="filterBtnCucurucho" onclick="filterChars('cucurucho',this)">🏛 THE FEDERATION</button>
     </div>
     <div class="chars-grid" id="charsGrid"></div>
   </div>
@@ -1661,15 +1661,15 @@
   <div class="profile-layout" id="profileContent"></div>
 </div>
 
-<!-- FEDERAÇÃO PÚBLICA -->
+<!-- THE FEDERATION PUBLIC -->
 <div id="federacao" class="page">
   <div class="section-header">
     <div class="section-label">// ARQUIVO PÚBLICO //</div>
-    <h1 class="section-title">A FEDERAÇÃO</h1>
+    <h1 class="section-title">THE FEDERATION</h1>
   </div>
   <div class="section-content">
     <div class="fed-header">
-      <img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png" id="fedHeaderLogo" style="width:280px;height:280px;object-fit:contain;filter:invert(1) brightness(2);mix-blend-mode:screen;margin:0 auto 1.5rem;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
+      <img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png" id="fedHeaderLogo" style="width:560px;height:560px;max-width:90vw;object-fit:contain;filter:invert(1) brightness(2);mix-blend-mode:screen;margin:0 auto 1.5rem;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
       <div class="fed-motto">
         <span>"Esperamos que aproveite a ilha."</span><br>
         <span>"We hope you enjoy the island."</span><br>
@@ -1677,16 +1677,16 @@
       </div>
     </div>
     <div class="fed-block">
-      <h2>O QUE É A FEDERAÇÃO</h2>
-      <p>A <strong style="color:var(--silver-bright)">Federação de Quesadilla Island</strong> é a organização responsável pela administração e governança da Ilha Quesadilla. Foi ela quem enviou os convites. Foi ela quem preparou os trens. Foi ela quem os recebeu.</p>
+      <h2>O QUE É THE FEDERATION</h2>
+      <p>A <strong style="color:var(--silver-bright)">The Federation</strong> é a organização responsável pela administração e governança da Ilha Quesadilla. Foi ela quem enviou os convites. Foi ela quem preparou os trens. Foi ela quem os recebeu.</p>
       <p>Seu objetivo declarado é simples: garantir o bem-estar e a segurança de todos os residentes da ilha.</p>
       <p><em style="color:var(--text-dim)">O quanto isso é verdade, cada um decide por conta própria.</em></p>
     </div>
     <div class="fed-block">
       <h2>ESTRUTURA CONHECIDA</h2>
-      <p>A Federação opera através de uma hierarquia ainda pouco compreendida pelos residentes. No topo, existe uma figura conhecida apenas como <strong style="color:var(--silver-bright)">The Host</strong> — cuja identidade permanece completamente desconhecida.</p>
+      <p>The Federation operates através de uma hierarquia ainda pouco compreendida pelos residentes. No topo, existe uma figura conhecida apenas como <strong style="color:var(--silver-bright)">The Host</strong> — cuja identidade permanece completamente desconhecida.</p>
       <p>As comunicações oficiais são feitas através do <strong style="color:var(--silver-bright)">Mr. Duck</strong>, gerente oficial da ilha, que se comunica exclusivamente por transmissões e anúncios gravados. Nenhum encontro presencial foi documentado até o momento.</p>
-      <p>Em campo, a Federação é representada pelos <strong style="color:var(--silver-bright)">Cucuruchos</strong> — agentes identificáveis por sua aparência característica, responsáveis pela aplicação das regras e pela interação direta com os residentes.</p>
+      <p>In the field, The Federation is representada pelos <strong style="color:var(--silver-bright)">Cucuruchos</strong> — agentes identificáveis por sua aparência característica, responsáveis pela aplicação das regras e pela interação direta com os residentes.</p>
       <div class="hierarchy-tree" style="margin-top:1.5rem;padding:1.5rem;background:var(--bg3);border:1px solid var(--border)">
         <div class="top">▶ THE HOST</div>
         <div class="mid">└─ MR. DUCK — Gerente da Ilha</div>
@@ -1696,7 +1696,7 @@
     </div>
     <div class="fed-block">
       <h2>O QUE SE SABE</h2>
-      <p>A Federação está presente na ilha desde o primeiro dia. Foi ela quem construiu a estação. Foi ela quem ergueu o muro que dividia os recém-chegados. E foi ela quem, ao final, deixou sua mensagem nas placas.</p>
+      <p>The Federation has been presente na ilha desde o primeiro dia. Foi ela quem construiu a estação. Foi ela quem ergueu o muro que dividia os recém-chegados. E foi ela quem, ao final, deixou sua mensagem nas placas.</p>
       <p>Ela observa. Ela registra. Ela administra.</p>
       <p>Por enquanto, é tudo que se sabe com certeza.</p>
       <div style="margin-top:1.5rem;padding:1rem;background:var(--bg3);border-left:2px solid var(--red);font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px">
@@ -1707,11 +1707,11 @@
   </div>
 </div>
 
-<!-- FEDERAÇÃO SECRETA -->
+<!-- THE FEDERATION SECRET -->
 <div id="fed-secret" class="page">
   <div class="section-header">
     <div class="section-label">// ACESSO RESTRITO //</div>
-    <h1 class="section-title" style="color:var(--red-bright)">FEDERAÇÃO</h1>
+    <h1 class="section-title" style="color:var(--red-bright)">THE FEDERATION</h1>
   </div>
   <div class="fed-secret-gate" id="fedGate">
     <div class="access-denied">ACESSO NEGADO</div>
@@ -1917,7 +1917,7 @@
       <button class="admin-tab" onclick="showAdminTab('players-admin',this);renderPlayersAdmin()">👥 PLAYERS</button>
       <button class="admin-tab" onclick="showAdminTab('fotos-admin',this);renderFotosAdmin()">🖼 FOTOS</button>
       <button class="admin-tab" onclick="showAdminTab('admin-meus-chars',this);renderAdminOwnChars()">👤 MEUS PERSONAGENS</button>
-      <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
+      <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">THE FEDERATION</button>
       <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
       <button class="admin-tab" onclick="showAdminTab('senha-admin',this)">🔐 MINHA SENHA</button>
       <button class="admin-tab" onclick="showAdminTab('log-admin',this);renderLogAdmin()">📋 LOG</button>
@@ -1967,12 +1967,12 @@
       </div>
     </div>
 
-    <div id="fed-admin" class="admin-content"><div class="empty-state">GERENCIAMENTO DA FEDERAÇÃO — EM BREVE</div></div>
+    <div id="fed-admin" class="admin-content"><div class="empty-state">GERENCIAMENTO DTHE FEDERATION — EM BREVE</div></div>
     <div id="config" class="admin-content">
       <div class="form-section">
         <h3>CONFIGURAÇÕES DO SITE</h3>
         <div class="form-grid">
-          <div class="form-group"><label>Senha da Área Secreta da Federação</label><input type="text" id="cfg_fedPass" placeholder="Defina a senha..."></div>
+          <div class="form-group"><label>Senha da Área Secreta of The Federation</label><input type="text" id="cfg_fedPass" placeholder="Defina a senha..."></div>
           <div class="form-group" style="justify-content:flex-end"><button class="submit-btn" style="margin-top:1.5rem" onclick="saveFedPassword()">SALVAR</button></div>
         </div>
         <div id="cfg_msg" style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
@@ -2115,7 +2115,7 @@ let approvedChars = [];
 
 // ===== IMAGES — substitua as URLs abaixo pelas reais =====
 const LOGO_URL = ''; // URL da logo do PARANOIA
-const FED_LOGO_URL = ''; // URL da logo da Federação
+const FED_LOGO_URL = ''; // URL da logo of The Federation
 const BG_PATTERN_URL = ''; // URL do background pattern
 
 function initImages() {
@@ -2201,7 +2201,33 @@ function renderChars(filter) {
     <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#f5a623;box-shadow:0 0 5px #f5a623;margin-right:6px;vertical-align:middle"></span>RESERVADO — ficha enviada, aguardando aprovação</span>
     <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#cc0000;box-shadow:0 0 5px #cc0000;margin-right:6px;vertical-align:middle"></span>OCUPADO — personagem em jogo</span>
   </div>`;
-  grid.innerHTML = legenda + list.map(c => {
+  const cucuruchoList = list.filter(c => c.lang === 'cucurucho');
+  const otherList = list.filter(c => c.lang !== 'cucurucho');
+
+  const classifiedBlock = (!window._adminLogado && cucuruchoList.length) ? `
+    <div onclick="showClassifiedModal()" style="grid-column:1/-1;cursor:pointer;padding:3rem 2rem;background:rgba(139,0,0,0.06);border:1px solid rgba(139,0,0,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='rgba(139,0,0,0.25)'">
+      <div style="font-size:4rem;filter:drop-shadow(0 0 15px rgba(139,0,0,0.6))">🔒</div>
+      <div style="font-family:'Orbitron',monospace;font-size:clamp(1.2rem,3vw,2rem);color:var(--red-bright);letter-spacing:6px;font-weight:900;text-shadow:0 0 20px rgba(139,0,0,0.7)">██ CLASSIFIED ██</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:3px">${cucuruchoList.length} ARQUIVO${cucuruchoList.length>1?'S':''} RESTRITO${cucuruchoList.length>1?'S':''} — THE FEDERATION</div>
+    </div>` : (window._adminLogado ? cucuruchoList.map(c => {
+      const clickId = c.charId || c.id;
+      const prePhoto = window._charPhotos && window._charPhotos[clickId];
+      const img = c.imageUrl ? `<img src="${c.imageUrl}" alt="${c.name}">` : prePhoto ? `<img src="${prePhoto}" alt="${c.name}">` : c.minecraft ? `<img loading="lazy" src="https://mc-heads.net/body/${c.minecraft}/80" alt="${c.name}">` : `<span>👤</span>`;
+      const realStatus = c.status === 'ocupado' ? 'ocupado' : getCharStatus(clickId);
+      const dotClass = realStatus === 'disponivel' ? 'available' : 'occupied';
+      const dotStyle = realStatus === 'reservado' ? 'style="background:#f5a623;box-shadow:0 0 6px #f5a623"' : '';
+      const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
+      const sl = c.gameStatus || 'PENDENTE';
+      return `<div class="char-card" onclick="showCharProfile('${clickId}')">
+        <div class="char-available ${dotClass}" ${dotStyle}></div>
+        <div class="char-avatar">${img}</div>
+        <div class="char-name">${c.name.toUpperCase()}</div>
+        ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
+        <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
+      </div>`;
+    }).join('') : '');
+
+  grid.innerHTML = legenda + otherList.map(c => {
     const clickId = c.charId || c.id;
     const prePhoto = window._charPhotos && window._charPhotos[clickId];
     const img = c.imageUrl
@@ -2216,6 +2242,7 @@ function renderChars(filter) {
     const dotStyle = realStatus === 'reservado' ? 'style="background:#f5a623;box-shadow:0 0 6px #f5a623"' : '';
     const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
     const sl = c.gameStatus || 'PENDENTE';
+    const isCucurucho = c.lang === 'cucurucho';
     return `<div class="char-card" onclick="showCharProfile('${clickId}')">
       <div class="char-available ${dotClass}" ${dotStyle}></div>
       <div class="char-avatar">${img}</div>
@@ -2223,7 +2250,7 @@ function renderChars(filter) {
       ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
       <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
     </div>`;
-  }).join('');
+  }).join('') + classifiedBlock;
 }
 
 function filterChars(f, btn) {
@@ -2281,7 +2308,40 @@ function showCharProfile(id) {
       </div>`).join('')}
     </div>` : '';
 
-  document.getElementById('profileContent').innerHTML = `
+  const isCucurucho = c.lang === 'cucurucho';
+  const isAdmin = !!window._adminLogado;
+  const clf = `<span style="font-family:'Share Tech Mono',monospace;color:var(--red-bright);letter-spacing:2px;font-size:0.8rem;background:rgba(139,0,0,0.12);padding:0.15rem 0.5rem;border:1px solid rgba(139,0,0,0.3)">██ CLASSIFIED ██</span>`;
+
+  document.getElementById('profileContent').innerHTML = (isCucurucho && !isAdmin) ? `
+    <div class="profile-sidebar">
+      <div class="profile-img-container">
+        <div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem">🎭</div>
+      </div>
+      <div class="profile-status-box">
+        <div class="profile-status-label">// STATUS ATUAL //</div>
+        <div class="status-badge ${sc}" style="font-size:0.75rem;padding:0.4rem 1rem">${sl.toUpperCase()}</div>
+      </div>
+      <div class="profile-info-box">
+        <div class="profile-info-item"><span class="label">IDENTIDADE</span><span class="value">${clf}</span></div>
+        <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${clf}</span></div>
+        <div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>
+        ${(()=>{const st=getCharStatus(id);const cor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';const label=st==='ocupado'?'OCUPADA':st==='reservado'?'RESERVADO':'DISPONÍVEL';return `<div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${cor}">${label}</span></div>`;})()}
+      </div>
+    </div>
+    <div class="profile-main">
+      <div class="profile-section">
+        <h3>CUCURUCHO</h3>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-dim);line-height:2;letter-spacing:1px">
+          As informações deste agente são de acesso restrito.<br>
+          Apenas pessoal autorizado of The Federation pode visualizar os dados completos deste arquivo.
+        </p>
+        <div style="margin-top:2rem;padding:2rem;background:rgba(139,0,0,0.06);border:1px solid rgba(139,0,0,0.2);text-align:center">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:3px;margin-bottom:1rem">ARQUIVO CLASSIFICADO</div>
+          <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:2px">ACESSO NEGADO — THE FEDERATION</div>
+        </div>
+      </div>
+    </div>` : `
     <div class="profile-sidebar">
       <div class="profile-img-container">${imgHtml}</div>
       <div class="profile-status-box">
@@ -2293,7 +2353,7 @@ function showCharProfile(id) {
         <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.player||'—'}</span></div>
         ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
         ${(()=>{const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
-        ${c.lang==='cucurucho' ? `<div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>` : `<div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>`}
+        <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>
         ${(()=>{const st=getCharStatus(id);const cor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';const label=st==='ocupado'?'OCUPADA':st==='reservado'?'RESERVADO':'DISPONÍVEL';return `<div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${cor}">${label}</span></div>`;})()}
       </div>
     </div>
@@ -2796,7 +2856,7 @@ async function changeAdminPassword() {
   btn.disabled = false; btn.textContent = 'SALVAR NOVA SENHA';
 }
 
-// ===== FEDERAÇÃO SECRETA =====
+// ===== THE FEDERATION SECRET =====
 function checkFedAccess() {
   const p = document.getElementById('fedPassword').value;
   window._getFedPasswordFirebase().then(stored => {
@@ -3700,7 +3760,7 @@ function adminGerenciarHistorico(fichaDocId) {
         <h3>ADICIONAR ENTRADA</h3>
         <div class="form-grid">
           <div class="form-group"><label>Data / Sessão</label><input type="text" id="hist_date" placeholder="Ex: Sessão 12 / 15/01/2026"></div>
-          <div class="form-group"><label>Título</label><input type="text" id="hist_title" placeholder="Ex: Encontro com a Federação"></div>
+          <div class="form-group"><label>Título</label><input type="text" id="hist_title" placeholder="Ex: Encontro com The Federation"></div>
           <div class="form-group full"><label>Descrição</label><textarea id="hist_desc" style="min-height:100px" placeholder="O que aconteceu..."></textarea></div>
         </div>
         <button class="submit-btn" style="margin-top:1rem" onclick="adminAddHistory('${fichaDocId}')">+ ADICIONAR AO HISTÓRICO</button>
@@ -3809,6 +3869,31 @@ async function renderPlayersAdmin() {
   }
 }
 
+function showClassifiedModal() {
+  const existing = document.getElementById('classifiedModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'classifiedModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.97);display:flex;align-items:center;justify-content:center;cursor:pointer';
+  modal.innerHTML = `
+    <div style="text-align:center;padding:3rem;max-width:700px;animation:fadeIn 0.3s ease">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:4px;margin-bottom:2rem">// THE FEDERATION //</div>
+      <div style="font-size:6rem;margin-bottom:1.5rem;filter:drop-shadow(0 0 30px rgba(139,0,0,0.8))">🔒</div>
+      <div style="font-family:'Orbitron',monospace;font-size:clamp(1.8rem,5vw,3.5rem);color:var(--red-bright);letter-spacing:6px;font-weight:900;text-shadow:0 0 40px rgba(139,0,0,0.9);margin-bottom:1rem;line-height:1.2">
+        ██ CLASSIFIED ██
+      </div>
+      <div style="width:80%;height:1px;background:var(--red);margin:1.5rem auto;box-shadow:0 0 10px var(--red)"></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.85rem;color:var(--text-dim);letter-spacing:2px;line-height:2;margin-bottom:2rem">
+        ARQUIVO DE ACESSO RESTRITO<br>
+        CREDENCIAIS DE NÍVEL <span style="color:var(--red-bright)">THE FEDERATION</span> REQUERIDAS<br>
+        TENTATIVA DE ACESSO REGISTRADA
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:3px;opacity:0.5">CLIQUE EM QUALQUER LUGAR PARA FECHAR</div>
+    </div>`;
+  modal.addEventListener('click', () => modal.remove());
+  document.body.appendChild(modal);
+}
+
 // ===== RESET FICHA =====
 function resetFichaForm() {
   // Reseta campos de texto
@@ -3874,9 +3959,15 @@ function buildNavPersonagensMenu() {
     const el = document.getElementById(elId);
     if(!el) return;
     const chars = CHARS_DATA.filter(c => c.lang === lang).slice().sort((a,b) => a.name.localeCompare(b.name));
+    const isCucurucho = lang === 'cucurucho';
     el.innerHTML = chars.map(c => {
       const st = getCharStatus(c.id);
       const color = st === 'disponivel' ? '#4caf50' : st === 'reservado' ? '#f5a623' : '#cc0000';
+      if(isCucurucho && !window._adminLogado) {
+        return `<a href="#" onclick="showClassifiedModal();event.stopPropagation()">
+          <span class="nav-submenu-status" style="background:${color}"></span><span style="color:var(--red-bright);letter-spacing:1px">██ CLASSIFIED ██</span>
+        </a>`;
+      }
       return `<a href="#" onclick="showPage('personagens');showCharProfile('${c.id}');event.stopPropagation()">
         <span class="nav-submenu-status" style="background:${color}"></span>${c.name}
       </a>`;
