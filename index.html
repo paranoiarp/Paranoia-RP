@@ -2194,7 +2194,8 @@ function showPage(id, pushState = true) {
   if(nav) nav.classList.add('active');
   document.getElementById('navLinks').classList.remove('open');
   setTimeout(() => window.scrollTo({top:0, behavior:'instant'}), 0);
-  if(pushState) {
+  if(pushState && location.hash !== '#' + id) {
+    window._skipHashChange = true;
     try { location.hash = id; } catch(e) {}
   }
   if(id==='personagens') renderChars('all');
@@ -2236,6 +2237,7 @@ function toggleNav() { document.getElementById('navLinks').classList.toggle('ope
 
 // Navegação por hash — funciona no GitHub Pages e suporta botão voltar
 window.addEventListener('hashchange', () => {
+  if(window._skipHashChange) { window._skipHashChange = false; return; }
   const id = location.hash.replace('#', '') || 'home';
   const validPages = ['home','historia','regras','sistema','personagens','federacao','ficha','admin-gate','admin-panel','minha-area','player-panel','char-profile','lore-chegada','fed-secret'];
   if(validPages.includes(id)) showPage(id, false);
