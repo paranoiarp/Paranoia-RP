@@ -860,7 +860,7 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc, setDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc, setDoc, updateDoc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAzdSLf-pBDkN8Z5kEh4JJXfEaNwRlph0",
@@ -876,7 +876,7 @@
 
   // Expor funções globais para o resto do script
   window._db = db;
-  window._fbModules = { collection, addDoc, getDocs, getDoc, doc, deleteDoc, setDoc, updateDoc, onSnapshot, query, orderBy };
+  window._fbModules = { collection, addDoc, getDocs, getDoc, doc, deleteDoc, setDoc, updateDoc, onSnapshot, query, orderBy, where };
 
   // Carregar fichas pendentes e aprovadas do Firestore
   async function loadFromFirestore() {
@@ -904,6 +904,11 @@
       if(typeof renderApprovedAdmin === 'function') renderApprovedAdmin();
       if(typeof renderPopupChars === 'function') renderPopupChars();
       if(typeof buildNavPersonagensMenu === 'function') buildNavPersonagensMenu();
+      // Reload player panel if active
+      if(window._playerLogado && typeof loadPlayerPanel === 'function') {
+        const pp = document.getElementById('player-panel');
+        if(pp && pp.classList.contains('active')) loadPlayerPanel();
+      }
     });
   }
 
@@ -986,6 +991,116 @@
     const db = window._db;
     const snap = await getDoc(doc(db, 'adminAuth', user.toLowerCase()));
     return snap.exists();
+  };
+
+  // ===== PLAYER AUTH =====
+  window._registerPlayerFirebase = async function(username, pass) {
+    const { doc, setDoc, getDoc } = window._fbModules;
+    const db = window._db;
+    const hash = await window._hashPassword(pass);
+    const snap = await getDoc(doc(db, 'playerAuth', username.toLowerCase()));
+    if(snap.exists()) throw new Error('USERNAME_TAKEN');
+    await setDoc(doc(db, 'playerAuth', username.toLowerCase()), { hash, username: username.toLowerCase(), createdAt: new Date().toISOString() });
+  };
+
+  window._checkPlayerFirebase = async function(username, pass) {
+    const { getDoc, doc } = window._fbModules;
+    const db = window._db;
+    const hash = await window._hashPassword(pass);
+    const snap = await getDoc(doc(db, 'playerAuth', username.toLowerCase()));
+    if(!snap.exists()) return false;
+    return snap.data().hash === hash;
+  };
+
+  window._playerExistsFirebase = async function(username) {
+    const { getDoc, doc } = window._fbModules;
+    const db = window._db;
+    const snap = await getDoc(doc(db, 'playerAuth', username.toLowerCase()));
+    return snap.exists();
+  };
+
+  window._setPlayerPasswordFirebase = async function(username, newPass) {
+    const { doc, updateDoc } = window._fbModules;
+    const db = window._db;
+    const hash = await window._hashPassword(newPass);
+    await updateDoc(doc(db, 'playerAuth', username.toLowerCase()), { hash });
+  };
+
+  window._getPlayerChars = async function(username) {
+    // Returns approved chars where playerAccount === username
+    const { collection, getDocs, query, where } = window._fbModules;
+    const db = window._db;
+    const snap = await getDocs(query(collection(db, 'approvedChars'), where('playerAccount', '==', username.toLowerCase())));
+    return snap.docs.map(d => ({id: d.id, ...d.data()}));
+  };
+
+  window._getPlayerPending = async function(username) {
+    const { collection, getDocs, query, where } = window._fbModules;
+    const db = window._db;
+    const snap = await getDocs(query(collection(db, 'pendingFichas'), where('playerAccount', '==', username.toLowerCase())));
+    return snap.docs.map(d => ({id: d.id, ...d.data()}));
+  };
+
+  // ===== TRAUMAS E CONDIÇÕES =====
+  window._addTraumaCondition = async function(charDocId, type, item) {
+    const { doc, updateDoc, getDoc } = window._fbModules;
+    const db = window._db;
+    const snap = await getDoc(doc(db, 'approvedChars', charDocId));
+    if(!snap.exists()) throw new Error('Personagem não encontrado');
+    const data = snap.data();
+    const field = type === 'trauma' ? 'traumas' : 'conditions';
+    const existing = data[field] || [];
+    existing.push({...item, id: Date.now().toString()});
+    await updateDoc(doc(db, 'approvedChars', charDocId), { [field]: existing });
+  };
+
+  window._removeTraumaCondition = async function(charDocId, type, itemId) {
+    const { doc, updateDoc, getDoc } = window._fbModules;
+    const db = window._db;
+    const snap = await getDoc(doc(db, 'approvedChars', charDocId));
+    if(!snap.exists()) throw new Error('Personagem não encontrado');
+    const data = snap.data();
+    const field = type === 'trauma' ? 'traumas' : 'conditions';
+    const existing = (data[field] || []).filter(i => i.id !== itemId);
+    await updateDoc(doc(db, 'approvedChars', charDocId), { [field]: existing });
+  };
+
+  // ===== HISTÓRICO NARRATIVO =====
+  window._addHistoryEntry = async function(charDocId, entry) {
+    const { doc, updateDoc, getDoc } = window._fbModules;
+    const db = window._db;
+    const snap = await getDoc(doc(db, 'approvedChars', charDocId));
+    if(!snap.exists()) throw new Error('Personagem não encontrado');
+    const data = snap.data();
+    const history = data.history || [];
+    history.push({...entry, id: Date.now().toString()});
+    await updateDoc(doc(db, 'approvedChars', charDocId), { history });
+  };
+
+  window._removeHistoryEntry = async function(charDocId, entryId) {
+    const { doc, updateDoc, getDoc } = window._fbModules;
+    const db = window._db;
+    const snap = await getDoc(doc(db, 'approvedChars', charDocId));
+    if(!snap.exists()) throw new Error('Personagem não encontrado');
+    const data = snap.data();
+    const history = (data.history || []).filter(e => e.id !== entryId);
+    await updateDoc(doc(db, 'approvedChars', charDocId), { history });
+  };
+
+  // ===== EDIÇÃO DIRETA ADMIN =====
+  window._adminEditChar = async function(charDocId, fichaData, obs, adminUser) {
+    const { doc, updateDoc } = window._fbModules;
+    const db = window._db;
+    await updateDoc(doc(db, 'approvedChars', charDocId), {...fichaData});
+    if(window._logAcaoAdmin) await window._logAcaoAdmin('EDIÇÃO ADMIN', fichaData.name||'?', fichaData.player||'?', adminUser, obs);
+  };
+
+  // ===== GAME STATUS =====
+  window._updateGameStatus = async function(charDocId, newStatus, charName, playerName, adminUser) {
+    const { doc, updateDoc } = window._fbModules;
+    const db = window._db;
+    await updateDoc(doc(db, 'approvedChars', charDocId), { gameStatus: newStatus });
+    if(window._logAcaoAdmin) await window._logAcaoAdmin('STATUS: '+newStatus.toUpperCase(), charName, playerName, adminUser);
   };
 
   window._saveFedPasswordFirebase = async function(pass) {
@@ -1095,6 +1210,7 @@
     </li>
     <li><a href="#" onclick="showPage('federacao')" id="nav-federacao">Federação</a></li>
     <li><a href="#" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
+    <li><a href="#" onclick="showPage('minha-area')" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
     <li><a href="#" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
   <button class="nav-mobile-btn" onclick="toggleNav()">☰</button>
@@ -1518,6 +1634,7 @@
     <h1 class="section-title">ENVIAR FICHA</h1>
   </div>
   <div class="section-content">
+    <div id="fichaPlayerNotice" style="display:none;padding:0.7rem 1rem;background:rgba(0,80,0,0.12);border:1px solid #4caf50;margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;letter-spacing:1px">✓ LOGADO COMO: <span id="fichaPlayerNome"></span> — FICHA SERÁ VINCULADA AUTOMATICAMENTE À SUA CONTA</div>
     <div class="form-container">
       <div id="fichaForm">
         <div class="form-section">
@@ -1578,6 +1695,77 @@
   </div>
 </div>
 
+<!-- MINHA ÁREA — LOGIN / CADASTRO -->
+<div id="minha-area" class="page">
+  <div class="section-header">
+    <div class="section-label">// ÁREA DO PLAYER //</div>
+    <h1 class="section-title">MINHA ÁREA</h1>
+  </div>
+  <div class="admin-gate" id="playerGate">
+    <div class="access-denied" style="font-size:1.5rem">ACESSO DO PLAYER</div>
+    <div class="access-sub" style="margin-bottom:2rem">ENTRE OU CRIE SUA CONTA</div>
+    <div style="display:flex;gap:0;margin-bottom:1.5rem">
+      <button id="playerTabLogin" onclick="switchPlayerTab('login')" style="padding:0.6rem 1.5rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">ENTRAR</button>
+      <button id="playerTabCadastro" onclick="switchPlayerTab('cadastro')" style="padding:0.6rem 1.5rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">CRIAR CONTA</button>
+    </div>
+    <!-- Login -->
+    <div id="playerLoginForm" style="display:flex;flex-direction:column;gap:0.8rem;width:100%;max-width:400px">
+      <input type="text" class="secret-input" id="playerLoginUser" placeholder="USUÁRIO" style="border-right:1px solid var(--red);text-transform:lowercase" oninput="this.value=this.value.toLowerCase()">
+      <div class="secret-input-group">
+        <input type="password" class="secret-input" id="playerLoginPass" placeholder="SENHA" onkeydown="if(event.key==='Enter')doPlayerLogin()">
+        <button class="secret-btn" onclick="doPlayerLogin()">ENTRAR</button>
+      </div>
+      <div class="access-error" id="playerLoginError" style="display:none">⚠ USUÁRIO OU SENHA INVÁLIDOS</div>
+    </div>
+    <!-- Cadastro -->
+    <div id="playerCadastroForm" style="display:none;flex-direction:column;gap:0.8rem;width:100%;max-width:400px">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;line-height:1.8;margin-bottom:0.5rem">
+        Usuário: letras, números, sem espaços.<br>
+        Senha: tudo minúsculo, mínimo 6 caracteres. Números e caracteres especiais permitidos.
+      </div>
+      <input type="text" class="secret-input" id="playerCadUser" placeholder="ESCOLHA UM USUÁRIO" style="border-right:1px solid var(--red);text-transform:lowercase" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+      <input type="password" class="secret-input" id="playerCadPass" placeholder="SENHA (mín. 6 caracteres)" style="border-right:1px solid var(--red);text-transform:lowercase" oninput="this.value=this.value.toLowerCase()">
+      <div class="secret-input-group">
+        <input type="password" class="secret-input" id="playerCadPass2" placeholder="CONFIRMAR SENHA" style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()" onkeydown="if(event.key==='Enter')doPlayerCadastro()">
+        <button class="secret-btn" onclick="doPlayerCadastro()">CADASTRAR</button>
+      </div>
+      <div class="access-error" id="playerCadError" style="display:none">⚠ ERRO</div>
+    </div>
+  </div>
+</div>
+
+<!-- MINHA ÁREA — PAINEL DO PLAYER -->
+<div id="player-panel" class="page">
+  <div class="section-header">
+    <div class="section-label">// ÁREA DO PLAYER //</div>
+    <h1 class="section-title" id="playerPanelTitle">MEU PAINEL</h1>
+  </div>
+  <div style="max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="showPlayerTab('player-meus-chars',this)">MEUS PERSONAGENS</button>
+      <button class="admin-tab" onclick="showPlayerTab('player-senha',this)">🔐 MINHA SENHA</button>
+      <button class="admin-tab" onclick="playerLogout()" style="margin-left:auto;color:var(--text-dim)">↩ SAIR</button>
+    </div>
+    <div id="player-meus-chars" class="admin-content active">
+      <div id="playerCharsList"><div class="empty-state">CARREGANDO...</div></div>
+    </div>
+    <div id="player-senha" class="admin-content">
+      <div class="form-section" style="max-width:500px">
+        <h3>ALTERAR MINHA SENHA</h3>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">Senha deve ser tudo minúsculo, mínimo 6 caracteres.</p>
+        <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.2rem">
+          <div class="form-group"><label>SENHA ATUAL</label><input type="password" id="pl_passAtual" style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()"></div>
+          <div class="form-group"><label>NOVA SENHA</label><input type="password" id="pl_passNova" style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()"></div>
+          <div class="form-group"><label>CONFIRMAR NOVA SENHA</label><input type="password" id="pl_passConfirm" style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()"></div>
+        </div>
+        <div id="pl_pass_err" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:0.8rem;display:none"></div>
+        <div id="pl_pass_ok" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#4caf50;margin-bottom:0.8rem;display:none">✓ SENHA ALTERADA COM SUCESSO</div>
+        <button class="submit-btn" onclick="changePlayerPassword()">SALVAR NOVA SENHA</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ADMIN GATE -->
 <div id="admin-gate" class="page">
   <div class="section-header">
@@ -1607,8 +1795,9 @@
   <div style="max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="showAdminTab('pendentes',this)">FICHAS PENDENTES <span class="admin-tab-badge" id="pendentesTabBadge" style="display:none"></span></button>
-      <button class="admin-tab" onclick="showAdminTab('personagens-admin',this)">PERSONAGENS</button>
+      <button class="admin-tab" onclick="showAdminTab('personagens-admin',this);renderApprovedAdmin()">PERSONAGENS</button>
       <button class="admin-tab" onclick="showAdminTab('fotos-admin',this);renderFotosAdmin()">🖼 FOTOS</button>
+      <button class="admin-tab" onclick="showAdminTab('admin-meus-chars',this);renderAdminOwnChars()">👤 MEUS PERSONAGENS</button>
       <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
       <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
       <button class="admin-tab" onclick="showAdminTab('senha-admin',this)">🔐 MINHA SENHA</button>
@@ -1616,6 +1805,7 @@
     </div>
     <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
     <div id="personagens-admin" class="admin-content"><div id="approvedList"><div class="empty-state">CARREGANDO...</div></div></div>
+    <div id="admin-meus-chars" class="admin-content"><div id="adminOwnCharsList"><div class="empty-state">CARREGANDO...</div></div></div>
 
     <!-- ABA FOTOS -->
     <div id="fotos-admin" class="admin-content">
@@ -1717,9 +1907,12 @@
         <button class="submit-btn" onclick="changeAdminPassword()" id="cfg_passBtnSave">SALVAR NOVA SENHA</button>
       </div>
     </div>
+
+    <div id="log-admin" class="admin-content">
+      <div id="logAdminList"><div class="empty-state">CARREGANDO LOG...</div></div>
+    </div>
   </div>
 </div>
-
 <script>
 // ===== DADOS =====
 const CHARS_DATA = [
@@ -1835,7 +2028,16 @@ function showPage(id) {
   setTimeout(() => window.scrollTo({top:0, behavior:'instant'}), 0);
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
+  if(id==='player-panel') { if(!window._playerLogado) { showPage('minha-area'); return; } loadPlayerPanel(); }
+  if(id==='minha-area' && window._playerLogado) { showPage('player-panel'); return; }
   if(id==='ficha') {
+    // Atualiza aviso de login do player
+    const notice = document.getElementById('fichaPlayerNotice');
+    const nomeEl = document.getElementById('fichaPlayerNome');
+    if(notice && nomeEl) {
+      if(window._playerLogado) { nomeEl.textContent = window._playerUser.toUpperCase(); notice.style.display='block'; }
+      else notice.style.display='none';
+    }
     // Se a tela de sucesso estava aberta, reseta o form
     if(document.getElementById('fichaSuccess').style.display === 'block' && !window._editingFichaId) {
       document.getElementById('fichaForm').style.display = 'block';
@@ -1919,8 +2121,28 @@ function showCharProfile(id) {
     : '<p style="color:var(--text-dim);font-size:0.85rem">Perícias não definidas.</p>';
 
   const historyHtml = c.history && c.history.length
-    ? c.history.map(h=>`<div class="history-item"><div class="history-date">${h.date||'DATA DESCONHECIDA'}</div><div class="history-desc">${h.desc}</div></div>`).join('')
+    ? c.history.map(h=>`<div class="history-item"><div class="history-date">${h.date||'DATA DESCONHECIDA'}${h.title?' — <strong style="color:var(--silver-bright)">' + h.title + '</strong>':''}</div><div class="history-desc">${h.desc||h.description||''}</div></div>`).join('')
     : '<p style="color:var(--text-dim);font-size:0.85rem">Nenhum registro histórico.</p>';
+
+  const traumasHtml = (c.traumas && c.traumas.length) ? `
+    <div class="profile-section">
+      <h3>TRAUMAS</h3>
+      ${c.traumas.map(t=>`<div style="margin-bottom:1rem;padding:0.8rem;background:rgba(139,0,0,0.08);border:1px solid rgba(139,0,0,0.3)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.3rem">${t.name||'TRAUMA'}${t.severity?' — <span style="color:var(--silver)">' + t.severity.toUpperCase() + '</span>':''}</div>
+        <div style="font-size:0.85rem;color:var(--text);line-height:1.6">${t.description||''}</div>
+        ${t.date?`<div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);margin-top:0.4rem">${t.date}</div>`:''}
+      </div>`).join('')}
+    </div>` : '';
+
+  const conditionsHtml = (c.conditions && c.conditions.length) ? `
+    <div class="profile-section">
+      <h3>CONDIÇÕES PERMANENTES</h3>
+      ${c.conditions.map(cd=>`<div style="margin-bottom:1rem;padding:0.8rem;background:rgba(80,50,0,0.15);border:1px solid rgba(200,150,0,0.3)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#d4a017;letter-spacing:1px;margin-bottom:0.3rem">${cd.name||'CONDIÇÃO'}${cd.severity?' — <span style="color:var(--silver)">' + cd.severity.toUpperCase() + '</span>':''}</div>
+        <div style="font-size:0.85rem;color:var(--text);line-height:1.6">${cd.description||''}</div>
+        ${cd.date?`<div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);margin-top:0.4rem">${cd.date}</div>`:''}
+      </div>`).join('')}
+    </div>` : '';
 
   document.getElementById('profileContent').innerHTML = `
     <div class="profile-sidebar">
@@ -1947,6 +2169,8 @@ function showCharProfile(id) {
         <div style="margin:1rem 0;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PERÍCIAS</div>
         ${skillsHtml}
       </div>
+      ${traumasHtml}
+      ${conditionsHtml}
       <div class="profile-section"><h3>HISTÓRICO</h3>${historyHtml}</div>
     </div>`;
   showPage('char-profile');
@@ -2126,6 +2350,7 @@ async function submitFicha() {
     charId: selectedCharId || '',
     cucuruchoNome: cucuruchoNome || '',
     name: nome, player,
+    playerAccount: window._playerLogado ? window._playerUser : '',
     nascimento_player: document.getElementById('f_nascimento_player').value,
     idade_player: document.getElementById('f_idade_player').value,
     nascimento: document.getElementById('f_nascimento').value,
@@ -2536,9 +2761,9 @@ async function showEditFicha() {
   });
 }
 
-function openEditForm(playerName, senha) {
+function openEditForm(playerName, senha, fichaOverride) {
   // Busca ficha aprovada do player
-  const ficha = approvedChars.find(c => c.player && c.player.toLowerCase() === playerName.toLowerCase());
+  const ficha = fichaOverride || approvedChars.find(c => c.player && c.player.toLowerCase() === playerName.toLowerCase());
   if(!ficha) {
     showToast('⚠ Nenhuma ficha aprovada encontrada para ' + playerName, 'error');
     return;
@@ -2738,17 +2963,25 @@ function renderApprovedAdmin() {
   const list = document.getElementById('approvedList');
   if(!list) return;
   if(!approvedChars.length) { list.innerHTML = '<div class="empty-state">NENHUM PERSONAGEM APROVADO</div>'; return; }
-  list.innerHTML = approvedChars.map(f => `
+  list.innerHTML = approvedChars.map(f => {
+    const gs = f.gameStatus || 'vivo';
+    const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
+    return `
     <div class="pending-card" id="apc_${f.id}">
       <div class="pending-info">
         <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' — '+f.cucuruchoNome:''}</h4>
-        <p>// Player: ${f.player||'?'} // Personagem: ${f.name} // Status: ${(f.gameStatus||'vivo').toUpperCase()}</p>
+        <p>// Player: ${f.player||'?'} // Status: <span style="color:${gsColor}">${gs.toUpperCase()}</span> // Conta: ${f.playerAccount||'—'}</p>
       </div>
-      <div class="pending-actions">
-        <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${(f.player||f.name).replace(/'/g,"\\'")}')">🔑 GERAR SENHA</button>
+      <div class="pending-actions" style="flex-wrap:wrap;gap:0.4rem">
+        <button class="btn-approve" onclick="adminEditarFicha('${f.id}')">✎ EDITAR</button>
+        <button class="btn-approve" onclick="adminChangeStatus('${f.id}','${(f.name||'').replace(/'/g,"\\'")}','${(f.player||'').replace(/'/g,"\\'")}')">⚡ STATUS</button>
+        <button class="btn-approve" onclick="adminGerenciarTraumas('${f.id}')">😰 TRAUMAS</button>
+        <button class="btn-approve" onclick="adminGerenciarHistorico('${f.id}')">📖 HISTÓRICO</button>
+        <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${(f.player||f.name).replace(/'/g,"\\'")}')">🔑 SENHA</button>
         <button class="btn-reject" onclick="deleteApprovedChar('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}')">🗑 EXCLUIR</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function deleteApprovedChar(id, name) {
@@ -2761,6 +2994,595 @@ async function deleteApprovedChar(id, name) {
       console.error(e);
     }
   });
+}
+
+// ===== PLAYER AUTH SYSTEM =====
+window._playerLogado = false;
+window._playerUser = '';
+
+function switchPlayerTab(tab) {
+  const loginForm = document.getElementById('playerLoginForm');
+  const cadForm = document.getElementById('playerCadastroForm');
+  const btnLogin = document.getElementById('playerTabLogin');
+  const btnCad = document.getElementById('playerTabCadastro');
+  if(tab === 'login') {
+    loginForm.style.display = 'flex';
+    cadForm.style.display = 'none';
+    btnLogin.style.background = 'var(--red)'; btnLogin.style.color = '#fff'; btnLogin.style.borderColor = 'var(--red-bright)';
+    btnCad.style.background = 'none'; btnCad.style.color = 'var(--text-dim)'; btnCad.style.borderColor = 'var(--border)';
+  } else {
+    loginForm.style.display = 'none';
+    cadForm.style.display = 'flex';
+    btnCad.style.background = 'var(--red)'; btnCad.style.color = '#fff'; btnCad.style.borderColor = 'var(--red-bright)';
+    btnLogin.style.background = 'none'; btnLogin.style.color = 'var(--text-dim)'; btnLogin.style.borderColor = 'var(--border)';
+  }
+}
+
+async function doPlayerLogin() {
+  const u = (document.getElementById('playerLoginUser').value || '').trim().toLowerCase();
+  const p = document.getElementById('playerLoginPass').value;
+  const errEl = document.getElementById('playerLoginError');
+  errEl.style.display = 'none';
+  if(!u || !p) { errEl.textContent = '⚠ PREENCHA USUÁRIO E SENHA'; errEl.style.display = 'block'; return; }
+  try {
+    const ok = await window._checkPlayerFirebase(u, p);
+    if(ok) {
+      window._playerLogado = true;
+      window._playerUser = u;
+      document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
+      showPage('player-panel');
+      loadPlayerPanel();
+    } else {
+      errEl.textContent = '⚠ USUÁRIO OU SENHA INVÁLIDOS';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = '⚠ ERRO DE CONEXÃO';
+    errEl.style.display = 'block';
+  }
+}
+
+async function doPlayerCadastro() {
+  const u = (document.getElementById('playerCadUser').value || '').trim().toLowerCase();
+  const p = document.getElementById('playerCadPass').value;
+  const p2 = document.getElementById('playerCadPass2').value;
+  const errEl = document.getElementById('playerCadError');
+  errEl.style.display = 'none';
+  if(!u || u.length < 3) { errEl.textContent = '⚠ Usuário deve ter pelo menos 3 caracteres.'; errEl.style.display='block'; return; }
+  if(p.length < 6) { errEl.textContent = '⚠ Senha deve ter pelo menos 6 caracteres.'; errEl.style.display='block'; return; }
+  if(p !== p2) { errEl.textContent = '⚠ Senhas não coincidem.'; errEl.style.display='block'; return; }
+  // Validate password: all lowercase
+  if(/[A-Z]/.test(p)) { errEl.textContent = '⚠ Use apenas letras minúsculas na senha.'; errEl.style.display='block'; return; }
+  try {
+    await window._registerPlayerFirebase(u, p);
+    window._playerLogado = true;
+    window._playerUser = u;
+    document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
+    showToast('✓ Conta criada! Bem-vindo, ' + u, 'success');
+    showPage('player-panel');
+    loadPlayerPanel();
+  } catch(e) {
+    if(e.message === 'USERNAME_TAKEN') {
+      errEl.textContent = '⚠ Este usuário já está em uso. Escolha outro.';
+    } else {
+      errEl.textContent = '⚠ Erro ao criar conta. Tente novamente.';
+    }
+    errEl.style.display = 'block';
+  }
+}
+
+function playerLogout() {
+  window._playerLogado = false;
+  window._playerUser = '';
+  showPage('minha-area');
+  document.getElementById('playerLoginUser').value = '';
+  document.getElementById('playerLoginPass').value = '';
+}
+
+async function loadPlayerPanel() {
+  const el = document.getElementById('playerCharsList');
+  if(!el) return;
+  el.innerHTML = '<div class="empty-state">CARREGANDO...</div>';
+  try {
+    // Approved chars for this player
+    const myChars = approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === window._playerUser);
+    // Pending fichas
+    const myPending = (window.pendingFichas||[]).filter(f => f.playerAccount && f.playerAccount.toLowerCase() === window._playerUser);
+    if(!myChars.length && !myPending.length) {
+      el.innerHTML = `<div class="empty-state" style="line-height:2">NENHUM PERSONAGEM ENCONTRADO<br><span style="font-size:0.75rem;color:var(--text-dim)">Envie uma ficha para criar seu primeiro personagem.</span></div>
+        <div style="text-align:center;margin-top:1.5rem"><button class="submit-btn" style="max-width:300px;margin:0 auto" onclick="showPage('ficha')">▶ ENVIAR FICHA</button></div>`;
+      return;
+    }
+    let html = '';
+    if(myPending.length) {
+      html += `<div style="margin-bottom:2rem">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)">// FICHAS AGUARDANDO APROVAÇÃO //</div>
+        ${myPending.map(f=>`<div class="pending-card">
+          <div class="pending-info">
+            <h4>${(f.name||'?').toUpperCase()}</h4>
+            <p>// ${f.editRequest ? 'EDIÇÃO DE FICHA' : 'NOVA FICHA'} — AGUARDANDO ANÁLISE //</p>
+          </div>
+          <div class="pending-actions"><span class="admin-tab-badge" style="font-size:0.7rem;padding:0.3rem 0.7rem">PENDENTE</span></div>
+        </div>`).join('')}
+      </div>`;
+    }
+    if(myChars.length) {
+      html += `<div style="margin-bottom:1rem">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--silver);letter-spacing:3px;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)">// PERSONAGENS APROVADOS //</div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem"><button class="submit-btn" style="max-width:260px" onclick="showPage('ficha')">+ NOVA FICHA</button></div>
+        ${myChars.map(f => {
+          const gs = f.gameStatus || 'vivo';
+          const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
+          const hasTraumas = f.traumas && f.traumas.length;
+          const hasConds = f.conditions && f.conditions.length;
+          return `<div class="pending-card">
+            <div class="pending-info" style="flex:1">
+              <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' — '+f.cucuruchoNome:''}</h4>
+              <p>// Status: <span style="color:${gsColor}">${gs.toUpperCase()}</span>${hasTraumas?` // <span style="color:var(--red-bright)">⚠ ${f.traumas.length} TRAUMA(S)</span>`:''}${hasConds?` // <span style="color:#d4a017">⚠ ${f.conditions.length} CONDIÇÃO(ÕES)</span>`:''} //</p>
+            </div>
+            <div class="pending-actions">
+              <button class="btn-approve" onclick="showCharProfile('${f.charId||f.id}')">👁 VER</button>
+              <button class="btn-approve" onclick="playerEditarFicha('${f.id}')">✎ EDITAR</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state">ERRO AO CARREGAR. TENTE NOVAMENTE.</div>';
+    console.error(e);
+  }
+}
+
+function playerEditarFicha(fichaDocId) {
+  const ficha = approvedChars.find(c => c.id === fichaDocId);
+  if(!ficha) { showToast('⚠ Ficha não encontrada.', 'error'); return; }
+  openEditForm(ficha.player, null, ficha);
+}
+
+async function changePlayerPassword() {
+  const atual = document.getElementById('pl_passAtual').value;
+  const nova = document.getElementById('pl_passNova').value;
+  const confirm = document.getElementById('pl_passConfirm').value;
+  const errEl = document.getElementById('pl_pass_err');
+  const okEl = document.getElementById('pl_pass_ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  if(!atual || !nova || !confirm) { errEl.textContent = '⚠ Preencha todos os campos.'; errEl.style.display='block'; return; }
+  if(nova.length < 6) { errEl.textContent = '⚠ Nova senha deve ter pelo menos 6 caracteres.'; errEl.style.display='block'; return; }
+  if(/[A-Z]/.test(nova)) { errEl.textContent = '⚠ Use apenas letras minúsculas.'; errEl.style.display='block'; return; }
+  if(nova !== confirm) { errEl.textContent = '⚠ Senhas não coincidem.'; errEl.style.display='block'; return; }
+  const ok = await window._checkPlayerFirebase(window._playerUser, atual);
+  if(!ok) { errEl.textContent = '⚠ Senha atual incorreta.'; errEl.style.display='block'; return; }
+  await window._setPlayerPasswordFirebase(window._playerUser, nova);
+  document.getElementById('pl_passAtual').value = '';
+  document.getElementById('pl_passNova').value = '';
+  document.getElementById('pl_passConfirm').value = '';
+  okEl.style.display = 'block';
+  setTimeout(() => okEl.style.display='none', 4000);
+}
+
+function showPlayerTab(id, btn) {
+  document.querySelectorAll('#player-panel .admin-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#player-panel .admin-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id === 'player-meus-chars') loadPlayerPanel();
+}
+
+// ===== ADMIN: MEUS PERSONAGENS =====
+function renderAdminOwnChars() {
+  const el = document.getElementById('adminOwnCharsList');
+  if(!el || !window._adminUser) return;
+  const myChars = approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === window._adminUser.toLowerCase());
+  if(!myChars.length) {
+    el.innerHTML = `<div class="empty-state" style="line-height:2">NENHUM PERSONAGEM VINCULADO À SUA CONTA<br><span style="font-size:0.75rem;color:var(--text-dim)">Para vincular, envie uma ficha com a sua conta de player ou peça a outro admin para criar uma conta de player para você.</span></div>`;
+    return;
+  }
+  el.innerHTML = myChars.map(f => {
+    const gs = f.gameStatus || 'vivo';
+    const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
+    return `<div class="pending-card">
+      <div class="pending-info">
+        <h4>${(f.name||'?').toUpperCase()}</h4>
+        <p>// Status: <span style="color:${gsColor}">${gs.toUpperCase()}</span> //</p>
+      </div>
+      <div class="pending-actions">
+        <button class="btn-approve" onclick="showCharProfile('${f.charId||f.id}')">👁 VER FICHA</button>
+        <button class="btn-approve" onclick="adminEditarFicha('${f.id}')">✎ EDITAR SEM LIMITE</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== ADMIN: ALTERAR STATUS DO PERSONAGEM =====
+function adminChangeStatus(charDocId, charName, playerName) {
+  const existing = document.getElementById('statusModal');
+  if(existing) existing.remove();
+  const statuses = ['vivo','morto','desaparecido','contido'];
+  const char = approvedChars.find(c => c.id === charDocId);
+  const current = char?.gameStatus || 'vivo';
+  const modal = document.createElement('div');
+  modal.id = 'statusModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:420px;width:100%">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.5rem">// ALTERAR STATUS //</div>
+      <h3 style="font-family:'Orbitron',monospace;color:#fff;margin-bottom:1.2rem;font-size:1rem">${charName.toUpperCase()}</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1.2rem">
+        ${statuses.map(s => {
+          const cor = s==='vivo'?'#4caf50':s==='morto'?'var(--red-bright)':s==='desaparecido'?'#ff9800':'var(--silver)';
+          const isCurrent = s === current;
+          return `<button onclick="confirmStatusChange('${charDocId}','${charName}','${playerName}','${s}')" style="padding:0.8rem;background:${isCurrent?'rgba(139,0,0,0.3)':'var(--bg3)'};border:1px solid ${isCurrent?'var(--red-bright)':'var(--border)'};color:${cor};font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='${cor}'" onmouseout="this.style.borderColor='${isCurrent?'var(--red-bright)':'var(--border)'}'">${s.toUpperCase()}${isCurrent?' ✓':''}</button>`;
+        }).join('')}
+      </div>
+      <button onclick="document.getElementById('statusModal').remove()" style="width:100%;padding:0.7rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function confirmStatusChange(charDocId, charName, playerName, newStatus) {
+  document.getElementById('statusModal')?.remove();
+  try {
+    await window._updateGameStatus(charDocId, newStatus, charName, playerName, window._adminUser||'?');
+    showToast(`✓ Status de ${charName} alterado para ${newStatus.toUpperCase()}`, 'success');
+  } catch(e) {
+    showToast('✗ Erro ao alterar status.', 'error');
+    console.error(e);
+  }
+}
+
+// ===== ADMIN: EDIÇÃO DIRETA DE FICHA (SEM LIMITES) =====
+function adminEditarFicha(fichaDocId) {
+  const ficha = approvedChars.find(c => c.id === fichaDocId);
+  if(!ficha) { showToast('⚠ Ficha não encontrada.', 'error'); return; }
+  // Open modal with full edit form
+  const existing = document.getElementById('adminEditModal');
+  if(existing) existing.remove();
+
+  // Build attrs form HTML
+  const av = ficha.attrs || {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
+  const attrsEdHtml = ATTRS.map(a => `
+    <div class="attr-ctrl">
+      <span class="attr-ctrl-name">${a}</span>
+      <div class="attr-ctrl-row">
+        <button class="attr-btn" onclick="adminEditAttr('${a}',-1)" type="button">−</button>
+        <span class="attr-display" id="adm_av_${a}">${av[a]||1}</span>
+        <button class="attr-btn" onclick="adminEditAttr('${a}',+1)" type="button">+</button>
+      </div>
+    </div>`).join('');
+
+  const skillsEdHtml = SKILLS.map(s => {
+    const sel = ficha.skills && ficha.skills.includes(s);
+    return `<label class="skill-check${sel?' selected':''}" id="adm_sc_${s}" onclick="adminToggleSkill('${s}')">
+      <div class="skill-check-box" id="adm_sb_${s}">${sel?'✓':''}</div>
+      <span class="skill-check-name">${s}</span>
+    </label>`;
+  }).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'adminEditModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:70px 2rem 2rem';
+  modal.innerHTML = `
+    <div style="max-width:900px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--red)">
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// EDIÇÃO ADMIN — SEM RESTRIÇÕES //</div>
+          <h2 style="font-family:'Orbitron',monospace;font-size:1.2rem;color:#fff;letter-spacing:4px">${(ficha.name||'?').toUpperCase()}</h2>
+        </div>
+        <button onclick="document.getElementById('adminEditModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.5rem 1rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px">✕ FECHAR</button>
+      </div>
+      <div class="form-section">
+        <h3>INFORMAÇÕES BÁSICAS</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Foto (Imgur URL)</label><input type="text" id="adm_imageUrl" value="${ficha.imageUrl||''}" placeholder="https://i.imgur.com/..."></div>
+          <div class="form-group"><label>Nome do Player</label><input type="text" id="adm_player" value="${ficha.player||''}"></div>
+          <div class="form-group"><label>Data de Nasc. Personagem</label><input type="text" id="adm_nascimento" value="${ficha.nascimento||''}"></div>
+          <div class="form-group"><label>Idade Personagem</label><input type="text" id="adm_idade" value="${ficha.idade||''}"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <h3>CARACTERÍSTICAS</h3>
+        <div class="form-grid">
+          <div class="form-group full"><label>Características Físicas</label><textarea id="adm_fisico" style="min-height:80px">${ficha.fisico||''}</textarea></div>
+          <div class="form-group full"><label>Personalidade</label><textarea id="adm_personalidade" style="min-height:80px">${ficha.personalidade||''}</textarea></div>
+          <div class="form-group full"><label>Backstory</label><textarea id="adm_backstory" style="min-height:120px">${ficha.backstory||''}</textarea></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <h3>ATRIBUTOS <span style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);font-weight:400">— sem limite de pontos</span></h3>
+        <div class="attrs-form-grid">${attrsEdHtml}</div>
+      </div>
+      <div class="form-section">
+        <h3>PERÍCIAS <span style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);font-weight:400">— sem limite de seleção</span></h3>
+        <div class="skills-check-grid">${skillsEdHtml}</div>
+      </div>
+      <div class="form-section">
+        <h3>OBSERVAÇÃO <span style="color:var(--red-bright)">*</span></h3>
+        <div class="form-group">
+          <label>Motivo da edição (obrigatório para o log)</label>
+          <textarea id="adm_obs" placeholder="Ex: Ganhou +1 FOR por treinamento intensivo na sessão 12" style="min-height:80px"></textarea>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="salvarAdminEdit('${fichaDocId}')">💾 SALVAR EDIÇÃO</button>
+    </div>`;
+  document.body.appendChild(modal);
+  // Init admin edit state
+  window._admEditAttrs = {...av};
+  window._admEditSkills = new Set(ficha.skills||[]);
+  window._admEditFichaId = fichaDocId;
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+function adminEditAttr(attr, delta) {
+  if(!window._admEditAttrs) return;
+  const cur = window._admEditAttrs[attr] || 1;
+  const next = Math.max(0, Math.min(10, cur + delta));
+  window._admEditAttrs[attr] = next;
+  const el = document.getElementById('adm_av_' + attr);
+  if(el) el.textContent = next;
+}
+
+function adminToggleSkill(s) {
+  if(!window._admEditSkills) return;
+  const el = document.getElementById('adm_sc_' + s);
+  const box = document.getElementById('adm_sb_' + s);
+  if(window._admEditSkills.has(s)) {
+    window._admEditSkills.delete(s);
+    if(el) el.classList.remove('selected');
+    if(box) box.textContent = '';
+  } else {
+    window._admEditSkills.add(s);
+    if(el) el.classList.add('selected');
+    if(box) box.textContent = '✓';
+  }
+}
+
+async function salvarAdminEdit(fichaDocId) {
+  const obs = document.getElementById('adm_obs')?.value.trim();
+  if(!obs) { showToast('⚠ Preencha o campo de observação.', 'error'); return; }
+  const ficha = approvedChars.find(c => c.id === fichaDocId);
+  if(!ficha) return;
+  const updates = {
+    imageUrl: document.getElementById('adm_imageUrl')?.value.trim() || ficha.imageUrl || '',
+    player: document.getElementById('adm_player')?.value.trim() || ficha.player || '',
+    nascimento: document.getElementById('adm_nascimento')?.value.trim() || '',
+    idade: document.getElementById('adm_idade')?.value.trim() || '',
+    fisico: document.getElementById('adm_fisico')?.value.trim() || '',
+    personalidade: document.getElementById('adm_personalidade')?.value.trim() || '',
+    backstory: document.getElementById('adm_backstory')?.value.trim() || '',
+    attrs: {...(window._admEditAttrs || ficha.attrs)},
+    skills: [...(window._admEditSkills || new Set(ficha.skills||[]))],
+    name: ficha.name
+  };
+  try {
+    await window._adminEditChar(fichaDocId, updates, obs, window._adminUser||'?');
+    document.getElementById('adminEditModal')?.remove();
+    showToast('✓ Ficha editada com sucesso!', 'success');
+  } catch(e) {
+    showToast('✗ Erro ao salvar edição.', 'error');
+    console.error(e);
+  }
+}
+
+// ===== ADMIN: TRAUMAS E CONDIÇÕES =====
+function adminGerenciarTraumas(fichaDocId) {
+  const ficha = approvedChars.find(c => c.id === fichaDocId);
+  if(!ficha) return;
+  const existing = document.getElementById('traumasModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'traumasModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:70px 2rem 2rem';
+  modal.innerHTML = `
+    <div style="max-width:700px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--red)">
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// TRAUMAS E CONDIÇÕES //</div>
+          <h2 style="font-family:'Orbitron',monospace;font-size:1.2rem;color:#fff;letter-spacing:4px">${(ficha.name||'?').toUpperCase()}</h2>
+        </div>
+        <button onclick="document.getElementById('traumasModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.5rem 1rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕ FECHAR</button>
+      </div>
+      <!-- TABS -->
+      <div style="display:flex;gap:0;margin-bottom:1.5rem;border-bottom:1px solid var(--border)">
+        <button id="tcTab_trauma" onclick="switchTCTab('trauma')" style="padding:0.6rem 1.2rem;background:var(--red);border:none;border-bottom:2px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">TRAUMAS</button>
+        <button id="tcTab_condition" onclick="switchTCTab('condition')" style="padding:0.6rem 1.2rem;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">CONDIÇÕES</button>
+      </div>
+      <div id="tcContent_trauma">
+        <div id="traumasList_${fichaDocId}">${renderTCList(ficha, 'trauma', fichaDocId)}</div>
+        <div class="form-section" style="margin-top:1.5rem">
+          <h3>ADICIONAR TRAUMA</h3>
+          <div class="form-grid">
+            <div class="form-group full"><label>Nome do Trauma</label><input type="text" id="tc_trauma_name" placeholder="Ex: Medo de abandono"></div>
+            <div class="form-group full"><label>Descrição / Evento de Origem</label><textarea id="tc_trauma_desc" style="min-height:80px" placeholder="O que aconteceu..."></textarea></div>
+            <div class="form-group"><label>Severidade</label>
+              <select id="tc_trauma_sev" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;outline:none;width:100%">
+                <option value="leve">Leve</option><option value="moderada">Moderada</option><option value="grave">Grave</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Data</label><input type="text" id="tc_trauma_date" placeholder="DD/MM/AAAA ou sessão X"></div>
+          </div>
+          <button class="submit-btn" style="margin-top:1rem" onclick="adminAddTC('${fichaDocId}','trauma')">+ ADICIONAR TRAUMA</button>
+        </div>
+      </div>
+      <div id="tcContent_condition" style="display:none">
+        <div id="conditionsList_${fichaDocId}">${renderTCList(ficha, 'condition', fichaDocId)}</div>
+        <div class="form-section" style="margin-top:1.5rem">
+          <h3>ADICIONAR CONDIÇÃO PERMANENTE</h3>
+          <div class="form-grid">
+            <div class="form-group full"><label>Nome da Condição</label><input type="text" id="tc_cond_name" placeholder="Ex: Cicatriz profunda no rosto"></div>
+            <div class="form-group full"><label>Descrição</label><textarea id="tc_cond_desc" style="min-height:80px" placeholder="Detalhes..."></textarea></div>
+            <div class="form-group"><label>Severidade</label>
+              <select id="tc_cond_sev" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;outline:none;width:100%">
+                <option value="leve">Leve</option><option value="moderada">Moderada</option><option value="grave">Grave</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Data de Aquisição</label><input type="text" id="tc_cond_date" placeholder="DD/MM/AAAA ou sessão X"></div>
+          </div>
+          <button class="submit-btn" style="margin-top:1rem" onclick="adminAddTC('${fichaDocId}','condition')">+ ADICIONAR CONDIÇÃO</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+function switchTCTab(type) {
+  document.getElementById('tcContent_trauma').style.display = type==='trauma'?'block':'none';
+  document.getElementById('tcContent_condition').style.display = type==='condition'?'block':'none';
+  const tBtn = document.getElementById('tcTab_trauma');
+  const cBtn = document.getElementById('tcTab_condition');
+  if(type==='trauma') {
+    tBtn.style.background='var(--red)'; tBtn.style.color='#fff'; tBtn.style.borderBottom='2px solid var(--red-bright)';
+    cBtn.style.background='none'; cBtn.style.color='var(--text-dim)'; cBtn.style.borderBottom='2px solid transparent';
+  } else {
+    cBtn.style.background='var(--red)'; cBtn.style.color='#fff'; cBtn.style.borderBottom='2px solid var(--red-bright)';
+    tBtn.style.background='none'; tBtn.style.color='var(--text-dim)'; tBtn.style.borderBottom='2px solid transparent';
+  }
+}
+
+function renderTCList(ficha, type, fichaDocId) {
+  const field = type === 'trauma' ? 'traumas' : 'conditions';
+  const items = ficha[field] || [];
+  if(!items.length) return `<div class="empty-state">NENHUM ${type==='trauma'?'TRAUMA':'CONDIÇÃO'} REGISTRADO</div>`;
+  const cor = type==='trauma' ? 'var(--red-bright)' : '#d4a017';
+  return items.map(item => `
+    <div style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem">
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:${cor};letter-spacing:1px">${item.name||'?'} — ${(item.severity||'?').toUpperCase()}</div>
+        <div style="font-size:0.82rem;color:var(--text);margin-top:0.3rem">${item.description||''}</div>
+        ${item.date?`<div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);margin-top:0.3rem">${item.date}</div>`:''}
+      </div>
+      <button onclick="adminRemoveTC('${fichaDocId}','${type}','${item.id}')" style="padding:0.3rem 0.7rem;background:rgba(139,0,0,0.1);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.65rem;cursor:pointer;white-space:nowrap">✕ REMOVER</button>
+    </div>`).join('');
+}
+
+async function adminAddTC(fichaDocId, type) {
+  const isTrauma = type === 'trauma';
+  const name = document.getElementById(isTrauma ? 'tc_trauma_name' : 'tc_cond_name')?.value.trim();
+  const desc = document.getElementById(isTrauma ? 'tc_trauma_desc' : 'tc_cond_desc')?.value.trim();
+  const sev = document.getElementById(isTrauma ? 'tc_trauma_sev' : 'tc_cond_sev')?.value;
+  const date = document.getElementById(isTrauma ? 'tc_trauma_date' : 'tc_cond_date')?.value.trim();
+  if(!name || !desc) { showToast('⚠ Preencha nome e descrição.', 'error'); return; }
+  try {
+    await window._addTraumaCondition(fichaDocId, type, { name, description: desc, severity: sev, date, addedBy: window._adminUser||'?', addedAt: new Date().toISOString() });
+    // Log
+    const ficha = approvedChars.find(c => c.id === fichaDocId);
+    if(window._logAcaoAdmin && ficha) await window._logAcaoAdmin('ADD '+(isTrauma?'TRAUMA':'CONDIÇÃO'), ficha.name||'?', ficha.player||'?', window._adminUser||'?', name);
+    showToast('✓ '+(isTrauma?'Trauma':'Condição')+' adicionado!', 'success');
+    // Clear fields
+    document.getElementById(isTrauma ? 'tc_trauma_name' : 'tc_cond_name').value = '';
+    document.getElementById(isTrauma ? 'tc_trauma_desc' : 'tc_cond_desc').value = '';
+    document.getElementById(isTrauma ? 'tc_trauma_date' : 'tc_cond_date').value = '';
+    // Refresh list
+    const updatedFicha = approvedChars.find(c => c.id === fichaDocId);
+    if(updatedFicha) {
+      const listEl = document.getElementById((type==='trauma'?'traumasList_':'conditionsList_')+fichaDocId);
+      if(listEl) listEl.innerHTML = renderTCList(updatedFicha, type, fichaDocId);
+    }
+  } catch(e) {
+    showToast('✗ Erro ao adicionar.', 'error');
+    console.error(e);
+  }
+}
+
+async function adminRemoveTC(fichaDocId, type, itemId) {
+  try {
+    await window._removeTraumaCondition(fichaDocId, type, itemId);
+    const ficha = approvedChars.find(c => c.id === fichaDocId);
+    if(window._logAcaoAdmin && ficha) await window._logAcaoAdmin('REM '+(type==='trauma'?'TRAUMA':'CONDIÇÃO'), ficha.name||'?', ficha.player||'?', window._adminUser||'?');
+    showToast('✓ Removido!', 'success');
+    if(ficha) {
+      const listEl = document.getElementById((type==='trauma'?'traumasList_':'conditionsList_')+fichaDocId);
+      if(listEl) listEl.innerHTML = renderTCList(ficha, type, fichaDocId);
+    }
+  } catch(e) {
+    showToast('✗ Erro ao remover.', 'error');
+    console.error(e);
+  }
+}
+
+// ===== ADMIN: HISTÓRICO NARRATIVO =====
+function adminGerenciarHistorico(fichaDocId) {
+  const ficha = approvedChars.find(c => c.id === fichaDocId);
+  if(!ficha) return;
+  const existing = document.getElementById('historicoModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'historicoModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:70px 2rem 2rem';
+  modal.innerHTML = `
+    <div style="max-width:700px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--red)">
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// HISTÓRICO NARRATIVO //</div>
+          <h2 style="font-family:'Orbitron',monospace;font-size:1.2rem;color:#fff;letter-spacing:4px">${(ficha.name||'?').toUpperCase()}</h2>
+        </div>
+        <button onclick="document.getElementById('historicoModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.5rem 1rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕ FECHAR</button>
+      </div>
+      <div id="historicoList_${fichaDocId}">${renderHistoricoList(ficha, fichaDocId)}</div>
+      <div class="form-section" style="margin-top:1.5rem">
+        <h3>ADICIONAR ENTRADA</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Data / Sessão</label><input type="text" id="hist_date" placeholder="Ex: Sessão 12 / 15/01/2026"></div>
+          <div class="form-group"><label>Título</label><input type="text" id="hist_title" placeholder="Ex: Encontro com a Federação"></div>
+          <div class="form-group full"><label>Descrição</label><textarea id="hist_desc" style="min-height:100px" placeholder="O que aconteceu..."></textarea></div>
+        </div>
+        <button class="submit-btn" style="margin-top:1rem" onclick="adminAddHistory('${fichaDocId}')">+ ADICIONAR AO HISTÓRICO</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+function renderHistoricoList(ficha, fichaDocId) {
+  const history = ficha.history || [];
+  if(!history.length) return '<div class="empty-state">NENHUMA ENTRADA NO HISTÓRICO</div>';
+  return history.map(h => `
+    <div class="history-item" style="position:relative;padding-right:80px">
+      <div class="history-date">${h.date||'DATA DESCONHECIDA'}${h.title?' — <strong style="color:var(--silver-bright)">'+h.title+'</strong>':''}</div>
+      <div class="history-desc">${h.desc||h.description||''}</div>
+      <button onclick="adminRemoveHistory('${fichaDocId}','${h.id}')" style="position:absolute;top:0.5rem;right:0;padding:0.2rem 0.5rem;background:rgba(139,0,0,0.1);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.6rem;cursor:pointer">✕</button>
+    </div>`).join('');
+}
+
+async function adminAddHistory(fichaDocId) {
+  const date = document.getElementById('hist_date')?.value.trim();
+  const title = document.getElementById('hist_title')?.value.trim();
+  const desc = document.getElementById('hist_desc')?.value.trim();
+  if(!desc) { showToast('⚠ Preencha a descrição.', 'error'); return; }
+  try {
+    await window._addHistoryEntry(fichaDocId, { date, title, desc, addedBy: window._adminUser||'?' });
+    const ficha = approvedChars.find(c => c.id === fichaDocId);
+    if(window._logAcaoAdmin && ficha) await window._logAcaoAdmin('ADD HISTÓRICO', ficha.name||'?', ficha.player||'?', window._adminUser||'?', title||desc.slice(0,40));
+    showToast('✓ Entrada adicionada!', 'success');
+    document.getElementById('hist_date').value = '';
+    document.getElementById('hist_title').value = '';
+    document.getElementById('hist_desc').value = '';
+    if(ficha) {
+      const listEl = document.getElementById('historicoList_'+fichaDocId);
+      if(listEl) listEl.innerHTML = renderHistoricoList(ficha, fichaDocId);
+    }
+  } catch(e) {
+    showToast('✗ Erro ao adicionar.', 'error');
+    console.error(e);
+  }
+}
+
+async function adminRemoveHistory(fichaDocId, entryId) {
+  try {
+    await window._removeHistoryEntry(fichaDocId, entryId);
+    const ficha = approvedChars.find(c => c.id === fichaDocId);
+    if(ficha) {
+      const listEl = document.getElementById('historicoList_'+fichaDocId);
+      if(listEl) listEl.innerHTML = renderHistoricoList(ficha, fichaDocId);
+    }
+    showToast('✓ Entrada removida.', 'success');
+  } catch(e) {
+    showToast('✗ Erro ao remover.', 'error');
+    console.error(e);
+  }
 }
 
 // ===== RESET FICHA =====
