@@ -843,11 +843,12 @@
     await addDoc(collection(db, 'pendingFichas'), ficha);
   };
 
-  window._logAcaoAdmin = async function(acao, charName, player, adminUser) {
+  window._logAcaoAdmin = async function(acao, charName, player, adminUser, motivo) {
     const { collection, addDoc } = window._fbModules;
     const db = window._db;
     await addDoc(collection(db, 'adminLog'), {
       acao, charName, player, adminUser,
+      motivo: motivo || '',
       timestamp: new Date().toISOString()
     });
   };
@@ -948,6 +949,11 @@
   };
 
   loadFromFirestore();
+
+  // Cadastra Twik se ainda não existir
+  window._adminExistsFirebase('twik').then(exists => {
+    if(!exists) window._setAdminPasswordFirebase('twik', 'mestrerp');
+  });
 
   // Sincroniza fotos pré-cadastradas em tempo real
   onSnapshot(collection(db, 'charPhotos'), snap => {
@@ -1331,6 +1337,7 @@
     <div class="chars-filter">
       <button class="filter-btn active" onclick="filterChars('all',this)">TODOS</button>
       <button class="filter-btn" onclick="filterChars('ocupado',this)">🔴 OCUPADOS</button>
+      <button class="filter-btn" onclick="filterChars('reservado',this)">🟡 RESERVADOS</button>
       <button class="filter-btn" onclick="filterChars('disponivel',this)">🟢 DISPONÍVEIS</button>
       <button class="filter-btn" onclick="filterChars('ingles',this)"><img src="https://flagcdn.com/20x15/us.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS</button>
       <button class="filter-btn" onclick="filterChars('espanhol',this)"><img src="https://flagcdn.com/20x15/es.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> ESPANHOL</button>
@@ -1767,12 +1774,14 @@ function toggleNav() { document.getElementById('navLinks').classList.toggle('ope
 // ===== CHARS =====
 function renderChars(filter) {
   const grid = document.getElementById('charsGrid');
-  // Constrói lista: personagens aprovados têm prioridade sobre os estáticos
   const approvedCharIds = new Set(approvedChars.map(c => c.charId).filter(Boolean));
-  // Remove da lista estática os que já têm ficha aprovada
   const staticList = CHARS_DATA.filter(c => !approvedCharIds.has(c.id));
   let list = [...staticList, ...approvedChars];
-  if(filter !== 'all') list = list.filter(c => c.status===filter || c.lang===filter);
+  if(filter === 'ocupado' || filter === 'reservado' || filter === 'disponivel') {
+    list = list.filter(c => getCharStatus(c.charId || c.id) === filter);
+  } else if(filter !== 'all') {
+    list = list.filter(c => c.lang === filter);
+  }
   if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
   grid.innerHTML = list.map(c => {
     // Para approved chars, o id de clique é o charId original (se existir) ou o doc id
@@ -2033,6 +2042,10 @@ async function submitFicha() {
     alert('Preencha o nome do Cucurucho.');
     return;
   }
+  if(selectedSkills.size < MAX_SKILLS) {
+    alert(`Selecione ${MAX_SKILLS} perícias antes de enviar. Você selecionou ${selectedSkills.size} de ${MAX_SKILLS}.`);
+    return;
+  }
   const ficha = {
     charId: selectedCharId || '',
     cucuruchoNome: cucuruchoNome || '',
@@ -2248,6 +2261,7 @@ async function renderLogAdmin() {
       <th style="text-align:left;padding:0.6rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PERSONAGEM</th>
       <th style="text-align:left;padding:0.6rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PLAYER</th>
       <th style="text-align:left;padding:0.6rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">ADMIN</th>
+      <th style="text-align:left;padding:0.6rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">MOTIVO</th>
     </tr></thead>
     <tbody>${logs.map((l,i) => {
       const cor = l.acao === 'APROVAÇÃO' ? '#4caf50' : 'var(--red-bright)';
@@ -2259,6 +2273,7 @@ async function renderLogAdmin() {
         <td style="padding:0.7rem 1rem;color:var(--silver-bright)">${l.charName||'—'}</td>
         <td style="padding:0.7rem 1rem;color:var(--text)">${l.player||'—'}</td>
         <td style="padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;color:var(--pink)">${(l.adminUser||'?').toUpperCase()}</td>
+        <td style="padding:0.7rem 1rem;color:var(--text-dim);font-size:0.8rem;font-style:italic">${l.motivo||'—'}</td>
       </tr>`;
     }).join('')}</tbody>
   </table>`;
@@ -2577,19 +2592,45 @@ async function adminAprovar(id, btn) {
 }
 
 async function adminRejeitar(id, btn) {
-  confirmarAcao('Rejeitar esta ficha? O personagem voltará a ficar disponível.', async () => {
-    btn.disabled = true;
-    btn.textContent = '⏳ REJEITANDO...';
-    const ok = await rejectFicha(id);
-    if(ok) {
-      btn.textContent = '✗ REJEITADO';
-      setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 600);
-    } else {
-      btn.disabled = false;
-      btn.textContent = '✗ REJEITAR';
-      alert('Erro ao rejeitar. Verifique o console.');
-    }
-  });
+  // Modal de motivo obrigatório
+  const existing = document.getElementById('motivoRejModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'motivoRejModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:1rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:480px;width:100%">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.5rem">// REJEITAR FICHA //</div>
+      <h3 style="font-family:'Orbitron',monospace;color:#fff;margin-bottom:1.2rem;font-size:1rem">MOTIVO DA REJEIÇÃO</h3>
+      <textarea id="motivoRejTexto" placeholder="Descreva o motivo da rejeição (obrigatório)..." style="width:100%;height:120px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.8rem;font-family:'Inter',sans-serif;font-size:0.9rem;resize:vertical;outline:none;margin-bottom:0.5rem"></textarea>
+      <div id="motivoRejErr" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:0.8rem;display:none">⚠ O motivo é obrigatório.</div>
+      <div style="display:flex;gap:0.5rem">
+        <button onclick="document.getElementById('motivoRejModal').remove()" style="flex:1;padding:0.8rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
+        <button id="motivoRejBtn" onclick="confirmarRejeicao('${id}')" style="flex:1;padding:0.8rem;background:rgba(139,0,0,0.2);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">✗ CONFIRMAR REJEIÇÃO</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
+  setTimeout(() => document.getElementById('motivoRejTexto')?.focus(), 100);
+}
+
+async function confirmarRejeicao(id) {
+  const motivo = document.getElementById('motivoRejTexto')?.value.trim();
+  const errEl = document.getElementById('motivoRejErr');
+  if(!motivo) { errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+  const btn = document.getElementById('motivoRejBtn');
+  btn.disabled = true; btn.textContent = '⏳ REJEITANDO...';
+  const ficha = (window.pendingFichas||[]).find(f => f.id===id);
+  try {
+    await window._rejectFichaFirebase(id);
+    if(window._logAcaoAdmin && ficha) await window._logAcaoAdmin('REJEIÇÃO', ficha.name||'?', ficha.player||'?', window._adminUser||'?', motivo);
+    document.getElementById('motivoRejModal')?.remove();
+    document.getElementById('fichaPreviewModal')?.remove();
+  } catch(err) {
+    btn.disabled = false; btn.textContent = '✗ CONFIRMAR REJEIÇÃO';
+    alert('Erro ao rejeitar.');
+  }
 }
 
 function gerarSenhaEdicao(charId, playerName) {
