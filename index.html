@@ -628,6 +628,7 @@
     onSnapshot(collection(db, 'approvedChars'), snap => {
       window.approvedChars = snap.docs.map(d => ({id: d.id, ...d.data()}));
       if(typeof renderChars === 'function') renderChars('all');
+      if(typeof renderApprovedAdmin === 'function') renderApprovedAdmin();
     });
   }
 
@@ -662,6 +663,23 @@
     const db = window._db;
     const snap = await getDoc(doc(db, 'config', 'fedPassword'));
     return snap.exists() ? snap.data().value : '';
+  };
+
+  window._getPlayerEditKey = async function(senha) {
+    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._db;
+    // Search all approved chars for matching edit key
+    const snap = await getDocs(collection(db, 'approvedChars'));
+    const found = snap.docs.find(d => d.data().editKey === senha);
+    return found ? found.data().player : null;
+  };
+
+  window._generateEditKey = async function(charId) {
+    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._db;
+    const key = Math.random().toString(36).substring(2, 8).toUpperCase();
+    await updateDoc(doc(db, 'approvedChars', charId), { editKey: key });
+    return key;
   };
 
   loadFromFirestore();
@@ -830,14 +848,15 @@
   <div class="section-content">
     <div class="chars-filter">
       <button class="filter-btn active" onclick="filterChars('all',this)">TODOS</button>
-      <button class="filter-btn" onclick="filterChars('ocupado',this)">☄️ OCUPADOS</button>
-      <button class="filter-btn" onclick="filterChars('disponivel',this)">💤 DISPONÍVEIS</button>
+      <button class="filter-btn" onclick="filterChars('ocupado',this)">🔴 OCUPADOS</button>
+      <button class="filter-btn" onclick="filterChars('disponivel',this)">🟢 DISPONÍVEIS</button>
       <button class="filter-btn" onclick="filterChars('ingles',this)">🇺🇸 INGLÊS</button>
       <button class="filter-btn" onclick="filterChars('espanhol',this)">🇪🇸 ESPANHOL</button>
       <button class="filter-btn" onclick="filterChars('portugues',this)">🇧🇷 PORTUGUÊS</button>
       <button class="filter-btn" onclick="filterChars('frances',this)">🇫🇷 FRANCÊS</button>
       <button class="filter-btn" onclick="filterChars('coreano',this)">🇰🇷 COREANO</button>
       <button class="filter-btn" onclick="filterChars('huevito',this)">🥚 HUEVITOS</button>
+      <button class="filter-btn" onclick="filterChars('cucurucho',this)">🎭 CUCURUCHOS</button>
     </div>
     <div class="chars-grid" id="charsGrid"></div>
   </div>
@@ -916,6 +935,17 @@
   </div>
 </div>
 
+
+<!-- POPUP SELEÇÃO DE PERSONAGEM -->
+<div id="charSelectPopup" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);overflow-y:auto;padding:2rem">
+  <div style="max-width:900px;margin:0 auto;background:var(--bg2);border:1px solid var(--red);padding:2rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2 style="font-family:'Orbitron',monospace;font-size:1rem;letter-spacing:3px;color:#fff">ESCOLHER PERSONAGEM</h2>
+      <button onclick="closeCharPopup()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕ FECHAR</button>
+    </div>
+    <div id="popupCharList"></div>
+  </div>
+</div>
 <!-- ENVIAR FICHA -->
 <div id="ficha" class="page">
   <div class="section-header">
@@ -928,7 +958,7 @@
         <div class="form-section">
           <h3>INFORMAÇÕES BÁSICAS</h3>
           <div class="form-grid">
-            <div class="form-group"><label>Nome do Personagem *</label><input type="text" id="f_nome" placeholder="Ex: Cellbit"></div>
+            <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em escolher..." readonly style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div></div>
             <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
             <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
             <div class="form-group"><label>Idade do Player</label><input type="number" id="f_idade_player" placeholder="Ex: 25"></div>
@@ -963,7 +993,9 @@
           <div class="skills-check-grid" id="skillsGrid"></div>
         </div>
 
-        <button class="submit-btn" onclick="submitFicha()">▶ ENVIAR FICHA PARA APROVAÇÃO</button>
+        <div id="fichaEditNotice" style="display:none;padding:0.8rem 1rem;background:rgba(139,0,0,0.15);border:1px solid var(--red);margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--red-bright);letter-spacing:1px">⚠ MODO EDIÇÃO — Sua edição será enviada para aprovação da administração.</div>
+        <button class="submit-btn" id="submitBtn" onclick="submitFicha()">▶ ENVIAR FICHA PARA APROVAÇÃO</button>
+        <button class="submit-btn" onclick="showEditFicha()" style="margin-top:0.5rem;background:none;border:1px solid var(--border);color:var(--text-dim)">✎ EDITAR FICHA EXISTENTE</button>
       </div>
       <div class="form-success" id="fichaSuccess">
         <h3>FICHA RECEBIDA</h3>
@@ -1007,7 +1039,7 @@
       <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
     </div>
     <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
-    <div id="personagens-admin" class="admin-content"><div class="empty-state">GERENCIAMENTO DE PERSONAGENS — EM BREVE</div></div>
+    <div id="personagens-admin" class="admin-content"><div id="approvedList"><div class="empty-state">CARREGANDO...</div></div></div>
     <div id="fed-admin" class="admin-content"><div class="empty-state">GERENCIAMENTO DA FEDERAÇÃO — EM BREVE</div></div>
     <div id="config" class="admin-content">
       <div class="form-section">
@@ -1081,11 +1113,15 @@ const CHARS_DATA = [
   {id:'tallulah',name:'Tallulah',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
   {id:'tilin',name:'Tilin',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
   {id:'trump',name:'Trump',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'cucurucho_ali',name:'Cucurucho Ali',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
+  {id:'cucurucho_andy',name:'Cucurucho Andy',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
+  {id:'cucurucho_twik',name:'Cucurucho Twik',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
+  {id:'cucurucho_ryu',name:'Cucurucho Ryu',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
 ];
 
 const SKILLS = ['Acrobacia','Adestramento','Artes','Atletismo','Atualidades','Ciências','Crime','Diplomacia','Enganação','Fortitude','Furtividade','Iniciativa','Intimidação','Intuição','Investigação','Luta','Medicina','Ocultismo','Percepção','Pilotagem','Pontaria','Profissão','Reflexos','Religião','Sobrevivência','Tática','Tecnologia','Vontade'];
 const ATTRS = ['AGI','FOR','INT','PRE','VIG'];
-const ADMINS = [{user:'Twik',pass:'MestreRP'},{user:'Ryu',pass:'StaffA'}];
+const ADMINS = [{user:'Twik',pass:'MestreRP'},{user:'Ryu',pass:'StaffA'},{user:'Andy',pass:'cegodosolhos'},{user:'Ali',pass:'euamocavalos'}];
 const MAX_ATTR_POINTS = 5;
 const MAX_SKILLS = 8;
 
@@ -1317,6 +1353,11 @@ function submitFicha() {
     skills: [...selectedSkills],
     gameStatus: 'vivo', status: 'disponivel', lang: 'custom', history: [], pending: true
   };
+  // Edit mode
+  if(window._editingFichaId) {
+    ficha.editRequest = true;
+    ficha.originalId = window._editingFichaId;
+  }
   window._submitFichaFirebase(ficha).then(() => {
     document.getElementById('fichaForm').style.display = 'none';
     document.getElementById('fichaSuccess').style.display = 'block';
@@ -1352,9 +1393,10 @@ function renderPending() {
     <div class="pending-card" id="pc_${f.id}">
       <div class="pending-info">
         <h4>${f.name.toUpperCase()}</h4>
-        <p>// Player: ${f.player} // Enviado: ${new Date(parseInt(f.id)).toLocaleDateString('pt-BR')}</p>
+        <p>// Player: ${f.player} // Personagem: ${f.name} // Tipo: ${f.editRequest ? 'EDIÇÃO' : 'NOVA FICHA'}</p>
       </div>
       <div class="pending-actions">
+        <button class="btn-approve" onclick="viewPendingFicha('${f.id}')">👁 VER</button>
         <button class="btn-approve" onclick="approveFicha('${f.id}')">✓ APROVAR</button>
         <button class="btn-reject" onclick="rejectFicha('${f.id}')">✗ REJEITAR</button>
       </div>
@@ -1398,6 +1440,162 @@ function checkFedAccess() {
       setTimeout(()=>document.getElementById('fedError').style.display='none',3000);
     }
   });
+}
+
+
+// ===== POPUP PERSONAGEM =====
+let selectedCharId = null;
+
+function openCharPopup() {
+  const popup = document.getElementById('charSelectPopup');
+  popup.style.display = 'block';
+  renderPopupChars();
+}
+
+function closeCharPopup() {
+  document.getElementById('charSelectPopup').style.display = 'none';
+}
+
+function renderPopupChars() {
+  const all = [...CHARS_DATA, ...approvedChars];
+  const cats = [
+    {key:'ingles', label:'🇺🇸 INGLÊS'},
+    {key:'espanhol', label:'🇪🇸 ESPANHOL'},
+    {key:'portugues', label:'🇧🇷 PORTUGUÊS'},
+    {key:'frances', label:'🇫🇷 FRANCÊS'},
+    {key:'coreano', label:'🇰🇷 COREANO'},
+    {key:'huevito', label:'🥚 HUEVITOS'},
+    {key:'cucurucho', label:'🎭 CUCURUCHOS'},
+  ];
+  const container = document.getElementById('popupCharList');
+  container.innerHTML = cats.map(cat => {
+    const chars = all.filter(c => c.lang === cat.key);
+    if(!chars.length) return '';
+    return `<div style="margin-bottom:1.5rem">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)">${cat.label}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
+        ${chars.map(c => `
+          <div onclick="selectChar('${c.id}','${c.name}','${c.lang}')" style="padding:0.8rem;background:var(--bg3);border:1px solid ${c.status==='ocupado'?'var(--red)':'var(--border)'};cursor:${c.status==='ocupado'?'not-allowed':'pointer'};opacity:${c.status==='ocupado'?'0.5':'1'};transition:all 0.2s" ${c.status!=='ocupado'?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
+            <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:${c.status==='ocupado'?'var(--text-dim)':'#fff'}">${c.name}</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:${c.status==='ocupado'?'var(--red-bright)':'#4caf50'}">${c.status==='ocupado'?'🔴 OCUPADO':'🟢 DISPONÍVEL'}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectChar(id, name, lang) {
+  const all = [...CHARS_DATA, ...approvedChars];
+  const c = all.find(x => x.id === id);
+  if(c && c.status === 'ocupado') return;
+  selectedCharId = id;
+  document.getElementById('f_nome').value = name;
+  // Se cucurucho, muda label
+  if(lang === 'cucurucho') {
+    document.getElementById('f_nome_label').textContent = 'Nome do Cucurucho *';
+  } else {
+    document.getElementById('f_nome_label').textContent = 'Personagem *';
+  }
+  closeCharPopup();
+}
+
+// ===== EDIÇÃO DE FICHA =====
+function showEditFicha() {
+  const senha = prompt('Digite sua senha de edição (solicitada via ticket no Discord):');
+  if(!senha) return;
+  // Verifica se é admin
+  const isAdmin = ADMINS.find(a => a.pass === senha);
+  if(isAdmin) {
+    openEditForm(isAdmin.user, senha);
+    return;
+  }
+  // Verifica senha de player no Firestore
+  window._getPlayerEditKey(senha).then(player => {
+    if(player) {
+      openEditForm(player, senha);
+    } else {
+      alert('Senha inválida. Solicite acesso via ticket no Discord.');
+    }
+  });
+}
+
+function openEditForm(playerName, senha) {
+  // Busca ficha aprovada do player
+  const ficha = approvedChars.find(c => c.player && c.player.toLowerCase() === playerName.toLowerCase());
+  if(!ficha) {
+    alert('Nenhuma ficha aprovada encontrada para ' + playerName);
+    return;
+  }
+  // Preenche o formulário com os dados existentes
+  document.getElementById('f_nome').value = ficha.name || '';
+  document.getElementById('f_player').value = ficha.player || '';
+  document.getElementById('f_nascimento_player').value = ficha.nascimento_player || '';
+  document.getElementById('f_idade_player').value = ficha.idade_player || '';
+  document.getElementById('f_nascimento').value = ficha.nascimento || '';
+  document.getElementById('f_idade').value = ficha.idade || '';
+  document.getElementById('f_imagem').value = ficha.imageUrl || '';
+  document.getElementById('f_fisico').value = ficha.fisico || '';
+  document.getElementById('f_personalidade').value = ficha.personalidade || '';
+  document.getElementById('f_backstory').value = ficha.backstory || '';
+  if(ficha.attrs) { Object.assign(attrValues, ficha.attrs); buildAttrsForm(); }
+  if(ficha.skills) { selectedSkills = new Set(ficha.skills); buildSkillsForm(); }
+  selectedCharId = ficha.id;
+  // Marca como edição
+  window._editingFichaId = ficha.id;
+  window._editingSenha = senha;
+  // Muda botão
+  document.getElementById('submitBtn').textContent = '▶ ENVIAR EDIÇÃO PARA APROVAÇÃO';
+  document.getElementById('fichaEditNotice').style.display = 'block';
+  showPage('ficha');
+}
+
+
+function viewPendingFicha(id) {
+  const f = pendingFichas.find(x => x.id === id);
+  if(!f) return;
+  const info = `
+PERSONAGEM: ${f.name}
+PLAYER: ${f.player}
+NASC. PLAYER: ${f.nascimento_player||'—'}
+IDADE PLAYER: ${f.idade_player||'—'}
+NASC. PERSONAGEM: ${f.nascimento||'—'}
+IDADE PERSONAGEM: ${f.idade||'—'}
+FOTO: ${f.imageUrl||'—'}
+
+FÍSICO: ${f.fisico||'—'}
+
+PERSONALIDADE: ${f.personalidade||'—'}
+
+BACKSTORY: ${f.backstory||'—'}
+
+ATRIBUTOS: ${JSON.stringify(f.attrs||{})}
+PERÍCIAS: ${(f.skills||[]).join(', ')}
+${f.editRequest ? '\n⚠ EDIÇÃO DE FICHA EXISTENTE' : ''}
+  `.trim();
+  alert(info);
+}
+
+function gerarSenhaEdicao(charId, playerName) {
+  window._generateEditKey(charId).then(key => {
+    alert('Senha de edição para ' + playerName + ': ' + key + '\n\nEnvie essa senha para o player via Discord.');
+  });
+}
+
+
+function renderApprovedAdmin() {
+  const list = document.getElementById('approvedList');
+  if(!list) return;
+  if(!approvedChars.length) { list.innerHTML = '<div class="empty-state">NENHUM PERSONAGEM APROVADO</div>'; return; }
+  list.innerHTML = approvedChars.map(f => `
+    <div class="pending-card">
+      <div class="pending-info">
+        <h4>${(f.name||'?').toUpperCase()}</h4>
+        <p>// Player: ${f.player||'?'}</p>
+      </div>
+      <div class="pending-actions">
+        <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${f.player||f.name}')">🔑 GERAR SENHA</button>
+      </div>
+    </div>`).join('');
 }
 
 // ===== INIT =====
