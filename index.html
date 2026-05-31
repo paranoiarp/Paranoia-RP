@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PARANOIA — Ilha Quesadilla</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;700;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
 
   :root {
     --red: #8B0000;
@@ -24,7 +24,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Rajdhani', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -69,7 +69,8 @@
     font-size: 1.1rem;
     font-weight: 900;
     color: #fff;
-    letter-spacing: 4px;
+    letter-spacing: 8px;
+    text-transform: uppercase;
   }
 
   .nav-links { display: flex; gap: 0; list-style: none; }
@@ -199,9 +200,9 @@
   .hero-desc {
     max-width: 600px;
     font-size: 1.1rem;
-    line-height: 1.9;
+    line-height: 1.8;
     color: var(--silver);
-    font-weight: 400;
+    font-weight: 300;
   }
 
   .scroll-indicator {
@@ -267,7 +268,7 @@
     margin-bottom: 0.8rem;
   }
 
-  .highlight-card p { font-size: 1rem; color: var(--text-dim); line-height: 1.7; font-weight: 400; }
+  .highlight-card p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.6; font-weight: 300; }
 
   /* SECTION */
   .section-header {
@@ -309,7 +310,7 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .lore-text { font-size: 1.05rem; line-height: 2; color: var(--text); font-weight: 400; max-width: 800px; }
+  .lore-text { font-size: 1.05rem; line-height: 1.9; color: var(--text); font-weight: 300; max-width: 800px; }
   .lore-text p { margin-bottom: 1.2rem; }
 
   .event-card {
@@ -333,7 +334,7 @@
   }
 
   .event-title { font-family: 'Orbitron', monospace; font-size: 0.9rem; letter-spacing: 2px; color: var(--silver-bright); }
-  .event-text { font-size: 1.05rem; line-height: 2; color: var(--text); font-weight: 400; }
+  .event-text { font-size: 1rem; line-height: 1.8; color: var(--text-dim); font-weight: 300; }
   .event-text p { margin-bottom: 0.8rem; }
 
   /* REGRAS */
@@ -361,8 +362,8 @@
   .rule-item {
     padding: 0.8rem 0;
     border-bottom: 1px solid var(--border);
-    font-size: 1rem;
-    line-height: 1.75;
+    font-size: 0.95rem;
+    line-height: 1.7;
     color: var(--text);
     display: flex;
     gap: 1rem;
@@ -469,7 +470,7 @@
   .profile-info-item .value { color: var(--silver-bright); font-weight: 500; }
   .profile-section { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
   .profile-section h3 { font-family: 'Orbitron', monospace; font-size: 0.75rem; letter-spacing: 3px; color: var(--red-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
-  .profile-section p { font-size: 1rem; line-height: 1.9; color: var(--text); font-weight: 400; }
+  .profile-section p { font-size: 0.95rem; line-height: 1.8; color: var(--text); font-weight: 300; }
 
   .attrs-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.8rem; margin-bottom: 2rem; }
   .attr-box { background: var(--bg3); border: 1px solid var(--border); padding: 1rem 0.5rem; text-align: center; }
@@ -493,7 +494,7 @@
   .fed-motto span { color: var(--red-bright); }
   .fed-block { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
   .fed-block h2 { font-family: 'Orbitron', monospace; font-size: 0.85rem; letter-spacing: 3px; color: var(--silver-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
-  .fed-block p { font-size: 1rem; line-height: 2; color: var(--text); font-weight: 400; margin-bottom: 1rem; }
+  .fed-block p { font-size: 1rem; line-height: 1.9; color: var(--text); font-weight: 300; margin-bottom: 1rem; }
   .hierarchy-tree { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; line-height: 2.2; color: var(--text-dim); }
   .hierarchy-tree .top { color: var(--red-bright); }
   .hierarchy-tree .mid { color: var(--silver); padding-left: 1.5rem; }
@@ -520,7 +521,7 @@
   .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
   .form-group.full { grid-column: 1 / -1; }
   .form-group label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; }
-  .form-group input, .form-group textarea, .form-group select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 0.7rem 1rem; font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; width: 100%; }
+  .form-group input, .form-group textarea, .form-group select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 0.7rem 1rem; font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; width: 100%; }
   .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--red); }
   .form-group textarea { resize: vertical; min-height: 100px; }
   .form-group select option { background: var(--bg3); }
@@ -562,7 +563,7 @@
   /* ADMIN */
   .admin-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 2rem; }
   .admin-tabs { display: flex; gap: 0; margin-bottom: 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-  .admin-tab { padding: 0.8rem 1.5rem; background: none; border: none; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 2px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .admin-tab { padding: 0.8rem 1.5rem; background: none; border: none; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
   .admin-tab:hover, .admin-tab.active { color: var(--red-bright); border-bottom-color: var(--red); }
   .admin-content { display: none; }
   .admin-content.active { display: block; }
@@ -578,28 +579,6 @@
   .btn-reject:hover { background: rgba(139,0,0,0.2); }
 
   .empty-state { text-align: center; padding: 3rem; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 2px; border: 1px dashed var(--border); }
-
-  /* NOTIFICAÇÃO ADMIN */
-  .admin-notify-badge {
-    position: absolute;
-    top: -4px; right: -4px;
-    width: 12px; height: 12px;
-    background: #4caf50;
-    border-radius: 50%;
-    border: 2px solid var(--bg);
-    animation: badgePulse 1s ease-in-out infinite;
-    display: none;
-  }
-  @keyframes badgePulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.4); opacity: 0.7; }
-  }
-  .nav-logo-wrap { position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-  @keyframes logoPulseNotify {
-    0%, 100% { filter: drop-shadow(0 0 6px rgba(139,0,0,0.6)); }
-    50% { filter: drop-shadow(0 0 22px rgba(76,175,80,1)); }
-  }
-  .nav-logo-notify img { animation: logoPulseNotify 0.8s ease-in-out infinite !important; }
 
   @media (max-width: 768px) {
     .nav-links { display: none; flex-direction: column; position: absolute; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
@@ -643,20 +622,15 @@
     // Pendentes
     onSnapshot(collection(db, 'pendingFichas'), snap => {
       window.pendingFichas = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      pendingFichas = window.pendingFichas;
       if(typeof renderPending === 'function') renderPending();
-      if(typeof renderPopupChars === 'function') renderPopupChars();
-      // Atualiza notificação só se admin estiver logado
-      if(window._adminLogado) updateAdminNotify();
+      if(typeof checkPendingNotification === 'function') checkPendingNotification();
     });
 
     // Aprovados
     onSnapshot(collection(db, 'approvedChars'), snap => {
       window.approvedChars = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      approvedChars = window.approvedChars;
       if(typeof renderChars === 'function') renderChars('all');
       if(typeof renderApprovedAdmin === 'function') renderApprovedAdmin();
-      if(typeof renderPopupChars === 'function') renderPopupChars();
     });
   }
 
@@ -677,36 +651,6 @@
     const { doc, deleteDoc } = window._fbModules;
     const db = window._db;
     await deleteDoc(doc(db, 'pendingFichas', fichaId));
-  };
-
-  // ===== ADMIN AUTH VIA FIRESTORE =====
-  window._hashPassword = async function(pass) {
-    const enc = new TextEncoder().encode(pass);
-    const buf = await crypto.subtle.digest('SHA-256', enc);
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-  };
-
-  window._checkAdminFirebase = async function(user, pass) {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const db = window._db;
-    const hash = await window._hashPassword(pass);
-    const snap = await getDoc(doc(db, 'adminAuth', user.toLowerCase()));
-    if(!snap.exists()) return false;
-    return snap.data().hash === hash;
-  };
-
-  window._setAdminPasswordFirebase = async function(user, newPass) {
-    const { doc, setDoc } = window._fbModules;
-    const db = window._db;
-    const hash = await window._hashPassword(newPass);
-    await setDoc(doc(db, 'adminAuth', user.toLowerCase()), { hash, user });
-  };
-
-  window._adminExistsFirebase = async function(user) {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const db = window._db;
-    const snap = await getDoc(doc(db, 'adminAuth', user.toLowerCase()));
-    return snap.exists();
   };
 
   window._saveFedPasswordFirebase = async function(pass) {
@@ -747,18 +691,17 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo-wrap" onclick="showPage('home')" id="navLogoWrap2">
+  <div class="nav-logo" onclick="showPage('home')">
     <img src="https://i.imgur.com/OSV9nga.png" id="navLogoImg" alt="PARANOIA" style="width:38px;height:38px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 6px rgba(139,0,0,0.6))">
-    <div class="admin-notify-badge" id="adminNotifyBadge"></div>
     <span>PARANOIA</span>
   </div>
   <ul class="nav-links" id="navLinks">
     <li><a href="#" onclick="showPage('home')" id="nav-home" class="active">Início</a></li>
     <li><a href="#" onclick="showPage('historia')" id="nav-historia">História</a></li>
     <li><a href="#" onclick="showPage('regras')" id="nav-regras">Regras</a></li>
-    <li><a href="#" onclick="showPage('sistema')" id="nav-sistema">Sistema</a></li>
     <li><a href="#" onclick="showPage('personagens')" id="nav-personagens">Personagens</a></li>
     <li><a href="#" onclick="showPage('federacao')" id="nav-federacao">Federação</a></li>
+    <li><a href="#" onclick="showPage('sistema')" id="nav-sistema">Sistema</a></li>
     <li><a href="#" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
     <li><a href="#" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
@@ -899,162 +842,6 @@
   </div>
 </div>
 
-<!-- SISTEMA DO RP -->
-<div id="sistema" class="page">
-  <div class="section-header">
-    <div class="section-label">// MANUAL DE REGRAS //</div>
-    <h1 class="section-title">SISTEMA DO RP</h1>
-  </div>
-  <div class="section-content">
-
-    <!-- INICIATIVA -->
-    <div class="rules-block" style="border-top:3px solid var(--red)">
-      <h2>🎲 DADOS DE INICIATIVA <span>INÍCIO DO COMBATE</span></h2>
-      <div class="rule-item">
-        <span class="rule-label">PADRÃO</span>
-        <span><strong style="color:var(--silver-bright)">1d20</strong> — Aplicado a todos os participantes do combate.</span>
-      </div>
-      <div class="rule-item">
-        <span class="rule-label">VANTAGEM</span>
-        <span><strong style="color:var(--silver-bright)">2d20</strong> (utiliza-se o maior resultado) — Ocorre apenas se o jogador identificar o perigo antes do combate, com validação do mestre.</span>
-      </div>
-    </div>
-
-    <!-- DANO -->
-    <div class="rules-block">
-      <h2>⚔️ DADOS DE DANO <span>ARMAS E BRIGA</span></h2>
-      <div class="rule-item"><span class="rule-label">BRIGA</span><span><strong style="color:var(--silver-bright)">1d5 + FOR</strong> — Desarmado, usa o valor de Força do personagem.</span></div>
-      <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">CORPO A CORPO (ARMADO)</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d4</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d5</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Ferro → 1d6</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Diamante → 1d7</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Netherite → 1d8</div>
-        </div>`).join('')}
-        </div>
-      </div>
-      <div style="padding:0.8rem 0">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">DISTÂNCIA</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Arco → 1d6</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Besta → 1d7</div>
-        </div>`).join('')}
-        </div>
-      </div>
-    </div>
-
-    <!-- DEFESA -->
-    <div class="rules-block">
-      <h2>🛡️ DADOS DE DEFESA <span>ESCUDO E ARMADURA</span></h2>
-      <div class="rule-item">
-        <span class="rule-label">ESCUDO</span>
-        <span><strong style="color:var(--silver-bright)">1d3</strong> — Defesa ativa. Requer declaração de ação no turno.<br>
-        <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim)">
-          Resultado 3 → Bloqueio Total (dano anulado) &nbsp;|&nbsp;
-          Resultado 2 → Bloqueio Parcial (dano reduzido à metade) &nbsp;|&nbsp;
-          Resultado 1 → Falha (dano passa para armadura)
-        </span></span>
-      </div>
-      <div class="rule-item">
-        <span class="rule-label">ARMADURA</span>
-        <span>Defesa passiva. Requer anúncio prévio de que está equipada.<br>
-        <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim)">
-          Ferro → reduz 1d4 &nbsp;|&nbsp; Diamante → reduz 1d6 &nbsp;|&nbsp; Netherite → reduz 1d7
-        </span></span>
-      </div>
-    </div>
-
-    <!-- FLUXO DE TURNO -->
-    <div class="rules-block">
-      <h2>🔄 FLUXO DE TURNO <span>COMBATE</span></h2>
-      <div class="rule-item"><span class="rule-label">AÇÕES</span><span><strong style="color:var(--silver-bright)">1 Ação Principal + 1 Ação Secundária</strong> + Narrativa livre por turno.</span></div>
-      <div class="rule-item">
-        <span class="rule-label">RESOLUÇÃO</span>
-        <span>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;line-height:2.2;color:var(--text-dim)">
-            <span style="color:var(--red-bright)">1.</span> Ataque acerta &nbsp;→&nbsp;
-            <span style="color:var(--red-bright)">2.</span> Escudo (1d3) tenta defender &nbsp;→&nbsp;
-            <span style="color:var(--red-bright)">3.</span> Dano restante vai à armadura &nbsp;→&nbsp;
-            <span style="color:var(--red-bright)">4.</span> Armadura reduz &nbsp;→&nbsp;
-            <span style="color:var(--red-bright)">5.</span> Resultado final é subtraído do HP
-          </div>
-        </span>
-      </div>
-    </div>
-
-    <!-- HP E ESTADOS -->
-    <div class="rules-block">
-      <h2>❤️ VIDA E ESTADOS <span>HP BASE: 20</span></h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem;margin-bottom:1rem">
-        <div style="padding:1rem;background:var(--bg3);border:1px solid #4caf50;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#4caf50;letter-spacing:1px;margin-bottom:0.3rem">NORMAL</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">20 – 15</div>
-        </div>
-        <div style="padding:1rem;background:var(--bg3);border:1px solid #ff9800;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#ff9800;letter-spacing:1px;margin-bottom:0.3rem">FERIDO</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">14 – 10</div>
-        </div>
-        <div style="padding:1rem;background:var(--bg3);border:1px solid #f44336;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#f44336;letter-spacing:1px;margin-bottom:0.3rem">GRAVE</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">9 – 5</div>
-        </div>
-        <div style="padding:1rem;background:rgba(139,0,0,0.3);border:1px solid var(--red-bright);text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.3rem">CRÍTICO</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">4 – 1</div>
-        </div>
-        <div style="padding:1rem;background:rgba(0,0,0,0.5);border:1px solid #444;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#666;letter-spacing:1px;margin-bottom:0.3rem">INCONSCIENTE</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:#555">0</div>
-        </div>
-      </div>
-      <div class="rule-item">
-        <span class="rule-label">IMPACTO</span>
-        <span>Receber mais de <strong style="color:var(--silver-bright)">10 de dano</strong> em um único ataque: personagem fica <strong style="color:var(--red-bright)">incapacitado por 2 turnos</strong> (sem atacar ou usar escudo). O mestre pode ajustar.</span>
-      </div>
-    </div>
-
-    <!-- MORTE E ESTABILIZAÇÃO -->
-    <div class="rules-block">
-      <h2>💀 MORTE E ESTABILIZAÇÃO <span>0 HP</span></h2>
-      <div class="rule-item"><span class="rule-label">TEMPO</span><span>O personagem tem até <strong style="color:var(--silver-bright)">3 rodadas</strong> após chegar a 0 HP.</span></div>
-      <div class="rule-item"><span class="rule-label">AÇÃO</span><span>Um aliado deve usar seu turno para realizar um <strong style="color:var(--silver-bright)">Teste de Medicina</strong> — ficando vulnerável a ataques.</span></div>
-      <div class="rule-item"><span class="rule-label">SUCESSO</span><span>Estabilização rola <strong style="color:var(--silver-bright)">1d6</strong> de HP recuperado instantaneamente.</span></div>
-      <div class="rule-item" style="color:var(--red-bright)"><span class="rule-label">FALHA</span><span>Se as 3 rodadas passarem sem estabilização — <strong style="color:var(--red-bright)">o personagem morre.</strong></span></div>
-    </div>
-
-    <!-- DURABILIDADE -->
-    <div class="rules-block">
-      <h2>🔧 DURABILIDADE DE ITENS <span>DESGASTE</span></h2>
-      <div class="rule-item"><span class="rule-label">GATILHO</span><span>Cada dano que ultrapassar a absorção do item exige um <strong style="color:var(--silver-bright)">Teste de Resistência</strong> (ex: 1d6).</span></div>
-      <div class="rule-item">
-        <span class="rule-label">ESTADOS</span>
-        <span>
-          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.4rem">
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#4caf50">Inteiro</span>
-            <span style="color:var(--text-dim);align-self:center">→</span>
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#ff9800">Danificado</span>
-            <span style="color:var(--text-dim);align-self:center">→</span>
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#f44336">Muito Danificado</span>
-            <span style="color:var(--text-dim);align-self:center">→</span>
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#666">Quebrado</span>
-          </div>
-        </span>
-      </div>
-    </div>
-
-    <!-- RESPAWN -->
-    <div class="rules-block">
-      <h2>🔁 RESPAWN <span>APÓS A MORTE</span></h2>
-      <div class="rule-item"><span class="rule-label">TEMPO</span><span><strong style="color:var(--silver-bright)">3 horas reais</strong> após o fim do combate.</span></div>
-      <div class="rule-item"><span class="rule-label">LOCAL</span><span>Spawn do servidor, casa do jogador ou local definido pelo mestre.</span></div>
-      <div class="rule-item"><span class="rule-label">PENALIDADES</span><span>Perda total de inventário, retorno tardio e impactos narrativos.</span></div>
-    </div>
-
-  </div>
-</div>
-
 <!-- PERSONAGENS -->
 <div id="personagens" class="page">
   <div class="section-header">
@@ -1162,6 +949,112 @@
     <div id="popupCharList"></div>
   </div>
 </div>
+
+<!-- SISTEMA -->
+<div id="sistema" class="page">
+  <div class="section-header">
+    <div class="section-label">// MANUAL DE REGRAS //</div>
+    <h1 class="section-title">SISTEMA</h1>
+  </div>
+  <div class="section-content">
+
+    <div class="rules-block">
+      <h2>1. DADOS DE INICIATIVA <span>INÍCIO DE COMBATE</span></h2>
+      <div class="rule-item"><span class="rule-label">PADRÃO</span><span><strong style="color:var(--silver-bright)">1d20</strong> — aplicado a todos os participantes.</span></div>
+      <div class="rule-item"><span class="rule-label">VANTAGEM</span><span><strong style="color:var(--silver-bright)">2d20</strong> — utiliza-se o maior resultado. Ocorre apenas se o jogador identificar o perigo antes do combate, com validação do mestre. Requer Perícia de <em>Percepção</em>.</span></div>
+    </div>
+
+    <div class="rules-block">
+      <h2>2. DADOS DE DANO <span>ATAQUE</span></h2>
+      <div class="rule-item"><span class="rule-label">BRIGA</span><span><strong style="color:var(--silver-bright)">1d5 + FOR</strong> — desarmado.</span></div>
+      <div class="rule-item"><span class="rule-label">CORPO A CORPO</span><span>
+        Madeira <strong style="color:var(--silver-bright)">1d4</strong> &nbsp;·&nbsp;
+        Pedra <strong style="color:var(--silver-bright)">1d5</strong> &nbsp;·&nbsp;
+        Ferro <strong style="color:var(--silver-bright)">1d6</strong> &nbsp;·&nbsp;
+        Diamante <strong style="color:var(--silver-bright)">1d7</strong> &nbsp;·&nbsp;
+        Netherite <strong style="color:var(--silver-bright)">1d8</strong>
+      </span></div>
+      <div class="rule-item"><span class="rule-label">DISTÂNCIA</span><span>
+        Arco <strong style="color:var(--silver-bright)">1d6</strong> &nbsp;·&nbsp;
+        Besta <strong style="color:var(--silver-bright)">1d7</strong>
+      </span></div>
+    </div>
+
+    <div class="rules-block">
+      <h2>3. DADOS DE DEFESA <span>REAÇÃO</span></h2>
+      <div class="rule-item"><span class="rule-label">ESCUDO</span><span><strong style="color:var(--silver-bright)">1d3</strong> — Defesa Ativa. Requer declaração de ação no turno.<br>
+        <span style="color:#4caf50">▸ Resultado 3:</span> Bloqueio Total — dano completamente anulado.<br>
+        <span style="color:var(--silver)">▸ Resultado 2:</span> Bloqueio Parcial — reduz o dano na metade (arredondado para baixo).<br>
+        <span style="color:var(--red-bright)">▸ Resultado 1:</span> Falha — dano passa integralmente para a armadura.
+      </span></div>
+      <div class="rule-item"><span class="rule-label">ARMADURA</span><span>Defesa Passiva. Requer anúncio prévio de que está equipada.<br>
+        Ferro <strong style="color:var(--silver-bright)">1d4</strong> &nbsp;·&nbsp;
+        Diamante <strong style="color:var(--silver-bright)">1d6</strong> &nbsp;·&nbsp;
+        Netherite <strong style="color:var(--silver-bright)">1d7</strong>
+      </span></div>
+    </div>
+
+    <div class="rules-block">
+      <h2>4. CURA E ESTABILIZAÇÃO <span>MEDICINA</span></h2>
+      <div class="rule-item"><span class="rule-label">TESTE</span><span>Perícia de <em>Medicina</em> exigida durante as rodadas de estabilização.</span></div>
+      <div class="rule-item"><span class="rule-label">SUCESSO</span><span><strong style="color:var(--silver-bright)">1d6</strong> pontos de HP recuperados instantaneamente.</span></div>
+    </div>
+
+    <div class="rules-block">
+      <h2>5. DURABILIDADE E DESGASTE <span>ITENS</span></h2>
+      <div class="rule-item"><span class="rule-label">CONDIÇÃO</span><span>Cada dano que ultrapassar a absorção do item exige um <strong style="color:var(--silver-bright)">Teste de Resistência</strong>.</span></div>
+      <div class="rule-item"><span class="rule-label">TESTE</span><span>Rolagem (ex: 1d6) define se o item mantém seu estado ou degrada.</span></div>
+      <div class="rule-item"><span class="rule-label">ESTADOS</span><span>
+        <span style="color:#4caf50">Inteiro</span> →
+        <span style="color:var(--silver)">Danificado</span> →
+        <span style="color:orange">Muito Danificado</span> →
+        <span style="color:var(--red-bright)">Quebrado</span>
+      </span></div>
+    </div>
+
+    <div class="rules-block">
+      <h2>6. FLUXO DE TURNO E COMBATE <span>SEQUÊNCIA</span></h2>
+      <div class="rule-item"><span class="rule-label">AÇÕES</span><span><strong style="color:var(--silver-bright)">1 Ação Principal</strong> + <strong style="color:var(--silver-bright)">1 Ação Secundária</strong> + Narrativa livre.</span></div>
+      <div class="rule-item"><span class="rule-label">RESOLUÇÃO</span><span>
+        <span style="color:var(--red-bright)">①</span> Ataque acerta &nbsp;→&nbsp;
+        <span style="color:var(--red-bright)">②</span> Escudo (1d3) tenta defender &nbsp;→&nbsp;
+        <span style="color:var(--red-bright)">③</span> Dano restante vai para a armadura &nbsp;→&nbsp;
+        <span style="color:var(--red-bright)">④</span> Armadura reduz dano &nbsp;→&nbsp;
+        <span style="color:var(--red-bright)">⑤</span> Resultado final subtrai do HP
+      </span></div>
+    </div>
+
+    <div class="rules-block">
+      <h2>7. VIDA E ESTADOS <span>HP BASE: 20</span></h2>
+      <div class="rule-item">
+        <span class="rule-label">NÍVEIS</span>
+        <span>
+          <span style="color:#4caf50">20–15 Normal</span> &nbsp;·&nbsp;
+          <span style="color:var(--silver)">14–10 Ferido</span> &nbsp;·&nbsp;
+          <span style="color:orange">9–5 Grave</span> &nbsp;·&nbsp;
+          <span style="color:var(--red-bright)">4–1 Crítico</span> &nbsp;·&nbsp;
+          <span style="color:#888">0 Inconsciente</span>
+        </span>
+      </div>
+      <div class="rule-item"><span class="rule-label">INCONSCIENTE</span><span>Não age, não se defende, fala com limitação narrativa.</span></div>
+      <div class="rule-item"><span class="rule-label">IMPACTO ALTO</span><span>Receber <strong style="color:var(--silver-bright)">mais de 10 de dano</strong> em um único ataque → Incapacitado por <strong style="color:var(--silver-bright)">2 turnos</strong> (não ataca, não usa escudo). O mestre pode ajustar a duração ou converter para Grave/Crítico.</span></div>
+      <div class="rule-item"><span class="rule-label">MORTE (0 HP)</span><span>
+        <strong style="color:var(--silver-bright)">3 rodadas</strong> na iniciativa do combate.<br>
+        Um aliado deve usar seu turno para realizar o teste de Medicina (ficando vulnerável).<br>
+        <span style="color:var(--red-bright)">Falha nas 3 rodadas = morte do personagem.</span>
+      </span></div>
+    </div>
+
+    <div class="rules-block">
+      <h2>8. REGRAS DE RESPAWN <span>PÓS-MORTE</span></h2>
+      <div class="rule-item"><span class="rule-label">TEMPO</span><span><strong style="color:var(--silver-bright)">3 horas reais</strong> após o fim do combate.</span></div>
+      <div class="rule-item"><span class="rule-label">LOCAL</span><span>Spawn do servidor, casa do jogador ou local definido pelo mestre.</span></div>
+      <div class="rule-item"><span class="rule-label">PENALIDADES</span><span>Perda total de inventário, retorno tardio e impactos narrativos.</span></div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ENVIAR FICHA -->
 <div id="ficha" class="page">
   <div class="section-header">
@@ -1175,14 +1068,12 @@
           <h3>INFORMAÇÕES BÁSICAS</h3>
           <div class="form-grid">
             <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em escolher..." readonly style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div></div>
-            <div class="form-group full" id="f_cucurucho_nome_group" style="display:none;grid-column:1/-1"><label>Nome do Cucurucho (como será chamado in-game) *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho, Cucurucho 03..."></div>
             <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
             <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
-            <div class="form-group"><label>Idade do Player</label><input type="text" id="f_idade_player" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
+            <div class="form-group"><label>Idade do Player</label><input type="number" id="f_idade_player" placeholder="Ex: 25"></div>
             <div class="form-group"><label>Data de Nascimento do Personagem</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA"></div>
-            <div class="form-group"><label>Idade do Personagem</label><input type="text" id="f_idade" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
-            <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div>
-<div id="f_imagem_err2" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ A imagem precisa ser quadrada (largura = altura). Edite antes de enviar.</div></div>
+            <div class="form-group"><label>Idade do Personagem</label><input type="number" id="f_idade" placeholder="Ex: 25"></div>
+            <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div></div>
           </div>
         </div>
 
@@ -1218,7 +1109,6 @@
       <div class="form-success" id="fichaSuccess">
         <h3>FICHA RECEBIDA</h3>
         <p>Sua ficha foi enviada e está aguardando aprovação da administração.<br><br>Você será notificado assim que for analisada.</p>
-        <button onclick="resetFichaForm()" style="margin-top:2rem;padding:0.8rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='var(--red-bright)'" onmouseout="this.style.background='var(--red)'">← VOLTAR AO INÍCIO</button>
       </div>
     </div>
   </div>
@@ -1256,7 +1146,6 @@
       <button class="admin-tab" onclick="showAdminTab('personagens-admin',this)">PERSONAGENS</button>
       <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
       <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
-      <button class="admin-tab" onclick="showAdminTab('senha-admin',this)">🔐 MINHA SENHA</button>
     </div>
     <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
     <div id="personagens-admin" class="admin-content"><div id="approvedList"><div class="empty-state">CARREGANDO...</div></div></div>
@@ -1271,92 +1160,68 @@
         <div id="cfg_msg" style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
       </div>
     </div>
-
-    <div id="senha-admin" class="admin-content">
-      <div class="form-section" style="max-width:500px">
-        <h3>ALTERAR MINHA SENHA</h3>
-        <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">A senha é armazenada como hash no Firebase — ninguém, nem a staff, consegue ver sua senha.</p>
-        <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.2rem">
-          <div class="form-group">
-            <label>SENHA ATUAL</label>
-            <input type="password" id="cfg_passAtual" placeholder="Digite sua senha atual" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-          </div>
-          <div class="form-group">
-            <label>NOVA SENHA</label>
-            <input type="password" id="cfg_passNova" placeholder="Mínimo 6 caracteres" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-          </div>
-          <div class="form-group">
-            <label>CONFIRMAR NOVA SENHA</label>
-            <input type="password" id="cfg_passConfirm" placeholder="Repita a nova senha" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-          </div>
-        </div>
-        <div id="cfg_pass_err" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:0.8rem;display:none"></div>
-        <div id="cfg_pass_ok" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#4caf50;margin-bottom:0.8rem;display:none">✓ SENHA ALTERADA COM SUCESSO</div>
-        <button class="submit-btn" onclick="changeAdminPassword()" id="cfg_passBtnSave">SALVAR NOVA SENHA</button>
-      </div>
-    </div>
   </div>
 </div>
 
 <script>
 // ===== DADOS =====
 const CHARS_DATA = [
-  {id:'badboyhalo',name:'BadBoyHalo',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'badboyhalo',name:'BadBoyHalo',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
   {id:'dantdm',name:'DanTDM',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
   {id:'fitmc',name:'FitMC',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
-  {id:'foolish',name:'Foolish',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'foolish',name:'Foolish',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
   {id:'ironmouse',name:'Ironmouse',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
-  {id:'jaiden',name:'Jaiden',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'jaiden',name:'Jaiden',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
   {id:'lenay',name:'Lenay',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
   {id:'nihachu',name:'Nihachu',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
-  {id:'philza',name:'Philza',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
-  {id:'slimecicle',name:'Slimecicle',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
-  {id:'tinakitten',name:'TinaKitten',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
-  {id:'tubbo',name:'Tubbo',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'philza',name:'Philza',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'slimecicle',name:'Slimecicle',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'tinakitten',name:'TinaKitten',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'tubbo',name:'Tubbo',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
   {id:'carre',name:'Carre',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'elmariana',name:'ElMariana',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'elmariana',name:'ElMariana',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
   {id:'german',name:'German',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'luzu',name:'Luzu',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'maximus',name:'Maximus',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'missasinfonia',name:'Missasinfonia',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'missasinfonia',name:'Missasinfonia',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
   {id:'polispol',name:'Polispol',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'quackity',name:'Quackity',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'quackity',name:'Quackity',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
   {id:'rivers',name:'Rivers',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'roier',name:'Roier',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'roier',name:'Roier',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
   {id:'rubius',name:'Rubius',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'spreen',name:'Spreen',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'spreen',name:'Spreen',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
   {id:'vegetta',name:'Vegetta',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
   {id:'willyrex',name:'Willyrex',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
-  {id:'bagi',name:'Bagi',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
-  {id:'cellbit',name:'Cellbit',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
-  {id:'felps',name:'Felps',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
-  {id:'mike',name:'Mike',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
-  {id:'pac',name:'Pac',lang:'portugues',status:'disponivel',gameStatus:'vivo'},
+  {id:'bagi',name:'Bagi',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'cellbit',name:'Cellbit',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'felps',name:'Felps',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'mike',name:'Mike',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'pac',name:'Pac',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
   {id:'antoine',name:'Antoine',lang:'frances',status:'disponivel',gameStatus:'vivo'},
   {id:'aypierre',name:'Aypierre',lang:'frances',status:'disponivel',gameStatus:'vivo'},
-  {id:'baghera',name:'Baghera',lang:'frances',status:'disponivel',gameStatus:'vivo'},
-  {id:'etoiles',name:'Etoiles',lang:'frances',status:'disponivel',gameStatus:'vivo'},
+  {id:'baghera',name:'Baghera',lang:'frances',status:'ocupado',gameStatus:'vivo'},
+  {id:'etoiles',name:'Etoiles',lang:'frances',status:'ocupado',gameStatus:'vivo'},
   {id:'kameto',name:'Kameto',lang:'frances',status:'disponivel',gameStatus:'vivo'},
   {id:'bjacau',name:'Bjacau',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
   {id:'jungryeok',name:'Jungryeok',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
   {id:'yangdding',name:'Yangdding',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
   {id:'kongkong',name:'Kongkong',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
-  {id:'bobby',name:'Bobby',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'bobby',name:'Bobby',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
   {id:'chayanne',name:'Chayanne',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
   {id:'chunsik',name:'Chunsik',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
   {id:'dapper',name:'Dapper',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'empanada',name:'Empanada',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'gegg',name:'Gegg',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'juanaflippa',name:'Juanaflippa',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'leonarda',name:'Leonarda',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'empanada',name:'Empanada',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'gegg',name:'Gegg',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'juanaflippa',name:'Juanaflippa',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'leonarda',name:'Leonarda',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
   {id:'pepito',name:'Pepito',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'pomme',name:'Pomme',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'ramon',name:'Ramón',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'richarlyson',name:'Richarlyson',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'sunnysideup',name:'Sunnysideup',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'tallulah',name:'Tallulah',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'tilin',name:'Tilin',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
-  {id:'trump',name:'Trump',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'pomme',name:'Pomme',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'ramon',name:'Ramón',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'richarlyson',name:'Richarlyson',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'sunnysideup',name:'Sunnysideup',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'tallulah',name:'Tallulah',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'tilin',name:'Tilin',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'trump',name:'Trump',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
   {id:'cucurucho_ali',name:'Cucurucho Ali',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
   {id:'cucurucho_andy',name:'Cucurucho Andy',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
   {id:'cucurucho_twik',name:'Cucurucho Twik',lang:'cucurucho',status:'disponivel',gameStatus:'vivo'},
@@ -1365,9 +1230,7 @@ const CHARS_DATA = [
 
 const SKILLS = ['Acrobacia','Adestramento','Artes','Atletismo','Atualidades','Ciências','Crime','Diplomacia','Enganação','Fortitude','Furtividade','Iniciativa','Intimidação','Intuição','Investigação','Luta','Medicina','Ocultismo','Percepção','Pilotagem','Pontaria','Profissão','Reflexos','Religião','Sobrevivência','Tática','Tecnologia','Vontade'];
 const ATTRS = ['AGI','FOR','INT','PRE','VIG'];
-// Lista de usuários admin válidos (apenas nomes — senhas ficam no Firestore)
-const ADMIN_USERS = ['twik','ryu','andy','ali'];
-function isValidAdminUser(u) { return ADMIN_USERS.includes(u.toLowerCase()); }
+const ADMINS = [{user:'Twik',pass:'MestreRP'},{user:'Ryu',pass:'StaffA'},{user:'Andy',pass:'cegodosolhos'},{user:'Ali',pass:'euamocavalos'}];
 const MAX_ATTR_POINTS = 5;
 const MAX_SKILLS = 8;
 
@@ -1382,18 +1245,17 @@ const FED_LOGO_URL = ''; // URL da logo da Federação
 const BG_PATTERN_URL = ''; // URL do background pattern
 
 function initImages() {
-  const safe = (id, fn) => { const el = document.getElementById(id); if(el) fn(el); };
   if(LOGO_URL) {
-    safe('navLogoImg', el => el.src = LOGO_URL);
-    safe('heroLogo', el => el.src = LOGO_URL);
-    safe('navLogoFallback', el => el.style.display = 'none');
+    document.getElementById('navLogoImg').src = LOGO_URL;
+    document.getElementById('heroLogo').src = LOGO_URL;
+    document.getElementById('navLogoFallback').style.display = 'none';
   }
   if(FED_LOGO_URL) {
-    safe('navFedLogo', el => el.src = FED_LOGO_URL);
-    safe('fedHeaderLogo', el => el.src = FED_LOGO_URL);
+    document.getElementById('navFedLogo').src = FED_LOGO_URL;
+    document.getElementById('fedHeaderLogo').src = FED_LOGO_URL;
   }
   if(BG_PATTERN_URL) {
-    safe('heroBg', el => el.style.backgroundImage = `url('${BG_PATTERN_URL}')`);
+    document.getElementById('heroBg').style.backgroundImage = `url('${BG_PATTERN_URL}')`;
   }
 }
 
@@ -1408,15 +1270,7 @@ function showPage(id) {
   document.getElementById('navLinks').classList.remove('open');
   window.scrollTo(0,0);
   if(id==='personagens') renderChars('all');
-  if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
-  if(id==='ficha') {
-    // Se a tela de sucesso estava aberta, reseta o form
-    if(document.getElementById('fichaSuccess').style.display === 'block' && !window._editingFichaId) {
-      document.getElementById('fichaForm').style.display = 'block';
-      document.getElementById('fichaSuccess').style.display = 'none';
-    }
-    buildAttrsForm(); buildSkillsForm(); initDateMasks();
-  }
+  if(id==='admin-panel') renderPending();
 }
 
 function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
@@ -1424,16 +1278,10 @@ function toggleNav() { document.getElementById('navLinks').classList.toggle('ope
 // ===== CHARS =====
 function renderChars(filter) {
   const grid = document.getElementById('charsGrid');
-  // Constrói lista: personagens aprovados têm prioridade sobre os estáticos
-  const approvedCharIds = new Set(approvedChars.map(c => c.charId).filter(Boolean));
-  // Remove da lista estática os que já têm ficha aprovada
-  const staticList = CHARS_DATA.filter(c => !approvedCharIds.has(c.id));
-  let list = [...staticList, ...approvedChars];
+  let list = [...CHARS_DATA, ...approvedChars];
   if(filter !== 'all') list = list.filter(c => c.status===filter || c.lang===filter);
   if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
   grid.innerHTML = list.map(c => {
-    // Para approved chars, o id de clique é o charId original (se existir) ou o doc id
-    const clickId = c.charId || c.id;
     const img = c.imageUrl
       ? `<img src="${c.imageUrl}" alt="${c.name}">`
       : c.minecraft
@@ -1441,7 +1289,7 @@ function renderChars(filter) {
       : `<span>👤</span>`;
     const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
     const sl = c.gameStatus || 'PENDENTE';
-    return `<div class="char-card" onclick="showCharProfile('${clickId}')">
+    return `<div class="char-card" onclick="showCharProfile('${c.id}')">
       <div class="char-available ${c.status==='ocupado'?'occupied':'available'}"></div>
       <div class="char-avatar">${img}</div>
       <div class="char-name">${c.name.toUpperCase()}</div>
@@ -1458,10 +1306,8 @@ function filterChars(f, btn) {
 }
 
 function showCharProfile(id) {
-  // Busca primeiro em approvedChars pelo charId original, depois por doc id
-  let c = approvedChars.find(x => x.charId === id || x.id === id);
-  // Fallback: busca no estático
-  if(!c) c = CHARS_DATA.find(x => x.id === id);
+  const all = [...CHARS_DATA, ...approvedChars];
+  const c = all.find(x => x.id===id);
   if(!c) return;
   const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
   const sl = c.gameStatus || 'DESCONHECIDO';
@@ -1492,10 +1338,11 @@ function showCharProfile(id) {
       </div>
       <div class="profile-info-box">
         <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${c.name}</span></div>
-        <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.player||'—'}</span></div>
+        ${c.player?`<div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.player}</span></div>`:''}
+
         ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
-        ${(()=>{const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
-        ${c.lang==='cucurucho' ? `<div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>` : `<div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>`}
+        ${c.idade?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${c.idade} anos</span></div>`:''}
+        <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>
         <div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${c.status==='ocupado'?'var(--red-bright)':'#4caf50'}">${c.status==='ocupado'?'OCUPADA':'DISPONÍVEL'}</span></div>
       </div>
     </div>
@@ -1559,14 +1406,11 @@ function updatePointsDisplay() {
 // ===== PERÍCIAS =====
 function buildSkillsForm() {
   const g = document.getElementById('skillsGrid');
-  g.innerHTML = SKILLS.map(s => {
-    const isSelected = selectedSkills.has(s);
-    return `
-    <label class="skill-check${isSelected?' selected':''}" id="sc_${s}" onclick="toggleSkill('${s}')">
-      <div class="skill-check-box" id="sb_${s}">${isSelected?'✓':''}</div>
+  g.innerHTML = SKILLS.map(s => `
+    <label class="skill-check" id="sc_${s}" onclick="toggleSkill('${s}')">
+      <div class="skill-check-box" id="sb_${s}"></div>
       <span class="skill-check-name">${s}</span>
-    </label>`;
-  }).join('');
+    </label>`).join('');
   updateSkillsDisplay();
 }
 
@@ -1588,100 +1432,21 @@ function updateSkillsDisplay() {
   document.getElementById('skillsLeft').textContent = MAX_SKILLS - selectedSkills.size;
 }
 
-// ===== IDADE AUTOMÁTICA =====
-function calcAge(dateStr) {
-  if(!dateStr || dateStr.length < 10) return '';
-  const [d,m,y] = dateStr.split('/').map(Number);
-  if(!d||!m||!y||y<1900) return '';
-  const today = new Date();
-  let age = today.getFullYear() - y;
-  if(today.getMonth()+1 < m || (today.getMonth()+1===m && today.getDate()<d)) age--;
-  return age >= 0 ? String(age) : '';
-}
-
-// ===== MÁSCARA DE DATA =====
-function maskDate(input) {
-  if(input._maskInitialized) return; // evita duplicar listeners
-  input._maskInitialized = true;
-  input.addEventListener('input', function() {
-    let v = this.value.replace(/\D/g, '').slice(0, 8);
-    if(v.length >= 5) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
-    else if(v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
-    this.value = v;
-  });
-  input.addEventListener('keydown', function(e) {
-    if(e.key === 'Backspace' && this.value.endsWith('/')) { this.value = this.value.slice(0,-1); e.preventDefault(); }
-  });
-  input.setAttribute('placeholder', 'DD/MM/AAAA');
-  input.setAttribute('maxlength', '10');
-}
-function initDateMasks() {
-  const pairs = [
-    ['f_nascimento_player', 'f_idade_player'],
-    ['f_nascimento', 'f_idade']
-  ];
-  pairs.forEach(([dateId, ageId]) => {
-    const el = document.getElementById(dateId);
-    if(!el) return;
-    maskDate(el);
-    if(!el._ageListenerInitialized) {
-      el._ageListenerInitialized = true;
-      el.addEventListener('input', function() {
-        const ageEl = document.getElementById(ageId);
-        if(ageEl) ageEl.value = calcAge(this.value);
-      });
-    }
-  });
-}
-
 // ===== SUBMIT =====
-async function submitFicha() {
+function submitFicha() {
   const nome = document.getElementById('f_nome').value.trim();
   const player = document.getElementById('f_player').value.trim();
   if(!nome || !player) { alert('Preencha ao menos o nome do personagem e do player.'); return; }
-  // Validar se personagem foi selecionado no popup
-  if(!selectedCharId && !window._editingFichaId) {
-    alert('Selecione um personagem clicando em "ESCOLHER".');
-    return;
-  }
   const imgVal = document.getElementById('f_imagem').value.trim();
   const errEl = document.getElementById('f_imagem_err');
-  const errEl2 = document.getElementById('f_imagem_err2');
-  errEl.style.display = 'none';
-  errEl2.style.display = 'none';
   if(imgVal && !imgVal.match(/^https?:\/\/(i\.)?imgur\.com\//i)) {
     errEl.style.display = 'block';
     document.getElementById('f_imagem').focus();
     return;
   }
-  if(imgVal) {
-    const isSquare = await new Promise(res => {
-      const img = new Image();
-      img.onload = () => res(img.naturalWidth === img.naturalHeight);
-      img.onerror = () => res(true); // se não carregar, deixa passar
-      img.src = imgVal;
-    });
-    if(!isSquare) {
-      errEl2.style.display = 'block';
-      document.getElementById('f_imagem').focus();
-      return;
-    }
-  }
-  // Validar atributos — obrigar distribuir todos os pontos
-  const pontosUsados = getUsedPoints();
-  if(pontosUsados < MAX_ATTR_POINTS) {
-    alert(`Distribua todos os ${MAX_ATTR_POINTS} pontos de atributo antes de enviar. Você usou ${pontosUsados} de ${MAX_ATTR_POINTS}.`);
-    return;
-  }
-  const charData = CHARS_DATA.find(c => c.id === selectedCharId);
-  const cucuruchoNome = document.getElementById('f_cucurucho_nome').value.trim();
-  if(charData?.lang === 'cucurucho' && !cucuruchoNome) {
-    alert('Preencha o nome do Cucurucho.');
-    return;
-  }
+  errEl.style.display = 'none';
   const ficha = {
-    charId: selectedCharId || '',
-    cucuruchoNome: cucuruchoNome || '',
+    id: Date.now().toString(),
     name: nome, player,
     nascimento_player: document.getElementById('f_nascimento_player').value,
     idade_player: document.getElementById('f_idade_player').value,
@@ -1694,22 +1459,16 @@ async function submitFicha() {
     backstory: document.getElementById('f_backstory').value,
     attrs: {...attrValues},
     skills: [...selectedSkills],
-    gameStatus: 'vivo', status: 'disponivel', lang: charData?.lang || 'custom', history: [], pending: true
+    gameStatus: 'vivo', status: 'disponivel', lang: 'custom', history: [], pending: true
   };
   // Edit mode
   if(window._editingFichaId) {
     ficha.editRequest = true;
     ficha.originalId = window._editingFichaId;
   }
-  if(!window._submitFichaFirebase) {
-    alert('Conexão com o banco de dados ainda está carregando. Aguarde um momento e tente novamente.');
-    return;
-  }
   window._submitFichaFirebase(ficha).then(() => {
     document.getElementById('fichaForm').style.display = 'none';
     document.getElementById('fichaSuccess').style.display = 'block';
-    // Scroll para o topo da seção
-    window.scrollTo(0, 0);
   }).catch(err => {
     alert('Erro ao enviar ficha. Tente novamente.');
     console.error(err);
@@ -1717,100 +1476,13 @@ async function submitFicha() {
 }
 
 // ===== ADMIN =====
-function updateAdminNotify() {
-  const badge = document.getElementById('adminNotifyBadge');
-  const logoWrap = document.getElementById('navLogoWrap2');
-  if(!badge || !logoWrap) return;
-  if(window.pendingFichas && window.pendingFichas.length > 0) {
-    badge.style.display = 'block';
-    logoWrap.classList.add('nav-logo-notify');
-    badge.title = window.pendingFichas.length + ' ficha(s) aguardando aprovação';
-  } else {
-    badge.style.display = 'none';
-    logoWrap.classList.remove('nav-logo-notify');
-  }
-}
-
-async function checkAdmin() {
+function checkAdmin() {
   const u = document.getElementById('adminUser').value.trim();
   const p = document.getElementById('adminPass').value;
-  const errEl = document.getElementById('adminError');
-  const btn = document.querySelector('#admin-gate .secret-btn');
-  if(!u || !p) { errEl.style.display = 'block'; return; }
-  if(!isValidAdminUser(u)) { errEl.style.display = 'block'; return; }
-  // Desabilita botão durante verificação
-  if(btn) { btn.disabled = true; btn.textContent = '...'; }
-  try {
-    // Verifica se admin já tem senha cadastrada no Firestore
-    const exists = await window._adminExistsFirebase(u);
-    if(!exists) {
-      // Primeiro acesso: pede criação de senha
-      errEl.style.display = 'none';
-      showFirstAccessSetup(u, p);
-      if(btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
-      return;
-    }
-    const ok = await window._checkAdminFirebase(u, p);
-    if(ok) {
-      window._adminLogado = true;
-      window._adminUser = u.toLowerCase();
-      updateAdminNotify();
-      showPage('admin-panel'); renderPending(); renderApprovedAdmin();
-    } else {
-      errEl.textContent = '⚠ CREDENCIAIS INVÁLIDAS';
-      errEl.style.display = 'block';
-    }
-  } catch(e) {
-    console.error(e);
-    errEl.textContent = '⚠ ERRO DE CONEXÃO — TENTE NOVAMENTE';
-    errEl.style.display = 'block';
-  }
-  if(btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
-}
-
-function showFirstAccessSetup(user, initialPass) {
-  // Modal para cadastrar senha pela primeira vez
-  const existing = document.getElementById('firstAccessModal');
-  if(existing) existing.remove();
-  const modal = document.createElement('div');
-  modal.id = 'firstAccessModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
-  modal.innerHTML = `
-    <div style="background:var(--bg2);border:1px solid var(--red);padding:2.5rem;max-width:420px;width:100%">
-      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.5rem">// PRIMEIRO ACESSO //</div>
-      <h3 style="font-family:'Orbitron',monospace;font-size:1rem;color:#fff;letter-spacing:3px;margin-bottom:0.5rem">${user.toUpperCase()}</h3>
-      <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);line-height:1.8;margin-bottom:1.5rem">Nenhuma senha cadastrada para este usuário. Defina sua senha agora para continuar.</p>
-      <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.5rem">
-        <input type="password" id="firstPass1" placeholder="NOVA SENHA" style="background:var(--bg3);border:1px solid var(--red);color:var(--red-bright);padding:0.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;letter-spacing:2px;outline:none;width:100%;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-        <input type="password" id="firstPass2" placeholder="CONFIRMAR SENHA" style="background:var(--bg3);border:1px solid var(--red);color:var(--red-bright);padding:0.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;letter-spacing:2px;outline:none;width:100%;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')confirmFirstAccess('${user}')">
-      </div>
-      <div id="firstAccessErr" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:1rem;display:none"></div>
-      <button onclick="confirmFirstAccess('${user}')" style="width:100%;padding:0.9rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer" id="firstAccessBtn">CADASTRAR SENHA</button>
-    </div>`;
-  document.body.appendChild(modal);
-}
-
-async function confirmFirstAccess(user) {
-  const p1 = document.getElementById('firstPass1').value;
-  const p2 = document.getElementById('firstPass2').value;
-  const errEl = document.getElementById('firstAccessErr');
-  const btn = document.getElementById('firstAccessBtn');
-  if(p1.length < 6) { errEl.textContent = '⚠ Senha precisa ter pelo menos 6 caracteres.'; errEl.style.display='block'; return; }
-  if(p1 !== p2) { errEl.textContent = '⚠ Senhas não coincidem.'; errEl.style.display='block'; return; }
-  btn.disabled = true; btn.textContent = 'SALVANDO...';
-  try {
-    await window._setAdminPasswordFirebase(user, p1);
-    document.getElementById('firstAccessModal').remove();
-    // Loga automaticamente
-    window._adminLogado = true;
-    window._adminUser = user.toLowerCase();
-    updateAdminNotify();
-    showPage('admin-panel'); renderPending(); renderApprovedAdmin();
-  } catch(e) {
-    console.error(e);
-    errEl.textContent = '⚠ Erro ao salvar. Tente novamente.';
-    errEl.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'CADASTRAR SENHA';
+  if(ADMINS.find(a => a.user.toLowerCase()===u.toLowerCase() && a.pass===p)) {
+    showPage('admin-panel'); renderPending();
+  } else {
+    document.getElementById('adminError').style.display = 'block';
   }
 }
 
@@ -1824,53 +1496,36 @@ function showAdminTab(id, btn) {
 function renderPending() {
   const list = document.getElementById('pendingList');
   if(!list) return;
-  const fichas = window.pendingFichas || [];
-  if(!fichas.length) { list.innerHTML = '<div class="empty-state">NENHUMA FICHA PENDENTE</div>'; return; }
-  list.innerHTML = fichas.map(f => `
+  if(!pendingFichas.length) { list.innerHTML = '<div class="empty-state">NENHUMA FICHA PENDENTE</div>'; return; }
+  list.innerHTML = pendingFichas.map(f => `
     <div class="pending-card" id="pc_${f.id}">
       <div class="pending-info">
-        <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome ? ' — ' + f.cucuruchoNome : ''}</h4>
+        <h4>${f.name.toUpperCase()}</h4>
         <p>// Player: ${f.player} // Personagem: ${f.name} // Tipo: ${f.editRequest ? 'EDIÇÃO' : 'NOVA FICHA'}</p>
       </div>
       <div class="pending-actions">
         <button class="btn-approve" onclick="viewPendingFicha('${f.id}')">👁 VER</button>
-        <button class="btn-approve" onclick="if(confirm('Aprovar a ficha de ${f.player}?')){(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await approveFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✓ APROVAR';}})(this)}">✓ APROVAR</button>
-        <button class="btn-reject" onclick="if(confirm('Rejeitar a ficha de ${f.player}? Esta ação não pode ser desfeita.')){(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await rejectFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✗ REJEITAR';}})(this)}">✗ REJEITAR</button>
+        <button class="btn-approve" onclick="approveFicha('${f.id}')">✓ APROVAR</button>
+        <button class="btn-reject" onclick="rejectFicha('${f.id}')">✗ REJEITAR</button>
       </div>
     </div>`).join('');
 }
 
-async function approveFicha(id) {
-  const ficha = (window.pendingFichas||[]).find(f => f.id===id);
-  if(!ficha) return false;
-  const { id: _localId, ...fichaData } = ficha;
-  try {
-    if(fichaData.editRequest && fichaData.originalId) {
-      // Edição: atualiza a ficha original no Firestore em vez de criar nova
-      const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const db = window._db;
-      const { editRequest, originalId, pending, ...cleanData } = fichaData;
-      await updateDoc(doc(db, 'approvedChars', originalId), {...cleanData, pending: false});
-      // Remove da fila de pendentes
-      await window._rejectFichaFirebase(id);
-    } else {
-      await window._approveFichaFirebase({...fichaData, pending:false}, id);
-    }
-    return true;
-  } catch(err) {
-    console.error('Erro ao aprovar:', err);
-    return false;
-  }
+function approveFicha(id) {
+  const ficha = pendingFichas.find(f => f.id===id);
+  if(!ficha) return;
+  const { id: fichaId, ...fichaData } = ficha;
+  window._approveFichaFirebase({...fichaData, pending:false}, id).catch(err => {
+    alert('Erro ao aprovar ficha.');
+    console.error(err);
+  });
 }
 
-async function rejectFicha(id) {
-  try {
-    await window._rejectFichaFirebase(id);
-    return true;
-  } catch(err) {
-    console.error('Erro ao rejeitar:', err);
-    return false;
-  }
+function rejectFicha(id) {
+  window._rejectFichaFirebase(id).catch(err => {
+    alert('Erro ao rejeitar ficha.');
+    console.error(err);
+  });
 }
 
 function saveFedPassword() {
@@ -1879,50 +1534,6 @@ function saveFedPassword() {
     document.getElementById('cfg_msg').style.display = 'block';
     setTimeout(() => document.getElementById('cfg_msg').style.display='none', 2000);
   });
-}
-
-async function changeAdminPassword() {
-  const atual = document.getElementById('cfg_passAtual').value;
-  const nova = document.getElementById('cfg_passNova').value;
-  const confirm = document.getElementById('cfg_passConfirm').value;
-  const errEl = document.getElementById('cfg_pass_err');
-  const okEl = document.getElementById('cfg_pass_ok');
-  const btn = document.getElementById('cfg_passBtnSave');
-  errEl.style.display = 'none';
-  okEl.style.display = 'none';
-  if(!atual || !nova || !confirm) {
-    errEl.textContent = '⚠ Preencha todos os campos.'; errEl.style.display='block'; return;
-  }
-  if(nova.length < 6) {
-    errEl.textContent = '⚠ Nova senha precisa ter pelo menos 6 caracteres.'; errEl.style.display='block'; return;
-  }
-  if(nova !== confirm) {
-    errEl.textContent = '⚠ Nova senha e confirmação não coincidem.'; errEl.style.display='block'; return;
-  }
-  if(!window._adminUser) {
-    errEl.textContent = '⚠ Sessão expirada. Faça login novamente.'; errEl.style.display='block'; return;
-  }
-  btn.disabled = true; btn.textContent = 'VERIFICANDO...';
-  try {
-    // Verifica senha atual
-    const ok = await window._checkAdminFirebase(window._adminUser, atual);
-    if(!ok) {
-      errEl.textContent = '⚠ Senha atual incorreta.'; errEl.style.display='block';
-      btn.disabled = false; btn.textContent = 'SALVAR NOVA SENHA'; return;
-    }
-    btn.textContent = 'SALVANDO...';
-    await window._setAdminPasswordFirebase(window._adminUser, nova);
-    // Limpa os campos
-    document.getElementById('cfg_passAtual').value = '';
-    document.getElementById('cfg_passNova').value = '';
-    document.getElementById('cfg_passConfirm').value = '';
-    okEl.style.display = 'block';
-    setTimeout(() => okEl.style.display='none', 4000);
-  } catch(e) {
-    console.error(e);
-    errEl.textContent = '⚠ Erro ao salvar. Tente novamente.'; errEl.style.display='block';
-  }
-  btn.disabled = false; btn.textContent = 'SALVAR NOVA SENHA';
 }
 
 // ===== FEDERAÇÃO SECRETA =====
@@ -1940,6 +1551,22 @@ function checkFedAccess() {
 }
 
 
+
+// ===== NOTIFICAÇÃO DE FICHAS PENDENTES =====
+function checkPendingNotification() {
+  const logo = document.getElementById('navLogoImg');
+  if(!logo) return;
+  if(pendingFichas.length > 0) {
+    logo.style.animation = 'pulse 0.8s ease-in-out infinite';
+    logo.style.filter = 'drop-shadow(0 0 12px rgba(204,0,0,1))';
+    logo.title = pendingFichas.length + ' ficha(s) pendente(s)!';
+  } else {
+    logo.style.animation = 'pulse 4s ease-in-out infinite';
+    logo.style.filter = 'drop-shadow(0 0 6px rgba(139,0,0,0.6))';
+    logo.title = '';
+  }
+}
+
 // ===== POPUP PERSONAGEM =====
 let selectedCharId = null;
 
@@ -1953,15 +1580,8 @@ function closeCharPopup() {
   document.getElementById('charSelectPopup').style.display = 'none';
 }
 
-function getCharStatus(charId) {
-  // Aprovado = ocupado
-  if(approvedChars.find(c => c.charId === charId || c.id === charId)) return 'ocupado';
-  // Pendente = reservado
-  if(pendingFichas.find(f => f.charId === charId)) return 'reservado';
-  return 'disponivel';
-}
-
 function renderPopupChars() {
+  const all = [...CHARS_DATA, ...approvedChars];
   const cats = [
     {key:'ingles', label:'🇺🇸 INGLÊS'},
     {key:'espanhol', label:'🇪🇸 ESPANHOL'},
@@ -1973,54 +1593,45 @@ function renderPopupChars() {
   ];
   const container = document.getElementById('popupCharList');
   container.innerHTML = cats.map(cat => {
-    const chars = CHARS_DATA.filter(c => c.lang === cat.key);
+    const chars = all.filter(c => c.lang === cat.key);
     if(!chars.length) return '';
     return `<div style="margin-bottom:1.5rem">
       <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)">${cat.label}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        ${chars.map(c => {
-          const st = getCharStatus(c.id);
-          const bloqueado = st !== 'disponivel';
-          const cor = st==='ocupado'?'var(--red)': st==='reservado'?'#ff9800':'var(--border)';
-          const label = st==='ocupado'?'🔴 OCUPADO': st==='reservado'?'🟡 RESERVADO':'🟢 DISPONÍVEL';
-          const labelCor = st==='ocupado'?'var(--red-bright)': st==='reservado'?'#ff9800':'#4caf50';
-          return `<div onclick="selectChar('${c.id}','${c.name}','${c.lang}')" style="padding:0.8rem;background:var(--bg3);border:1px solid ${cor};cursor:${bloqueado?'not-allowed':'pointer'};opacity:${bloqueado?'0.5':'1'};transition:all 0.2s" ${!bloqueado?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
-            <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:${bloqueado?'var(--text-dim)':'#fff'}">${c.name}</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:${labelCor}">${label}</div>
-          </div>`;
-        }).join('')}
+        ${chars.map(c => `
+          <div onclick="selectChar('${c.id}','${c.name}','${c.lang}')" style="padding:0.8rem;background:var(--bg3);border:1px solid ${c.status==='ocupado'?'var(--red)':'var(--border)'};cursor:${c.status==='ocupado'?'not-allowed':'pointer'};opacity:${c.status==='ocupado'?'0.5':'1'};transition:all 0.2s" ${c.status!=='ocupado'?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
+            <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:${c.status==='ocupado'?'var(--text-dim)':'#fff'}">${c.name}</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:${c.status==='ocupado'?'var(--red-bright)':'#4caf50'}">${c.status==='ocupado'?'🔴 OCUPADO':'🟢 DISPONÍVEL'}</div>
+          </div>`).join('')}
       </div>
     </div>`;
   }).join('');
 }
 
 function selectChar(id, name, lang) {
-  const st = getCharStatus(id);
-  if(st !== 'disponivel') return;
+  const all = [...CHARS_DATA, ...approvedChars];
+  const c = all.find(x => x.id === id);
+  if(c && c.status === 'ocupado') return;
   selectedCharId = id;
   document.getElementById('f_nome').value = name;
-  // Se cucurucho, muda label e mostra campo de nome real
+  // Se cucurucho, muda label
   if(lang === 'cucurucho') {
-    document.getElementById('f_nome_label').textContent = 'Cucurucho Escolhido *';
-    document.getElementById('f_cucurucho_nome_group').style.display = 'block';
+    document.getElementById('f_nome_label').textContent = 'Nome do Cucurucho *';
   } else {
     document.getElementById('f_nome_label').textContent = 'Personagem *';
-    document.getElementById('f_cucurucho_nome_group').style.display = 'none';
-    document.getElementById('f_cucurucho_nome').value = '';
   }
   closeCharPopup();
 }
 
 // ===== EDIÇÃO DE FICHA =====
-async function showEditFicha() {
+function showEditFicha() {
   const senha = prompt('Digite sua senha de edição (solicitada via ticket no Discord):');
   if(!senha) return;
-  // Verifica se é admin: testa todos os usuários admin válidos
-  for(const u of ADMIN_USERS) {
-    try {
-      const ok = await window._checkAdminFirebase(u, senha);
-      if(ok) { openEditForm(u, senha); return; }
-    } catch(e) { /* continua */ }
+  // Verifica se é admin
+  const isAdmin = ADMINS.find(a => a.pass === senha);
+  if(isAdmin) {
+    openEditForm(isAdmin.user, senha);
+    return;
   }
   // Verifica senha de player no Firestore
   window._getPlayerEditKey(senha).then(player => {
@@ -2039,9 +1650,6 @@ function openEditForm(playerName, senha) {
     alert('Nenhuma ficha aprovada encontrada para ' + playerName);
     return;
   }
-  // Garante que fichaSuccess não está visível
-  document.getElementById('fichaForm').style.display = 'block';
-  document.getElementById('fichaSuccess').style.display = 'none';
   // Preenche o formulário com os dados existentes
   document.getElementById('f_nome').value = ficha.name || '';
   document.getElementById('f_player').value = ficha.player || '';
@@ -2055,144 +1663,45 @@ function openEditForm(playerName, senha) {
   document.getElementById('f_backstory').value = ficha.backstory || '';
   if(ficha.attrs) { Object.assign(attrValues, ficha.attrs); buildAttrsForm(); }
   if(ficha.skills) { selectedSkills = new Set(ficha.skills); buildSkillsForm(); }
-  // selectedCharId = charId original (para validação do popup)
-  selectedCharId = ficha.charId || ficha.id;
-  // _editingFichaId = doc ID do Firestore (para updateDoc na aprovação)
+  selectedCharId = ficha.id;
+  // Marca como edição
   window._editingFichaId = ficha.id;
   window._editingSenha = senha;
   // Muda botão
   document.getElementById('submitBtn').textContent = '▶ ENVIAR EDIÇÃO PARA APROVAÇÃO';
   document.getElementById('fichaEditNotice').style.display = 'block';
   showPage('ficha');
-  initDateMasks();
 }
+
 
 function viewPendingFicha(id) {
-  const f = (window.pendingFichas||[]).find(x => x.id === id);
+  const f = pendingFichas.find(x => x.id === id);
   if(!f) return;
+  const info = `
+PERSONAGEM: ${f.name}
+PLAYER: ${f.player}
+NASC. PLAYER: ${f.nascimento_player||'—'}
+IDADE PLAYER: ${f.idade_player||'—'}
+NASC. PERSONAGEM: ${f.nascimento||'—'}
+IDADE PERSONAGEM: ${f.idade||'—'}
+FOTO: ${f.imageUrl||'—'}
 
-  const attrsHtml = f.attrs
-    ? `<div class="attrs-grid">${Object.entries(f.attrs).map(([k,v])=>`<div class="attr-box"><span class="attr-name">${k}</span><span class="attr-val">${v}</span></div>`).join('')}</div>`
-    : '<p style="color:var(--text-dim);font-size:0.85rem">Atributos não definidos.</p>';
+FÍSICO: ${f.fisico||'—'}
 
-  const skillsHtml = f.skills && f.skills.length
-    ? `<div class="skills-grid">${f.skills.map(s=>`<div class="skill-item"><span class="skill-name">${s}</span><span class="skill-val">✓</span></div>`).join('')}</div>`
-    : '<p style="color:var(--text-dim);font-size:0.85rem">Nenhuma perícia definida.</p>';
+PERSONALIDADE: ${f.personalidade||'—'}
 
-  const imgHtml = f.imageUrl
-    ? `<img src="${f.imageUrl}" alt="${f.name}" class="profile-img">`
-    : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
+BACKSTORY: ${f.backstory||'—'}
 
-  const modal = document.createElement('div');
-  modal.id = 'fichaPreviewModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:80px 2rem 2rem;display:flex;align-items:flex-start;justify-content:center';
-  modal.innerHTML = `
-    <div style="max-width:1100px;width:100%;margin:auto">
-      <!-- Header -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--red)">
-        <div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// FICHA PENDENTE — REVISÃO ADMIN //</div>
-          <h2 style="font-family:'Orbitron',monospace;font-size:1.4rem;color:#fff;letter-spacing:4px">${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' <span style="color:var(--silver);font-size:1rem">— '+f.cucuruchoNome+'</span>':''}</h2>
-          ${f.editRequest?`<div style="margin-top:0.5rem;display:inline-block;padding:0.2rem 0.8rem;background:rgba(139,0,0,0.3);border:1px solid var(--red);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:2px">⚠ EDIÇÃO DE FICHA EXISTENTE</div>`:''}
-        </div>
-        <div style="display:flex;gap:0.5rem;align-items:center">
-          <button id="btnAprovarTop_${f.id}" class="btn-approve" onclick="adminAprovar('${f.id}',this)" style="padding:0.6rem 1.2rem;font-size:0.75rem;letter-spacing:2px">✓ APROVAR</button>
-          <button id="btnRejeitarTop_${f.id}" class="btn-reject" onclick="adminRejeitar('${f.id}',this)" style="padding:0.6rem 1.2rem;font-size:0.75rem;letter-spacing:2px">✗ REJEITAR</button>
-          <button onclick="document.getElementById('fichaPreviewModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.6rem 1.2rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='#fff'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">✕ FECHAR</button>
-        </div>
-      </div>
-      <div class="profile-layout">
-        <!-- Sidebar -->
-        <div class="profile-sidebar">
-          <div class="profile-img-container">${imgHtml}</div>
-          <div class="profile-status-box">
-            <div class="profile-status-label">// TIPO //</div>
-            <div class="status-badge status-pendente" style="font-size:0.75rem;padding:0.4rem 1rem">${f.editRequest?'EDIÇÃO':'NOVA FICHA'}</div>
-          </div>
-          <div class="profile-info-box">
-            <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${f.name||'—'}</span></div>
-            ${f.cucuruchoNome?`<div class="profile-info-item"><span class="label">NOME IN-GAME</span><span class="value">${f.cucuruchoNome}</span></div>`:''}
-            <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${f.player||'—'}</span></div>
-            <div class="profile-info-item"><span class="label">NASC. PLAYER</span><span class="value">${f.nascimento_player||'—'}</span></div>
-            <div class="profile-info-item"><span class="label">IDADE PLAYER</span><span class="value">${f.idade_player||'—'}</span></div>
-            <div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${f.nascimento||'—'}</span></div>
-            <div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${f.idade?f.idade+' anos':'—'}</span></div>
-            ${f.lang==='cucurucho' ? `<div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>` : `<div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${(f.lang||'—').toUpperCase()}</span></div>`}
-          </div>
-        </div>
-
-        <!-- Main -->
-        <div class="profile-main">
-          ${f.fisico||f.personalidade?`
-          <div class="profile-section">
-            <h3>CARACTERÍSTICAS</h3>
-            ${f.fisico?`<p style="margin-bottom:1rem"><strong style="color:var(--silver)">Físico:</strong><br>${f.fisico}</p>`:''}
-            ${f.personalidade?`<p><strong style="color:var(--silver)">Personalidade:</strong><br>${f.personalidade}</p>`:''}
-          </div>`:''}
-          ${f.backstory?`<div class="profile-section"><h3>HISTÓRIA</h3><p>${f.backstory}</p></div>`:''}
-          <div class="profile-section">
-            <h3>SISTEMA</h3>
-            <div style="margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">ATRIBUTOS</div>
-            ${attrsHtml}
-            <div style="margin:1rem 0;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PERÍCIAS</div>
-            ${skillsHtml}
-          </div>
-        </div>
-      </div>
-
-
-    </div>`;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
-}
-
-async function adminAprovar(id, btn) {
-  btn.disabled = true;
-  btn.textContent = '⏳ APROVANDO...';
-  const ok = await approveFicha(id);
-  if(ok) {
-    btn.textContent = '✓ APROVADO!';
-    btn.style.background = '#1a4a1a';
-    setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 600);
-  } else {
-    btn.disabled = false;
-    btn.textContent = '✓ APROVAR';
-    alert('Erro ao aprovar. Verifique o console.');
-  }
-}
-
-async function adminRejeitar(id, btn) {
-  btn.disabled = true;
-  btn.textContent = '⏳ REJEITANDO...';
-  const ok = await rejectFicha(id);
-  if(ok) {
-    btn.textContent = '✗ REJEITADO';
-    setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 600);
-  } else {
-    btn.disabled = false;
-    btn.textContent = '✗ REJEITAR';
-    alert('Erro ao rejeitar. Verifique o console.');
-  }
+ATRIBUTOS: ${JSON.stringify(f.attrs||{})}
+PERÍCIAS: ${(f.skills||[]).join(', ')}
+${f.editRequest ? '\n⚠ EDIÇÃO DE FICHA EXISTENTE' : ''}
+  `.trim();
+  alert(info);
 }
 
 function gerarSenhaEdicao(charId, playerName) {
   window._generateEditKey(charId).then(key => {
-    // Modal estilizado em vez de alert()
-    const existingModal = document.getElementById('senhaModal');
-    if(existingModal) existingModal.remove();
-    const modal = document.createElement('div');
-    modal.id = 'senhaModal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:2rem';
-    modal.innerHTML = `
-      <div style="background:var(--bg2);border:1px solid var(--red);padding:2.5rem;max-width:460px;width:100%;text-align:center">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem">// SENHA GERADA //</div>
-        <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:#fff;margin-bottom:0.5rem">${playerName.toUpperCase()}</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:2rem;color:var(--red-bright);letter-spacing:6px;padding:1.5rem;background:var(--bg3);border:1px solid var(--red);margin:1.5rem 0;cursor:pointer;user-select:all" title="Clique para copiar" onclick="navigator.clipboard.writeText('${key}').then(()=>{this.style.color='#4caf50';setTimeout(()=>this.style.color='var(--red-bright)',1200)})">${key}</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem">Clique na senha para copiar. Envie ao player via Discord.</div>
-        <button onclick="document.getElementById('senhaModal').remove()" style="padding:0.7rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">FECHAR</button>
-      </div>`;
-    document.body.appendChild(modal);
-    modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
+    alert('Senha de edição para ' + playerName + ': ' + key + '\n\nEnvie essa senha para o player via Discord.');
   });
 }
 
@@ -2202,58 +1711,15 @@ function renderApprovedAdmin() {
   if(!list) return;
   if(!approvedChars.length) { list.innerHTML = '<div class="empty-state">NENHUM PERSONAGEM APROVADO</div>'; return; }
   list.innerHTML = approvedChars.map(f => `
-    <div class="pending-card" id="apc_${f.id}">
+    <div class="pending-card">
       <div class="pending-info">
-        <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' — '+f.cucuruchoNome:''}</h4>
-        <p>// Player: ${f.player||'?'} // Personagem: ${f.name} // Status: ${(f.gameStatus||'vivo').toUpperCase()}</p>
+        <h4>${(f.name||'?').toUpperCase()}</h4>
+        <p>// Player: ${f.player||'?'}</p>
       </div>
       <div class="pending-actions">
-        <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${(f.player||f.name).replace(/'/g,"\\'")}')">🔑 GERAR SENHA</button>
-        <button class="btn-reject" onclick="deleteApprovedChar('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}')">🗑 EXCLUIR</button>
+        <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${f.player||f.name}')">🔑 GERAR SENHA</button>
       </div>
     </div>`).join('');
-}
-
-async function deleteApprovedChar(id, name) {
-  if(!confirm('Excluir o personagem "' + name + '"? Esta ação não pode ser desfeita.')) return;
-  try {
-    const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    await deleteDoc(doc(window._db, 'approvedChars', id));
-  } catch(e) {
-    alert('Erro ao excluir. Verifique o console.');
-    console.error(e);
-  }
-}
-
-// ===== RESET FICHA =====
-function resetFichaForm() {
-  // Reseta campos de texto
-  ['f_nome','f_player','f_nascimento_player','f_idade_player','f_nascimento','f_idade','f_imagem','f_fisico','f_personalidade','f_backstory','f_cucurucho_nome'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.value = '';
-  });
-  // Reseta atributos
-  attrValues = {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
-  buildAttrsForm();
-  // Reseta perícias
-  selectedSkills = new Set();
-  buildSkillsForm();
-  // Reseta seleção de personagem
-  selectedCharId = null;
-  // Reseta modo edição
-  window._editingFichaId = null;
-  window._editingSenha = null;
-  // Reseta UI
-  document.getElementById('submitBtn').textContent = '▶ ENVIAR FICHA PARA APROVAÇÃO';
-  document.getElementById('fichaEditNotice').style.display = 'none';
-  document.getElementById('f_cucurucho_nome_group').style.display = 'none';
-  document.getElementById('f_nome_label').textContent = 'Personagem *';
-  document.getElementById('f_imagem_err').style.display = 'none';
-  document.getElementById('f_imagem_err2').style.display = 'none';
-  // Volta para a tela do formulário
-  document.getElementById('fichaForm').style.display = 'block';
-  document.getElementById('fichaSuccess').style.display = 'none';
-  showPage('home');
 }
 
 // ===== INIT =====
@@ -2261,7 +1727,6 @@ initImages();
 buildAttrsForm();
 buildSkillsForm();
 renderChars('all');
-initDateMasks();
 </script>
 </body>
 </html>
