@@ -1132,7 +1132,7 @@
           <h3>INFORMAÇÕES BÁSICAS</h3>
           <div class="form-grid">
             <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em escolher..." readonly style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div></div>
-            <div class="form-group full" id="f_cucurucho_nome_group" style="display:none"><label>Nome do Cucurucho (como será chamado in-game) *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho, Cucurucho 03..."></div>
+            <div class="form-group full" id="f_cucurucho_nome_group" style="display:none;grid-column:1/-1"><label>Nome do Cucurucho (como será chamado in-game) *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho, Cucurucho 03..."></div>
             <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
             <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
             <div class="form-group"><label>Idade do Player</label><input type="number" id="f_idade_player" placeholder="Ex: 25"></div>
@@ -1538,6 +1538,10 @@ function submitFicha() {
     ficha.editRequest = true;
     ficha.originalId = window._editingFichaId;
   }
+  if(!window._submitFichaFirebase) {
+    alert('Conexão com o banco de dados ainda está carregando. Aguarde um momento e tente novamente.');
+    return;
+  }
   window._submitFichaFirebase(ficha).then(() => {
     document.getElementById('fichaForm').style.display = 'none';
     document.getElementById('fichaSuccess').style.display = 'block';
@@ -1584,11 +1588,12 @@ function showAdminTab(id, btn) {
 function renderPending() {
   const list = document.getElementById('pendingList');
   if(!list) return;
-  if(!pendingFichas.length) { list.innerHTML = '<div class="empty-state">NENHUMA FICHA PENDENTE</div>'; return; }
-  list.innerHTML = pendingFichas.map(f => `
+  const fichas = window.pendingFichas || [];
+  if(!fichas.length) { list.innerHTML = '<div class="empty-state">NENHUMA FICHA PENDENTE</div>'; return; }
+  list.innerHTML = fichas.map(f => `
     <div class="pending-card" id="pc_${f.id}">
       <div class="pending-info">
-        <h4>${f.name.toUpperCase()}</h4>
+        <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome ? ' — ' + f.cucuruchoNome : ''}</h4>
         <p>// Player: ${f.player} // Personagem: ${f.name} // Tipo: ${f.editRequest ? 'EDIÇÃO' : 'NOVA FICHA'}</p>
       </div>
       <div class="pending-actions">
@@ -1600,7 +1605,7 @@ function renderPending() {
 }
 
 function approveFicha(id) {
-  const ficha = pendingFichas.find(f => f.id===id);
+  const ficha = (window.pendingFichas||[]).find(f => f.id===id);
   if(!ficha) return;
   const { id: fichaId, ...fichaData } = ficha;
   window._approveFichaFirebase({...fichaData, pending:false}, id).catch(err => {
@@ -1701,7 +1706,7 @@ function selectChar(id, name, lang) {
   // Se cucurucho, muda label e mostra campo de nome real
   if(lang === 'cucurucho') {
     document.getElementById('f_nome_label').textContent = 'Cucurucho Escolhido *';
-    document.getElementById('f_cucurucho_nome_group').style.display = 'flex';
+    document.getElementById('f_cucurucho_nome_group').style.display = 'block';
   } else {
     document.getElementById('f_nome_label').textContent = 'Personagem *';
     document.getElementById('f_cucurucho_nome_group').style.display = 'none';
@@ -1762,7 +1767,7 @@ function openEditForm(playerName, senha) {
 
 
 function viewPendingFicha(id) {
-  const f = pendingFichas.find(x => x.id === id);
+  const f = (window.pendingFichas||[]).find(x => x.id === id);
   if(!f) return;
   const info = `
 PERSONAGEM: ${f.name}
