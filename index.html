@@ -591,6 +591,81 @@
     .form-group.full { grid-column: 1; }
   }
 </style>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, setDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzdSLf-pBDkN8Z5kEh4JJXfEaNwRlph0",
+    authDomain: "paranoia-rp.firebaseapp.com",
+    projectId: "paranoia-rp",
+    storageBucket: "paranoia-rp.firebasestorage.app",
+    messagingSenderId: "1022899063017",
+    appId: "1:1022899063017:web:48d614418df7bdb4234878"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Expor funções globais para o resto do script
+  window._db = db;
+  window._fbModules = { collection, addDoc, getDocs, doc, deleteDoc, setDoc, onSnapshot, query, orderBy };
+
+  // Carregar fichas pendentes e aprovadas do Firestore
+  async function loadFromFirestore() {
+    const { getDocs, collection, onSnapshot, query, orderBy } = window._fbModules;
+    const db = window._db;
+
+    // Pendentes
+    onSnapshot(collection(db, 'pendingFichas'), snap => {
+      window.pendingFichas = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      if(typeof renderPending === 'function') renderPending();
+    });
+
+    // Aprovados
+    onSnapshot(collection(db, 'approvedChars'), snap => {
+      window.approvedChars = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      if(typeof renderChars === 'function') renderChars('all');
+    });
+  }
+
+  window._submitFichaFirebase = async function(ficha) {
+    const { collection, addDoc } = window._fbModules;
+    const db = window._db;
+    await addDoc(collection(db, 'pendingFichas'), ficha);
+  };
+
+  window._approveFichaFirebase = async function(ficha, fichaId) {
+    const { collection, addDoc, doc, deleteDoc } = window._fbModules;
+    const db = window._db;
+    await addDoc(collection(db, 'approvedChars'), ficha);
+    await deleteDoc(doc(db, 'pendingFichas', fichaId));
+  };
+
+  window._rejectFichaFirebase = async function(fichaId) {
+    const { doc, deleteDoc } = window._fbModules;
+    const db = window._db;
+    await deleteDoc(doc(db, 'pendingFichas', fichaId));
+  };
+
+  window._saveFedPasswordFirebase = async function(pass) {
+    const { doc, setDoc } = window._fbModules;
+    const db = window._db;
+    await setDoc(doc(db, 'config', 'fedPassword'), { value: pass });
+  };
+
+  window._getFedPasswordFirebase = async function() {
+    const { doc } = window._fbModules;
+    const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._db;
+    const snap = await getDoc(doc(db, 'config', 'fedPassword'));
+    return snap.exists() ? snap.data().value : '';
+  };
+
+  loadFromFirestore();
+</script>
 </head>
 <body>
 
@@ -1014,8 +1089,8 @@ const MAX_SKILLS = 8;
 
 let attrValues = {AGI:0,FOR:0,INT:0,PRE:0,VIG:0};
 let selectedSkills = new Set();
-let pendingFichas = JSON.parse(localStorage.getItem('pendingFichas')||'[]');
-let approvedChars = JSON.parse(localStorage.getItem('approvedChars')||'[]');
+let pendingFichas = [];
+let approvedChars = [];
 
 // ===== IMAGES — substitua as URLs abaixo pelas reais =====
 const LOGO_URL = ''; // URL da logo do PARANOIA
@@ -1233,10 +1308,13 @@ function submitFicha() {
     skills: [...selectedSkills],
     gameStatus: 'vivo', status: 'disponivel', lang: 'custom', history: [], pending: true
   };
-  pendingFichas.push(ficha);
-  localStorage.setItem('pendingFichas', JSON.stringify(pendingFichas));
-  document.getElementById('fichaForm').style.display = 'none';
-  document.getElementById('fichaSuccess').style.display = 'block';
+  window._submitFichaFirebase(ficha).then(() => {
+    document.getElementById('fichaForm').style.display = 'none';
+    document.getElementById('fichaSuccess').style.display = 'block';
+  }).catch(err => {
+    alert('Erro ao enviar ficha. Tente novamente.');
+    console.error(err);
+  });
 }
 
 // ===== ADMIN =====
@@ -1275,38 +1353,42 @@ function renderPending() {
 }
 
 function approveFicha(id) {
-  const idx = pendingFichas.findIndex(f => f.id===id);
-  if(idx===-1) return;
-  approvedChars.push({...pendingFichas[idx], pending:false});
-  pendingFichas.splice(idx,1);
-  localStorage.setItem('pendingFichas', JSON.stringify(pendingFichas));
-  localStorage.setItem('approvedChars', JSON.stringify(approvedChars));
-  renderPending();
+  const ficha = pendingFichas.find(f => f.id===id);
+  if(!ficha) return;
+  const { id: fichaId, ...fichaData } = ficha;
+  window._approveFichaFirebase({...fichaData, pending:false}, id).catch(err => {
+    alert('Erro ao aprovar ficha.');
+    console.error(err);
+  });
 }
 
 function rejectFicha(id) {
-  pendingFichas = pendingFichas.filter(f => f.id!==id);
-  localStorage.setItem('pendingFichas', JSON.stringify(pendingFichas));
-  renderPending();
+  window._rejectFichaFirebase(id).catch(err => {
+    alert('Erro ao rejeitar ficha.');
+    console.error(err);
+  });
 }
 
 function saveFedPassword() {
-  localStorage.setItem('fedPassword', document.getElementById('cfg_fedPass').value);
-  document.getElementById('cfg_msg').style.display = 'block';
-  setTimeout(() => document.getElementById('cfg_msg').style.display='none', 2000);
+  const pass = document.getElementById('cfg_fedPass').value;
+  window._saveFedPasswordFirebase(pass).then(() => {
+    document.getElementById('cfg_msg').style.display = 'block';
+    setTimeout(() => document.getElementById('cfg_msg').style.display='none', 2000);
+  });
 }
 
 // ===== FEDERAÇÃO SECRETA =====
 function checkFedAccess() {
   const p = document.getElementById('fedPassword').value;
-  const stored = localStorage.getItem('fedPassword')||'';
-  if(stored && p===stored) {
-    document.getElementById('fedGate').style.display='none';
-    document.getElementById('fedContent').style.display='block';
-  } else {
-    document.getElementById('fedError').style.display='block';
-    setTimeout(()=>document.getElementById('fedError').style.display='none',3000);
-  }
+  window._getFedPasswordFirebase().then(stored => {
+    if(stored && p===stored) {
+      document.getElementById('fedGate').style.display='none';
+      document.getElementById('fedContent').style.display='block';
+    } else {
+      document.getElementById('fedError').style.display='block';
+      setTimeout(()=>document.getElementById('fedError').style.display='none',3000);
+    }
+  });
 }
 
 // ===== INIT =====
