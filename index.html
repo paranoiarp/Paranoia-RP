@@ -969,9 +969,15 @@
   };
 
   window._approveFichaFirebase = async function(ficha, fichaId) {
-    const { collection, addDoc, doc, deleteDoc } = window._fbModules;
+    const { collection, addDoc, doc, deleteDoc, setDoc } = window._fbModules;
     const db = window._db;
-    await addDoc(collection(db, 'approvedChars'), ficha);
+    // Se for edição, atualiza a ficha original em vez de criar nova
+    if(ficha.editRequest && ficha.originalId) {
+      const { editRequest, originalId, ...cleanFicha } = ficha;
+      await setDoc(doc(db, 'approvedChars', ficha.originalId), {...cleanFicha, pending: false});
+    } else {
+      await addDoc(collection(db, 'approvedChars'), ficha);
+    }
     await deleteDoc(doc(db, 'pendingFichas', fichaId));
   };
 
