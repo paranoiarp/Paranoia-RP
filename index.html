@@ -927,13 +927,20 @@
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
         <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">CORPO A CORPO (ARMADO)</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
-          ${['Madeira → 1d4','Pedra → 1d5','Ferro → 1d6','Diamante → 1d7','Netherite → 1d8'].map(i=>`<div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">${i}</div>`).join('')}
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d4</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d5</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Ferro → 1d6</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Diamante → 1d7</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Netherite → 1d8</div>
+        </div>`).join('')}
         </div>
       </div>
       <div style="padding:0.8rem 0">
         <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">DISTÂNCIA</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
-          ${['Arco → 1d6','Besta → 1d7'].map(i=>`<div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">${i}</div>`).join('')}
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Arco → 1d6</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Besta → 1d7</div>
+        </div>`).join('')}
         </div>
       </div>
     </div>
@@ -1025,7 +1032,13 @@
         <span class="rule-label">ESTADOS</span>
         <span>
           <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.4rem">
-            ${['Inteiro','Danificado','Muito Danificado','Quebrado'].map((s,i)=>`<span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:${['#4caf50','#ff9800','#f44336','#666'][i]}">${s}</span>`).join('<span style="color:var(--text-dim);align-self:center">→</span>')}
+            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#4caf50">Inteiro</span>
+            <span style="color:var(--text-dim);align-self:center">→</span>
+            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#ff9800">Danificado</span>
+            <span style="color:var(--text-dim);align-self:center">→</span>
+            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#f44336">Muito Danificado</span>
+            <span style="color:var(--text-dim);align-self:center">→</span>
+            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#666">Quebrado</span>
           </div>
         </span>
       </div>
