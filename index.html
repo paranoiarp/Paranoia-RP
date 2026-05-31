@@ -1133,6 +1133,32 @@
     return key;
   };
 
+  // ===== NOTIFICAÇÕES DO PLAYER =====
+  window._sendPlayerNotif = async function(playerAccount, type, charName, message) {
+    const { collection, addDoc } = window._fbModules;
+    const db = window._db;
+    await addDoc(collection(db, 'playerNotifs'), {
+      playerAccount: playerAccount.toLowerCase(),
+      type, // 'aprovada' | 'rejeitada'
+      charName,
+      message: message || '',
+      createdAt: new Date().toISOString()
+    });
+  };
+
+  window._dismissPlayerNotif = async function(notifId) {
+    const { doc, deleteDoc } = window._fbModules;
+    const db = window._db;
+    await deleteDoc(doc(db, 'playerNotifs', notifId));
+  };
+
+  // ===== EXCLUIR PLAYER =====
+  window._deletePlayerFirebase = async function(username) {
+    const { doc, deleteDoc } = window._fbModules;
+    const db = window._db;
+    await deleteDoc(doc(db, 'playerAuth', username.toLowerCase()));
+  };
+
   loadFromFirestore();
 
   // Cadastra Twik se ainda não existir
@@ -1148,6 +1174,16 @@
     if(typeof renderFotosAdmin === 'function') {
       const tab = document.getElementById('fotos-admin');
       if(tab && tab.classList.contains('active')) renderFotosAdmin();
+    }
+  });
+
+  // Sincroniza notificações do player em tempo real
+  onSnapshot(collection(db, 'playerNotifs'), snap => {
+    window.playerNotifs = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    // Atualiza painel do player se estiver aberto
+    if(window._playerLogado && typeof loadPlayerPanel === 'function') {
+      const tab = document.getElementById('player-meus-chars');
+      if(tab && tab.classList.contains('active')) loadPlayerPanel();
     }
   });
 </script>
@@ -1386,18 +1422,54 @@
     <div class="rules-block">
       <h2>⚔️ DADOS DE DANO <span>ARMAS E BRIGA</span></h2>
       <div class="rule-item"><span class="rule-label">BRIGA</span><span><strong style="color:var(--silver-bright)">1d5 + FOR</strong> — Desarmado, usa o valor de Força do personagem.</span></div>
+
+      <!-- ESPADAS -->
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">CORPO A CORPO (ARMADO)</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">⚔ ESPADAS — Arma equilibrada e versátil</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d4</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d5</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d2</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d4</div>
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Ferro → 1d6</div>
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Diamante → 1d7</div>
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Netherite → 1d8</div>
         </div>
       </div>
+
+      <!-- MACHADOS -->
+      <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">🪓 MACHADOS — Golpes pesados e alto dano</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d4</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d5</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Ferro → 1d7</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Diamante → 1d8</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Netherite → 1d9</div>
+        </div>
+      </div>
+
+      <!-- FOICES -->
+      <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">🌙 FOICES — A mais poderosa, grande potencial ofensivo</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d5</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d6</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Ferro → 1d8</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Diamante → 1d9</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Netherite → 1d10</div>
+        </div>
+      </div>
+
+      <!-- ADAGA -->
+      <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">🗡 ADAGA — Discreta, ideal para furtividade e emboscadas</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Diamante → 1d6</div>
+        </div>
+      </div>
+
+      <!-- DISTÂNCIA -->
       <div style="padding:0.8rem 0">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">DISTÂNCIA</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">🏹 DISTÂNCIA</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Arco → 1d6</div>
           <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Besta → 1d7</div>
@@ -1647,7 +1719,9 @@
               </div>
             </div>
             <div class="form-group full" id="f_cucurucho_nome_group" style="display:none;grid-column:1/-1"><label>Nome do Cucurucho (como será chamado in-game) *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho, Cucurucho 03..."></div>
-            <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
+            <div class="form-group"><label>Nome do Player *
+              <span style="font-family:'Share Tech Mono',monospace;font-weight:400;font-size:0.6rem;color:var(--text-dim);letter-spacing:1px;display:block;margin-top:0.2rem">⚠ Use o mesmo nome do seu usuário cadastrado, para que a adm saiba de quem é a ficha.</span>
+            </label><input type="text" id="f_player" placeholder="Seu usuário cadastrado"></div>
             <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
             <div class="form-group"><label>Idade do Player</label><input type="text" id="f_idade_player" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
             <div class="form-group"><label>Data de Nascimento do Personagem</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA"></div>
@@ -1796,6 +1870,7 @@
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="showAdminTab('pendentes',this)">FICHAS PENDENTES <span class="admin-tab-badge" id="pendentesTabBadge" style="display:none"></span></button>
       <button class="admin-tab" onclick="showAdminTab('personagens-admin',this);renderApprovedAdmin()">PERSONAGENS</button>
+      <button class="admin-tab" onclick="showAdminTab('players-admin',this);renderPlayersAdmin()">👥 PLAYERS</button>
       <button class="admin-tab" onclick="showAdminTab('fotos-admin',this);renderFotosAdmin()">🖼 FOTOS</button>
       <button class="admin-tab" onclick="showAdminTab('admin-meus-chars',this);renderAdminOwnChars()">👤 MEUS PERSONAGENS</button>
       <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
@@ -1805,6 +1880,7 @@
     </div>
     <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
     <div id="personagens-admin" class="admin-content"><div id="approvedList"><div class="empty-state">CARREGANDO...</div></div></div>
+    <div id="players-admin" class="admin-content"><div id="playersAdminList"><div class="empty-state">CARREGANDO...</div></div></div>
     <div id="admin-meus-chars" class="admin-content"><div id="adminOwnCharsList"><div class="empty-state">CARREGANDO...</div></div></div>
 
     <!-- ABA FOTOS -->
@@ -2037,6 +2113,11 @@ function showPage(id) {
     if(notice && nomeEl) {
       if(window._playerLogado) { nomeEl.textContent = window._playerUser.toUpperCase(); notice.style.display='block'; }
       else notice.style.display='none';
+    }
+    // Preenche nome do player automaticamente se logado
+    if(window._playerLogado && !window._editingFichaId) {
+      const fPlayer = document.getElementById('f_player');
+      if(fPlayer && !fPlayer.value) fPlayer.value = window._playerUser;
     }
     // Se a tela de sucesso estava aberta, reseta o form
     if(document.getElementById('fichaSuccess').style.display === 'block' && !window._editingFichaId) {
@@ -2532,6 +2613,10 @@ async function approveFicha(id) {
     }
     // Log da ação
     if(window._logAcaoAdmin) await window._logAcaoAdmin('APROVAÇÃO', ficha.name||'?', ficha.player||'?', window._adminUser||'?');
+    // Notificação para o player
+    if(ficha.playerAccount && window._sendPlayerNotif) {
+      await window._sendPlayerNotif(ficha.playerAccount, 'aprovada', ficha.name||'?', 'Sua ficha foi aprovada! Você já pode acessar seu personagem na área do player.');
+    }
     return true;
   } catch(err) {
     console.error('Erro ao aprovar:', err);
@@ -2545,6 +2630,10 @@ async function rejectFicha(id) {
     await window._rejectFichaFirebase(id);
     // Log da ação
     if(window._logAcaoAdmin && ficha) await window._logAcaoAdmin('REJEIÇÃO', ficha.name||'?', ficha.player||'?', window._adminUser||'?');
+    // Notificação para o player
+    if(ficha?.playerAccount && window._sendPlayerNotif) {
+      await window._sendPlayerNotif(ficha.playerAccount, 'rejeitada', ficha.name||'?', 'Sua ficha foi rejeitada pela administração. Entre em contato via Discord para mais informações.');
+    }
     return true;
   } catch(err) {
     console.error('Erro ao rejeitar:', err);
@@ -2688,6 +2777,7 @@ function getCharStatus(charId) {
 }
 
 function renderPopupChars() {
+  const isAdmin = !!window._adminLogado;
   const cats = [
     {key:'ingles', label:'<img loading="lazy" src="https://flagcdn.com/20x15/us.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS'},
     {key:'espanhol', label:'🇪🇸 ESPANHOL'},
@@ -2695,7 +2785,8 @@ function renderPopupChars() {
     {key:'frances', label:'<img loading="lazy" src="https://flagcdn.com/20x15/fr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS'},
     {key:'coreano', label:'<img loading="lazy" src="https://flagcdn.com/20x15/kr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO'},
     {key:'huevito', label:'🥚 HUEVITOS'},
-    {key:'cucurucho', label:'🎭 CUCURUCHOS'},
+    // Cucuruchos só aparecem para admins logados
+    ...(isAdmin ? [{key:'cucurucho', label:'🎭 CUCURUCHOS'}] : []),
   ];
   const container = document.getElementById('popupCharList');
   container.innerHTML = cats.map(cat => {
@@ -3089,12 +3180,35 @@ async function loadPlayerPanel() {
     const myChars = approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === window._playerUser);
     // Pending fichas
     const myPending = (window.pendingFichas||[]).filter(f => f.playerAccount && f.playerAccount.toLowerCase() === window._playerUser);
-    if(!myChars.length && !myPending.length) {
+    // Notificações (fichas recentemente aprovadas ou rejeitadas)
+    const myNotifs = (window.playerNotifs || []).filter(n => n.playerAccount && n.playerAccount.toLowerCase() === window._playerUser);
+
+    if(!myChars.length && !myPending.length && !myNotifs.length) {
       el.innerHTML = `<div class="empty-state" style="line-height:2">NENHUM PERSONAGEM ENCONTRADO<br><span style="font-size:0.75rem;color:var(--text-dim)">Envie uma ficha para criar seu primeiro personagem.</span></div>
         <div style="text-align:center;margin-top:1.5rem"><button class="submit-btn" style="max-width:300px;margin:0 auto" onclick="showPage('ficha')">▶ ENVIAR FICHA</button></div>`;
       return;
     }
     let html = '';
+
+    // Notificações de aprovação/rejeição
+    if(myNotifs.length) {
+      html += `<div style="margin-bottom:2rem">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#ff9800;letter-spacing:3px;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)">// NOTIFICAÇÕES //</div>
+        ${myNotifs.map(n => {
+          const isAprov = n.type === 'aprovada';
+          const cor = isAprov ? '#4caf50' : 'var(--red-bright)';
+          const icon = isAprov ? '✓' : '✗';
+          return `<div style="padding:1rem;background:${isAprov?'rgba(0,80,0,0.12)':'rgba(139,0,0,0.12)'};border:1px solid ${cor};margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+            <div>
+              <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:${cor};letter-spacing:2px;margin-bottom:0.3rem">${icon} FICHA ${isAprov?'APROVADA':'REJEITADA'}</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--silver-bright)">${(n.charName||'?').toUpperCase()}</div>
+              ${n.message?`<div style="font-size:0.8rem;color:var(--text-dim);margin-top:0.3rem">${n.message}</div>`:''}
+            </div>
+            <button onclick="dismissPlayerNotif('${n.id}')" style="padding:0.3rem 0.7rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.65rem;cursor:pointer;white-space:nowrap">✕ OK</button>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
     if(myPending.length) {
       html += `<div style="margin-bottom:2rem">
         <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)">// FICHAS AGUARDANDO APROVAÇÃO //</div>
@@ -3582,6 +3696,56 @@ async function adminRemoveHistory(fichaDocId, entryId) {
     showToast('✓ Entrada removida.', 'success');
   } catch(e) {
     showToast('✗ Erro ao remover.', 'error');
+    console.error(e);
+  }
+}
+
+// ===== NOTIFICAÇÕES DO PLAYER =====
+async function dismissPlayerNotif(notifId) {
+  try {
+    await window._dismissPlayerNotif(notifId);
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+// ===== ADMIN: EXCLUIR PLAYER =====
+async function adminDeletePlayer(username) {
+  confirmarAcao(`Excluir a conta do player "${username}"? Esta ação não pode ser desfeita. Os personagens vinculados não serão removidos.`, async () => {
+    try {
+      await window._deletePlayerFirebase(username);
+      showToast(`✓ Conta de ${username} excluída.`, 'success');
+      renderPlayersAdmin();
+    } catch(e) {
+      showToast('✗ Erro ao excluir. Tente novamente.', 'error');
+      console.error(e);
+    }
+  });
+}
+
+async function renderPlayersAdmin() {
+  const el = document.getElementById('playersAdminList');
+  if(!el) return;
+  el.innerHTML = '<div class="empty-state">CARREGANDO...</div>';
+  try {
+    const { collection, getDocs } = window._fbModules;
+    const snap = await getDocs(collection(window._db, 'playerAuth'));
+    const players = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    if(!players.length) { el.innerHTML = '<div class="empty-state">NENHUM PLAYER CADASTRADO</div>'; return; }
+    el.innerHTML = players.map(p => {
+      const myChars = approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === p.username?.toLowerCase());
+      return `<div class="pending-card">
+        <div class="pending-info">
+          <h4>${(p.username||p.id).toUpperCase()}</h4>
+          <p>// ${myChars.length} personagem(s) vinculado(s) // Criado em: ${p.createdAt ? new Date(p.createdAt).toLocaleDateString('pt-BR') : '—'}</p>
+        </div>
+        <div class="pending-actions">
+          <button class="btn-reject" onclick="adminDeletePlayer('${p.username||p.id}')">🗑 EXCLUIR</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state">ERRO AO CARREGAR.</div>';
     console.error(e);
   }
 }
