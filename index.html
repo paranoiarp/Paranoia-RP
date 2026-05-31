@@ -1138,7 +1138,8 @@
             <div class="form-group"><label>Idade do Player</label><input type="text" id="f_idade_player" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
             <div class="form-group"><label>Data de Nascimento do Personagem</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA"></div>
             <div class="form-group"><label>Idade do Personagem</label><input type="text" id="f_idade" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
-            <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div></div>
+            <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div>
+<div id="f_imagem_err2" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ A imagem precisa ser quadrada (largura = altura). Edite antes de enviar.</div></div>
           </div>
         </div>
 
@@ -1539,18 +1540,33 @@ function initDateMasks() {
 }
 
 // ===== SUBMIT =====
-function submitFicha() {
+async function submitFicha() {
   const nome = document.getElementById('f_nome').value.trim();
   const player = document.getElementById('f_player').value.trim();
   if(!nome || !player) { alert('Preencha ao menos o nome do personagem e do player.'); return; }
   const imgVal = document.getElementById('f_imagem').value.trim();
   const errEl = document.getElementById('f_imagem_err');
+  const errEl2 = document.getElementById('f_imagem_err2');
+  errEl.style.display = 'none';
+  errEl2.style.display = 'none';
   if(imgVal && !imgVal.match(/^https?:\/\/(i\.)?imgur\.com\//i)) {
     errEl.style.display = 'block';
     document.getElementById('f_imagem').focus();
     return;
   }
-  errEl.style.display = 'none';
+  if(imgVal) {
+    const isSquare = await new Promise(res => {
+      const img = new Image();
+      img.onload = () => res(img.naturalWidth === img.naturalHeight);
+      img.onerror = () => res(true); // se não carregar, deixa passar
+      img.src = imgVal;
+    });
+    if(!isSquare) {
+      errEl2.style.display = 'block';
+      document.getElementById('f_imagem').focus();
+      return;
+    }
+  }
   // Validar atributos — obrigar distribuir todos os pontos
   const pontosUsados = getUsedPoints();
   if(pontosUsados < MAX_ATTR_POINTS) {
