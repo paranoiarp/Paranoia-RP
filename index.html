@@ -2632,7 +2632,7 @@ async function rejectFicha(id) {
     if(window._logAcaoAdmin && ficha) await window._logAcaoAdmin('REJEIÇÃO', ficha.name||'?', ficha.player||'?', window._adminUser||'?');
     // Notificação para o player
     if(ficha?.playerAccount && window._sendPlayerNotif) {
-      await window._sendPlayerNotif(ficha.playerAccount, 'rejeitada', ficha.name||'?', 'Sua ficha foi rejeitada pela administração. Entre em contato via Discord para mais informações.');
+      await window._sendPlayerNotif(ficha.playerAccount, 'rejeitada', ficha.name||'?', motivo || 'Sua ficha foi rejeitada pela administração. Entre em contato via Discord para mais informações.');
     }
     return true;
   } catch(err) {
