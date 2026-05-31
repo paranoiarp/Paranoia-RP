@@ -790,7 +790,7 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, setDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc, setDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAzdSLf-pBDkN8Z5kEh4JJXfEaNwRlph0",
@@ -806,7 +806,7 @@
 
   // Expor funções globais para o resto do script
   window._db = db;
-  window._fbModules = { collection, addDoc, getDocs, doc, deleteDoc, setDoc, onSnapshot, query, orderBy };
+  window._fbModules = { collection, addDoc, getDocs, getDoc, doc, deleteDoc, setDoc, updateDoc, onSnapshot, query, orderBy };
 
   // Carregar fichas pendentes e aprovadas do Firestore
   async function loadFromFirestore() {
@@ -878,7 +878,7 @@
   };
 
   window._checkAdminFirebase = async function(user, pass) {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { getDoc, doc } = window._fbModules;
     const db = window._db;
     const hash = await window._hashPassword(pass);
     const snap = await getDoc(doc(db, 'adminAuth', user.toLowerCase()));
@@ -894,7 +894,7 @@
   };
 
   window._adminExistsFirebase = async function(user) {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { getDoc, doc } = window._fbModules;
     const db = window._db;
     const snap = await getDoc(doc(db, 'adminAuth', user.toLowerCase()));
     return snap.exists();
@@ -907,15 +907,14 @@
   };
 
   window._getFedPasswordFirebase = async function() {
-    const { doc } = window._fbModules;
-    const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { doc, getDoc } = window._fbModules;
     const db = window._db;
     const snap = await getDoc(doc(db, 'config', 'fedPassword'));
     return snap.exists() ? snap.data().value : '';
   };
 
   window._getPlayerEditKey = async function(senha) {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { getDoc, doc } = window._fbModules;
     const db = window._db;
     // Search all approved chars for matching edit key
     const snap = await getDocs(collection(db, 'approvedChars'));
@@ -924,25 +923,13 @@
   };
 
   window._generateEditKey = async function(charId) {
-    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { doc, updateDoc } = window._fbModules;
     const db = window._db;
     const key = Math.random().toString(36).substring(2, 8).toUpperCase();
     await updateDoc(doc(db, 'approvedChars', charId), { editKey: key });
     return key;
   };
 
-  // Bootstrap admins Andy e Ali
-  async function bootstrapAdmins() {
-    const admins = [
-      {user: 'andy', pass: 'cegodosolhos'},
-      {user: 'ali', pass: 'euamocavalos'},
-    ];
-    for(const a of admins) {
-      const exists = await window._adminExistsFirebase(a.user);
-      if(!exists) await window._setAdminPasswordFirebase(a.user, a.pass);
-    }
-  }
-  bootstrapAdmins();
   loadFromFirestore();
 
   // Sincroniza fotos pré-cadastradas em tempo real
@@ -2157,7 +2144,7 @@ async function approveFicha(id) {
   try {
     if(fichaData.editRequest && fichaData.originalId) {
       // Edição: atualiza a ficha original no Firestore em vez de criar nova
-      const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const { doc, updateDoc } = window._fbModules;
       const db = window._db;
       const { editRequest, originalId, pending, ...cleanData } = fichaData;
       await updateDoc(doc(db, 'approvedChars', originalId), {...cleanData, pending: false, status: 'ocupado'});
@@ -2537,7 +2524,7 @@ function renderApprovedAdmin() {
 async function deleteApprovedChar(id, name) {
   confirmarAcao('Excluir o personagem "' + name + '"?<br>O personagem voltará a ficar disponível.', async () => {
     try {
-      const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const { doc, deleteDoc } = window._fbModules;
       await deleteDoc(doc(window._db, 'approvedChars', id));
     } catch(e) {
       alert('Erro ao excluir. Verifique o console.');
@@ -2622,19 +2609,7 @@ function buildNavPersonagensMenu() {
 }
 
 // ===== FOTOS ADMIN =====
-
-// Cache de fotos pré-cadastradas (charId → imageUrl), carregado do Firestore
-window._charPhotos = {};
-
-// Carrega todas as fotos pré-cadastradas do Firestore
-async function loadCharPhotos() {
-  try {
-    const { getDocs, collection } = window._fbModules;
-    const snap = await getDocs(collection(window._db, 'charPhotos'));
-    snap.docs.forEach(d => { window._charPhotos[d.id] = d.data().imageUrl || ''; });
-  } catch(e) { console.warn('Erro ao carregar charPhotos', e); }
-}
-loadCharPhotos();
+// window._charPhotos é populado em tempo real pelo onSnapshot no módulo Firebase
 
 // Renderiza o grid de fotos no painel admin
 function renderFotosAdmin() {
