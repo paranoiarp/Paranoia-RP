@@ -930,9 +930,11 @@
           <div class="form-grid">
             <div class="form-group"><label>Nome do Personagem *</label><input type="text" id="f_nome" placeholder="Ex: Cellbit"></div>
             <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
-            <div class="form-group"><label>Data de Nascimento</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA"></div>
-            <div class="form-group"><label>Idade</label><input type="number" id="f_idade" placeholder="Ex: 25"></div>
-            <div class="form-group full"><label>Imagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div></div>
+            <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
+            <div class="form-group"><label>Idade do Player</label><input type="number" id="f_idade_player" placeholder="Ex: 25"></div>
+            <div class="form-group"><label>Data de Nascimento do Personagem</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA"></div>
+            <div class="form-group"><label>Idade do Personagem</label><input type="number" id="f_idade" placeholder="Ex: 25"></div>
+            <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div></div>
           </div>
         </div>
 
@@ -948,7 +950,7 @@
         <div class="form-section">
           <h3>ATRIBUTOS</h3>
           <div class="attrs-points-info">
-            Você possui <span class="attrs-points-remaining" id="pointsLeft">4</span> pontos para distribuir. Cada atributo começa com 1 ponto e pode ser reduzido para remanejamento.
+            Você possui <span class="attrs-points-remaining" id="pointsLeft">5</span> pontos para distribuir. Cada atributo começa com 1 ponto. Reduzir um atributo abaixo de 1 devolve esse ponto para distribuição.
           </div>
           <div class="attrs-form-grid" id="attrsGrid"></div>
         </div>
@@ -1081,13 +1083,13 @@ const CHARS_DATA = [
   {id:'trump',name:'Trump',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
 ];
 
-const SKILLS = ['Acrobacia','Adestramento','Artes','Atletismo','Atualidades','Ciências','Diplomacia','Enganação','Fortitude','Furtividade','Iniciativa','Intimidação','Intuição','Investigação','Luta','Medicina','Ocultismo','Percepção','Pilotagem','Pontaria','Profissão','Reflexos','Religião','Tática','Tecnologia'];
+const SKILLS = ['Acrobacia','Adestramento','Artes','Atletismo','Atualidades','Ciências','Crime','Diplomacia','Enganação','Fortitude','Furtividade','Iniciativa','Intimidação','Intuição','Investigação','Luta','Medicina','Ocultismo','Percepção','Pilotagem','Pontaria','Profissão','Reflexos','Religião','Sobrevivência','Tática','Tecnologia','Vontade'];
 const ATTRS = ['AGI','FOR','INT','PRE','VIG'];
 const ADMINS = [{user:'Twik',pass:'MestreRP'},{user:'Ryu',pass:'StaffA'}];
-const MAX_ATTR_POINTS = 4;
+const MAX_ATTR_POINTS = 5;
 const MAX_SKILLS = 8;
 
-let attrValues = {AGI:0,FOR:0,INT:0,PRE:0,VIG:0};
+let attrValues = {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
 let selectedSkills = new Set();
 let pendingFichas = [];
 let approvedChars = [];
@@ -1192,8 +1194,10 @@ function showCharProfile(id) {
       <div class="profile-info-box">
         <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${c.name}</span></div>
         ${c.player?`<div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.player}</span></div>`:''}
-        ${c.nascimento?`<div class="profile-info-item"><span class="label">NASCIMENTO</span><span class="value">${c.nascimento}</span></div>`:''}
-        ${c.idade?`<div class="profile-info-item"><span class="label">IDADE</span><span class="value">${c.idade} anos</span></div>`:''}
+        ${c.nascimento_player?`<div class="profile-info-item"><span class="label">NASC. PLAYER</span><span class="value">${c.nascimento_player}</span></div>`:''}
+        ${c.idade_player?`<div class="profile-info-item"><span class="label">IDADE PLAYER</span><span class="value">${c.idade_player} anos</span></div>`:''}
+        ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
+        ${c.idade?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${c.idade} anos</span></div>`:''}
         <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>
         <div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${c.status==='ocupado'?'var(--red-bright)':'#4caf50'}">${c.status==='ocupado'?'OCUPADA':'DISPONÍVEL'}</span></div>
       </div>
@@ -1214,7 +1218,11 @@ function showCharProfile(id) {
 
 // ===== ATRIBUTOS =====
 function getUsedPoints() {
-  return Object.values(attrValues).reduce((s,v) => s+v, 0);
+  // Points spent from pool: each point above base(1) costs 1, each zeroed attr refunds 1
+  const vals = Object.values(attrValues);
+  const spent = vals.reduce((s,v) => s + Math.max(v - 1, 0), 0);
+  const refunded = vals.filter(v => v === 0).length;
+  return spent - refunded;
 }
 
 function buildAttrsForm() {
@@ -1239,11 +1247,10 @@ function changeAttr(attr, delta) {
   if(delta > 0 && getUsedPoints() >= MAX_ATTR_POINTS) return; // sem pontos sobrando
   attrValues[attr] = next;
   document.getElementById('av_'+attr).textContent = next;
-  // desabilita botão − se valor for 1
   const btnMinus = document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',-1)"]`);
   const btnPlus = document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',+1)"]`);
   if(btnMinus) btnMinus.style.opacity = next <= 0 ? '0.3' : '1';
-  if(btnPlus) btnPlus.style.opacity = (getUsedPoints() >= MAX_ATTR_POINTS && next < 5) || next >= 5 ? '0.3' : '1';
+  if(btnPlus) btnPlus.style.opacity = (getUsedPoints() >= MAX_ATTR_POINTS) || next >= 5 ? '0.3' : '1';
   updatePointsDisplay();
 }
 
@@ -1297,6 +1304,8 @@ function submitFicha() {
   const ficha = {
     id: Date.now().toString(),
     name: nome, player,
+    nascimento_player: document.getElementById('f_nascimento_player').value,
+    idade_player: document.getElementById('f_idade_player').value,
     nascimento: document.getElementById('f_nascimento').value,
     idade: document.getElementById('f_idade').value,
     imageUrl: imgVal || '',
