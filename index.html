@@ -31,6 +31,8 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
+  nav { position: relative; z-index: 100; }
+  .page { position: relative; z-index: 1; }
 
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -1189,6 +1191,7 @@
 </script>
 </head>
 <body>
+<canvas id="bgCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
 
 <div id="toastContainer"></div>
 
@@ -3957,6 +3960,86 @@ buildSkillsForm();
 renderChars('all');
 initDateMasks();
 buildNavPersonagensMenu();
+</script>
+
+<script>
+(function() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = 'https://i.imgur.com/OSV9nga.png';
+  const N = 55;
+  let fichas = [];
+  let animId = null;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initFichas() {
+    fichas = [];
+    const cols = 5;
+    const colW = canvas.width / cols;
+    for(let i = 0; i < N; i++) {
+      const col = i % cols;
+      const r = Math.random();
+      fichas.push({
+        x: col * colW + Math.random() * colW,
+        y: Math.random() * canvas.height * 2 - canvas.height,
+        size: 15 + Math.random() * 80,
+        speed: 0.1 + Math.random() * 0.35,
+        opacity: r < 0.3 ? 0.02 + Math.random() * 0.03 : 0.05 + Math.random() * 0.1,
+        drift: (Math.random() - 0.5) * 0.2,
+        rot: (Math.random() - 0.5) * 0.6,
+        rotSpeed: (Math.random() - 0.5) * 0.0008,
+        col
+      });
+    }
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const colW = canvas.width / 5;
+    fichas.forEach(f => {
+      f.y += f.speed;
+      f.x += f.drift;
+      f.rot += f.rotSpeed;
+      f.rot = Math.max(-0.7, Math.min(0.7, f.rot));
+      if(f.y > canvas.height + f.size) {
+        f.y = -f.size * 2;
+        f.x = f.col * colW + Math.random() * colW;
+      }
+      ctx.save();
+      ctx.globalAlpha = f.opacity;
+      ctx.translate(f.x, f.y);
+      ctx.rotate(f.rot);
+      ctx.drawImage(img, -f.size/2, -f.size/2, f.size, f.size);
+      ctx.restore();
+    });
+    animId = requestAnimationFrame(loop);
+  }
+
+  img.onload = () => {
+    resize();
+    initFichas();
+    loop();
+  };
+
+  window.addEventListener('resize', () => {
+    resize();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden) {
+      cancelAnimationFrame(animId);
+    } else {
+      cancelAnimationFrame(animId);
+      loop();
+    }
+  });
+})();
 </script>
 </body>
 </html>
