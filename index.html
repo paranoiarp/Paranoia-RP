@@ -1584,7 +1584,7 @@
         </div>
         <div id="cfg_msg" style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
       </div>
-      <div class="form-section" style="margin-top:2rem">
+      <div class="form-section" style="margin-top:2rem" id="secaoGerenciarAdmins" style="display:none">
         <h3>GERENCIAR SENHAS DE ADMINS</h3>
         <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">Redefina a senha de qualquer admin. Use para recuperar acesso ou cadastrar novos admins.</p>
         <div style="display:flex;flex-direction:column;gap:0.8rem;max-width:500px">
@@ -2109,6 +2109,9 @@ async function checkAdmin() {
       window._adminLogado = true;
       window._adminUser = u.toLowerCase();
       updateAdminNotify();
+      // Mostrar seção de gerenciar admins só para ryu e twik
+      const secao = document.getElementById('secaoGerenciarAdmins');
+      if(secao) secao.style.display = ['ryu','twik'].includes(u.toLowerCase()) ? 'block' : 'none';
       showPage('admin-panel'); renderPending(); renderApprovedAdmin();
     } else {
       errEl.textContent = '⚠ CREDENCIAIS INVÁLIDAS';
@@ -2159,6 +2162,8 @@ async function confirmFirstAccess(user) {
     window._adminLogado = true;
     window._adminUser = user.toLowerCase();
     updateAdminNotify();
+    const secao = document.getElementById('secaoGerenciarAdmins');
+    if(secao) secao.style.display = ['ryu','twik'].includes(user.toLowerCase()) ? 'block' : 'none';
     showPage('admin-panel'); renderPending(); renderApprovedAdmin();
   } catch(e) {
     console.error(e);
