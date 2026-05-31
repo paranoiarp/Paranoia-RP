@@ -96,6 +96,7 @@
     z-index: 200;
   }
   .nav-dropdown:hover .nav-dropdown-menu { display: block; }
+  .nav-dropdown.touch-open > .nav-dropdown-menu { display: block; }
   .nav-dropdown-menu a {
     display: flex !important;
     align-items: center;
@@ -128,6 +129,7 @@
     z-index: 300;
   }
   .nav-submenu-item:hover > .nav-submenu { display: block; }
+  .nav-submenu-item.touch-open > .nav-submenu { display: block; }
   .nav-submenu a {
     display: flex !important;
     align-items: center;
@@ -376,7 +378,7 @@
     margin-bottom: 0.8rem;
   }
 
-  .highlight-card p { font-size: 1rem; color: var(--text-dim); line-height: 1.7; font-weight: 400; }
+  .highlight-card p { font-size: 1rem; color: #999; line-height: 1.7; font-weight: 400; }
 
   /* SECTION */
   .section-header {
@@ -549,8 +551,6 @@
   #char-profile { display: none; padding-top: 60px; min-height: 100vh; }
   #char-profile.active { display: block; }
 
-  .profile-back { padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; }
-
   .back-btn {
     background: none;
     border: 1px solid var(--border);
@@ -562,8 +562,10 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-
   .back-btn:hover { border-color: var(--red); color: var(--red-bright); }
+
+  .profile-back { position: sticky; top: 62px; z-index: 100; padding: 0.6rem 2rem; background: var(--bg); border-bottom: 1px solid var(--border); }
+  .profile-back-bottom { padding: 2rem 2rem 1rem; }
 
   .profile-layout { max-width: 1200px; margin: 0 auto; padding: 0 2rem 4rem; display: grid; grid-template-columns: 300px 1fr; gap: 2rem; }
   .profile-sidebar { position: sticky; top: 80px; height: fit-content; }
@@ -790,6 +792,35 @@
     vertical-align: middle;
   }
 
+  /* FICHA PROGRESS BAR */
+  .ficha-progress-wrap {
+    max-width: 860px;
+    margin: 0 auto 1.5rem;
+    padding: 0 0.5rem;
+  }
+  .ficha-progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 0.4rem;
+  }
+  .ficha-progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .ficha-progress-fill {
+    height: 100%;
+    background: var(--red-bright);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
   /* TOAST */
   #toastContainer {
     position: fixed;
@@ -852,7 +883,8 @@
     .nav-links li a { height: auto; line-height: 1; padding: 1rem 2rem; border-bottom: 1px solid var(--border); }
     .nav-mobile-btn { display: block; }
     .profile-layout { grid-template-columns: 1fr; }
-    .profile-sidebar { position: static; }
+    .profile-sidebar { position: static; order: 2; }
+    .profile-main { order: 1; }
     .attrs-grid, .attrs-form-grid { grid-template-columns: repeat(3, 1fr); }
     .form-grid { grid-template-columns: 1fr; }
     .form-group.full { grid-column: 1; }
@@ -1758,6 +1790,13 @@
   <div class="section-content">
     <div id="fichaPlayerNotice" style="display:none;padding:0.7rem 1rem;background:rgba(0,80,0,0.12);border:1px solid #4caf50;margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;letter-spacing:1px">✓ LOGADO COMO: <span id="fichaPlayerNome"></span> — FICHA SERÁ VINCULADA AUTOMATICAMENTE À SUA CONTA</div>
     <div class="form-container">
+      <div class="ficha-progress-wrap" id="fichaProgressWrap">
+        <div class="ficha-progress-header">
+          <span>PROGRESSO DA FICHA</span>
+          <span id="fichaProgressPct">0%</span>
+        </div>
+        <div class="ficha-progress-bar"><div class="ficha-progress-fill" id="fichaProgressFill"></div></div>
+      </div>
       <div id="fichaForm">
         <div class="form-section">
           <h3>INFORMAÇÕES BÁSICAS</h3>
@@ -2143,7 +2182,7 @@ function initImages() {
 // ===== NAV =====
 function showLorePage(slug) { showPage('lore-' + slug); }
 
-function showPage(id) {
+function showPage(id, pushState = true) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById(id);
   if(p) p.classList.add('active');
@@ -2152,6 +2191,9 @@ function showPage(id) {
   if(nav) nav.classList.add('active');
   document.getElementById('navLinks').classList.remove('open');
   setTimeout(() => window.scrollTo({top:0, behavior:'instant'}), 0);
+  if(pushState) {
+    try { history.pushState({page: id}, '', '#' + id); } catch(e) {}
+  }
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
   if(id==='player-panel') { if(!window._playerLogado) { showPage('minha-area'); return; } loadPlayerPanel(); }
@@ -2176,10 +2218,45 @@ function showPage(id) {
       document.getElementById('fichaSuccess').style.display = 'none';
     }
     buildAttrsForm(); buildSkillsForm(); initDateMasks();
+    // Hook progress bar
+    setTimeout(() => {
+      document.querySelectorAll('#fichaForm input, #fichaForm textarea').forEach(el => {
+        el.addEventListener('input', updateFichaProgress);
+        el.addEventListener('change', updateFichaProgress);
+      });
+      updateFichaProgress();
+    }, 100);
   }
 }
 
 function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
+
+// Seta do navegador
+window.addEventListener('popstate', (e) => {
+  const page = (e.state && e.state.page) || 'home';
+  showPage(page, false);
+});
+// Registra estado inicial
+try { history.replaceState({page: 'home'}, '', '#home'); } catch(e) {}
+
+// Touch support para dropdowns da nav no mobile
+document.addEventListener('click', (e) => {
+  const dropItem = e.target.closest('.nav-dropdown > a');
+  const subItem  = e.target.closest('.nav-submenu-item > a');
+  if(dropItem && window.innerWidth <= 768) {
+    const dropdown = dropItem.closest('.nav-dropdown');
+    const isOpen = dropdown.classList.contains('touch-open');
+    document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('touch-open'));
+    if(!isOpen) { dropdown.classList.add('touch-open'); e.preventDefault(); }
+  } else if(subItem && window.innerWidth <= 768) {
+    const subParent = subItem.closest('.nav-submenu-item');
+    const isOpen = subParent.classList.contains('touch-open');
+    document.querySelectorAll('.nav-submenu-item').forEach(d => d.classList.remove('touch-open'));
+    if(!isOpen) { subParent.classList.add('touch-open'); e.preventDefault(); }
+  } else if(!e.target.closest('.nav-dropdown') && !e.target.closest('.nav-submenu-item')) {
+    document.querySelectorAll('.nav-dropdown, .nav-submenu-item').forEach(d => d.classList.remove('touch-open'));
+  }
+});
 
 // ===== CHARS =====
 function renderChars(filter) {
@@ -2448,6 +2525,7 @@ function toggleSkill(s) {
     document.getElementById('sb_'+s).textContent = '✓';
   }
   updateSkillsDisplay();
+  updateFichaProgress();
 }
 
 function updateSkillsDisplay() {
@@ -2577,10 +2655,18 @@ async function submitFicha() {
     return;
   }
   window._submitFichaFirebase(ficha).then(() => {
-    document.getElementById('fichaForm').style.display = 'none';
-    document.getElementById('fichaSuccess').style.display = 'block';
-    // Scroll para o topo da seção
-    window.scrollTo(0, 0);
+    if(window._editingFichaId && window._playerLogado) {
+      // Modo edição: volta para área do player com toast
+      window._editingFichaId = null;
+      resetFichaForm();
+      showToast('✓ Edição enviada para aprovação!', 'success');
+      showPage('player-panel');
+      loadPlayerPanel();
+    } else {
+      document.getElementById('fichaForm').style.display = 'none';
+      document.getElementById('fichaSuccess').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
   }).catch(err => {
     showToast('✗ Erro ao enviar ficha. Tente novamente.', 'error');
     console.error(err);
@@ -2951,6 +3037,7 @@ function selectChar(id, name, lang) {
   // Exibe preview do personagem com foto pré-cadastrada (se houver)
   showFichaCharPreview(id);
   closeCharPopup();
+  updateFichaProgress();
 }
 
 // ===== EDIÇÃO DE FICHA =====
@@ -3235,9 +3322,11 @@ async function doPlayerLogin() {
   const u = (document.getElementById('playerLoginUser').value || '').trim().toLowerCase();
   const p = document.getElementById('playerLoginPass').value;
   const errEl = document.getElementById('playerLoginError');
+  const btn = document.querySelector('#playerLoginForm .secret-btn');
   errEl.style.display = 'none';
   if(!window._checkPlayerFirebase) { errEl.textContent = '⚠ Conexão ainda carregando. Aguarde um segundo e tente novamente.'; errEl.style.display='block'; return; }
   if(!u || !p) { errEl.textContent = '⚠ PREENCHA USUÁRIO E SENHA'; errEl.style.display = 'block'; return; }
+  btn.textContent = 'AGUARDE...'; btn.disabled = true;
   try {
     const ok = await window._checkPlayerFirebase(u, p);
     if(ok) {
@@ -3254,6 +3343,8 @@ async function doPlayerLogin() {
   } catch(e) {
     errEl.textContent = '⚠ ERRO: ' + (e.message || 'verifique o console (F12).');
     errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'ENTRAR'; btn.disabled = false;
   }
 }
 
@@ -3262,12 +3353,14 @@ async function doPlayerCadastro() {
   const p = document.getElementById('playerCadPass').value;
   const p2 = document.getElementById('playerCadPass2').value;
   const errEl = document.getElementById('playerCadError');
+  const btn = document.querySelector('#playerCadastroForm .secret-btn');
   errEl.style.display = 'none';
   if(!window._registerPlayerFirebase) { errEl.textContent = '⚠ Conexão ainda carregando. Aguarde um segundo e tente novamente.'; errEl.style.display='block'; return; }
   if(!u || u.length < 3) { errEl.textContent = '⚠ Usuário deve ter pelo menos 3 caracteres.'; errEl.style.display='block'; return; }
   if(p.length < 6) { errEl.textContent = '⚠ Senha deve ter pelo menos 6 caracteres.'; errEl.style.display='block'; return; }
   if(p !== p2) { errEl.textContent = '⚠ Senhas não coincidem.'; errEl.style.display='block'; return; }
   if(/[A-Z]/.test(p)) { errEl.textContent = '⚠ Use apenas letras minúsculas na senha.'; errEl.style.display='block'; return; }
+  btn.textContent = 'AGUARDE...'; btn.disabled = true;
   try {
     await window._registerPlayerFirebase(u, p);
     window._playerLogado = true;
@@ -3284,6 +3377,8 @@ async function doPlayerCadastro() {
       errEl.textContent = '⚠ Erro ao criar conta: ' + (e.message || 'verifique o console (F12).');
     }
     errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'CADASTRAR'; btn.disabled = false;
   }
 }
 
@@ -4080,6 +4175,33 @@ function showFichaCharPreview(charId) {
   const hasPhoto = !!url;
   info.innerHTML = `<strong>${c.name.toUpperCase()}</strong><br>${langLabel}<br><span style="color:${hasPhoto?'#4caf50':'var(--text-dim)'}">● ${hasPhoto ? 'Foto pré-cadastrada pela equipe' : 'Sem foto pré-cadastrada'}</span>`;
   preview.style.display = 'flex';
+}
+
+function updateFichaProgress() {
+  const fields = [
+    document.getElementById('f_nome'),
+    document.getElementById('f_player'),
+    document.getElementById('f_personagem_nasc'),
+    document.getElementById('f_fisico'),
+    document.getElementById('f_personalidade'),
+    document.getElementById('f_backstory'),
+  ];
+  const filled = fields.filter(f => f && f.value && f.value.trim()).length;
+  const hasChar = !!selectedCharId;
+  const hasSkills = selectedSkills && selectedSkills.size >= 8;
+  const hasAttrs = (() => {
+    let total = 0;
+    document.querySelectorAll('.attr-input').forEach(i => total += parseInt(i.value)||0);
+    return total >= 5;
+  })();
+  const total = fields.length + 3; // +char, +skills, +attrs
+  const done = filled + (hasChar?1:0) + (hasSkills?1:0) + (hasAttrs?1:0);
+  const pct = Math.round((done/total)*100);
+  const fill = document.getElementById('fichaProgressFill');
+  const pctEl = document.getElementById('fichaProgressPct');
+  if(fill) fill.style.width = pct + '%';
+  if(pctEl) pctEl.textContent = pct + '%';
+  if(fill) fill.style.background = pct === 100 ? '#4caf50' : 'var(--red-bright)';
 }
 
 // ===== TOAST =====
