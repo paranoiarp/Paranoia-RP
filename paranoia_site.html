@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARANOIA — Ilha Quesadilla</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --red: #8B0000;
+    --red-bright: #cc0000;
+    --silver: #a0a0a0;
+    --silver-bright: #d0d0d0;
+    --pink: #c084a0;
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --border: #2a2a2a;
+    --text: #c8c8c8;
+    --text-dim: #666;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--red); }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.97);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .nav-logo img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .nav-logo span {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 4px;
+  }
+
+  .nav-links { display: flex; gap: 0; list-style: none; }
+
+  .nav-links li a {
+    display: block;
+    padding: 0 1rem;
+    height: 60px;
+    line-height: 60px;
+    color: var(--silver);
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+
+  .nav-links li a:hover, .nav-links li a.active {
+    color: #fff;
+    border-bottom-color: var(--red-bright);
+  }
+
+  .nav-fed-logo {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 4px;
+    filter: invert(1) brightness(0.6);
+  }
+
+  .nav-mobile-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--silver);
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  /* PAGES */
+  .page { display: none; padding-top: 60px; min-height: 100vh; }
+  .page.active { display: block; }
+  #home { display: none; flex-direction: column; }
+  #home.active { display: flex; }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: repeat;
+    opacity: 0.12;
+    z-index: 0;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.85) 70%, rgba(10,10,10,0.98) 100%);
+    z-index: 1;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(139,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,0,0,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 2;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-logo {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 30px rgba(139,0,0,0.6));
+    animation: pulse 4s ease-in-out infinite;
+    object-fit: cover;
+  }
+
+  @keyframes pulse {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(139,0,0,0.4)); }
+    50% { filter: drop-shadow(0 0 50px rgba(139,0,0,0.9)); }
+  }
+
+  .hero h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 12px;
+    text-shadow: 0 0 40px rgba(139,0,0,0.8);
+  }
+
+  .hero-divider {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    margin: 2rem auto;
+  }
+
+  .hero-desc {
+    max-width: 600px;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--silver);
+    font-weight: 300;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    animation: bounce 2s infinite;
+    z-index: 3;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  .highlights {
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .highlight-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .highlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--red-bright);
+    transition: height 0.3s;
+  }
+
+  .highlight-card:hover { border-color: var(--red); transform: translateY(-2px); }
+  .highlight-card:hover::before { height: 100%; }
+
+  .highlight-card .icon { font-size: 1.5rem; margin-bottom: 1rem; }
+
+  .highlight-card h3 {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    color: var(--silver-bright);
+    margin-bottom: 0.8rem;
+  }
+
+  .highlight-card p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.6; font-weight: 300; }
+
+  /* SECTION */
+  .section-header {
+    padding: 3rem 2rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--red-bright);
+    letter-spacing: 4px;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 4px;
+  }
+
+  .section-content { max-width: 1200px; margin: 0 auto; padding: 0 2rem 4rem; }
+
+  /* HISTÓRIA */
+  .lore-section { margin-bottom: 3rem; }
+
+  .lore-section h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    color: var(--silver-bright);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lore-text { font-size: 1.05rem; line-height: 1.9; color: var(--text); font-weight: 300; max-width: 800px; }
+  .lore-text p { margin-bottom: 1.2rem; }
+
+  .event-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .event-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+
+  .event-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--red-bright);
+    letter-spacing: 2px;
+    background: rgba(139,0,0,0.1);
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--red);
+  }
+
+  .event-title { font-family: 'Orbitron', monospace; font-size: 0.9rem; letter-spacing: 2px; color: var(--silver-bright); }
+  .event-text { font-size: 1rem; line-height: 1.8; color: var(--text-dim); font-weight: 300; }
+  .event-text p { margin-bottom: 0.8rem; }
+
+  /* REGRAS */
+  .rules-block { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
+
+  .rules-block h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: var(--silver-bright);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .rules-block h2 span {
+    font-size: 0.65rem;
+    color: var(--red-bright);
+    border: 1px solid var(--red);
+    padding: 0.2rem 0.5rem;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .rule-item {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text);
+    display: flex;
+    gap: 1rem;
+  }
+
+  .rule-item:last-child { border-bottom: none; }
+  .rule-item .rule-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--red-bright); min-width: 80px; padding-top: 0.2rem; letter-spacing: 1px; }
+
+  .punishment-item { padding: 0.8rem 1rem; margin-bottom: 0.5rem; background: var(--bg3); border-left: 2px solid var(--red); font-size: 0.95rem; }
+  .punishment-item strong { color: var(--red-bright); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 1px; display: block; margin-bottom: 0.3rem; }
+
+  /* PERSONAGENS */
+  .chars-filter { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+
+  .filter-btn {
+    padding: 0.4rem 1rem;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .filter-btn:hover, .filter-btn.active { border-color: var(--red); color: var(--red-bright); background: rgba(139,0,0,0.1); }
+
+  .chars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+
+  .char-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .char-card:hover { border-color: var(--red); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(139,0,0,0.2); }
+
+  .char-avatar {
+    width: 80px; height: 80px;
+    margin: 0 auto 1rem;
+    border-radius: 4px;
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .char-avatar img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+
+  .char-name { font-family: 'Orbitron', monospace; font-size: 0.7rem; letter-spacing: 2px; color: var(--silver-bright); margin-bottom: 0.5rem; }
+  .char-player { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.8rem; font-family: 'Share Tech Mono', monospace; }
+
+  .status-badge { display: inline-block; padding: 0.2rem 0.6rem; font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; border: 1px solid; }
+  .status-vivo { color: #4caf50; border-color: #4caf50; background: rgba(76,175,80,0.1); }
+  .status-morto { color: #666; border-color: #444; background: rgba(0,0,0,0.3); }
+  .status-desaparecido { color: #ff9800; border-color: #ff9800; background: rgba(255,152,0,0.1); }
+  .status-contido { color: var(--red-bright); border-color: var(--red); background: rgba(139,0,0,0.1); }
+  .status-pendente { color: var(--silver); border-color: var(--border); }
+
+  .char-available { position: absolute; top: 0.5rem; right: 0.5rem; width: 8px; height: 8px; border-radius: 50%; }
+  .available { background: #4caf50; box-shadow: 0 0 6px #4caf50; }
+  .occupied { background: var(--red-bright); box-shadow: 0 0 6px var(--red-bright); }
+
+  /* PROFILE */
+  #char-profile { display: none; padding-top: 60px; min-height: 100vh; }
+  #char-profile.active { display: block; }
+
+  .profile-back { padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; }
+
+  .back-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--silver);
+    padding: 0.5rem 1.2rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .back-btn:hover { border-color: var(--red); color: var(--red-bright); }
+
+  .profile-layout { max-width: 1200px; margin: 0 auto; padding: 0 2rem 4rem; display: grid; grid-template-columns: 300px 1fr; gap: 2rem; }
+  .profile-sidebar { position: sticky; top: 80px; height: fit-content; }
+  .profile-img-container { background: var(--bg2); border: 1px solid var(--border); padding: 1.5rem; text-align: center; margin-bottom: 1rem; }
+  .profile-img { width: 100%; max-width: 220px; margin: 0 auto; display: block; image-rendering: pixelated; }
+  .profile-status-box { background: var(--bg2); border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1rem; }
+  .profile-status-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 0.8rem; }
+  .profile-info-box { background: var(--bg2); border: 1px solid var(--border); padding: 1.5rem; }
+  .profile-info-item { padding: 0.6rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .profile-info-item:last-child { border-bottom: none; }
+  .profile-info-item .label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 1px; display: block; margin-bottom: 0.2rem; }
+  .profile-info-item .value { color: var(--silver-bright); font-weight: 500; }
+  .profile-section { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
+  .profile-section h3 { font-family: 'Orbitron', monospace; font-size: 0.75rem; letter-spacing: 3px; color: var(--red-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+  .profile-section p { font-size: 0.95rem; line-height: 1.8; color: var(--text); font-weight: 300; }
+
+  .attrs-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.8rem; margin-bottom: 2rem; }
+  .attr-box { background: var(--bg3); border: 1px solid var(--border); padding: 1rem 0.5rem; text-align: center; }
+  .attr-name { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--red-bright); letter-spacing: 1px; display: block; margin-bottom: 0.3rem; }
+  .attr-val { font-family: 'Orbitron', monospace; font-size: 1.3rem; color: var(--silver-bright); font-weight: 700; }
+
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.5rem; }
+  .skill-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.8rem; background: var(--bg3); border: 1px solid var(--border); font-size: 0.8rem; }
+  .skill-name { color: var(--text); }
+  .skill-val { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--red-bright); }
+
+  .history-item { padding: 1rem; border-left: 2px solid var(--border); margin-bottom: 1rem; position: relative; }
+  .history-item::before { content: ''; position: absolute; left: -5px; top: 1.2rem; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+  .history-date { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--red-bright); letter-spacing: 1px; margin-bottom: 0.3rem; }
+  .history-desc { font-size: 0.9rem; color: var(--text-dim); }
+
+  /* FEDERAÇÃO */
+  .fed-header { background: var(--bg2); border: 1px solid var(--border); border-top: 3px solid var(--red); padding: 3rem 2rem; text-align: center; margin-bottom: 2rem; position: relative; overflow: hidden; }
+  .fed-header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(139,0,0,0.08) 0%, transparent 70%); }
+  .fed-motto { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 1.5rem; position: relative; z-index: 1; line-height: 2.2; }
+  .fed-motto span { color: var(--red-bright); }
+  .fed-block { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
+  .fed-block h2 { font-family: 'Orbitron', monospace; font-size: 0.85rem; letter-spacing: 3px; color: var(--silver-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+  .fed-block p { font-size: 1rem; line-height: 1.9; color: var(--text); font-weight: 300; margin-bottom: 1rem; }
+  .hierarchy-tree { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; line-height: 2.2; color: var(--text-dim); }
+  .hierarchy-tree .top { color: var(--red-bright); }
+  .hierarchy-tree .mid { color: var(--silver); padding-left: 1.5rem; }
+  .hierarchy-tree .bot { color: var(--text-dim); padding-left: 3rem; }
+  .hierarchy-tree .bot2 { color: var(--text-dim); padding-left: 5rem; }
+
+  /* ACESSO NEGADO */
+  .fed-secret-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 2rem; }
+  .access-denied { font-family: 'Orbitron', monospace; font-size: clamp(1.5rem, 5vw, 3rem); color: var(--red-bright); letter-spacing: 8px; margin-bottom: 1rem; animation: flicker 3s infinite; }
+  @keyframes flicker { 0%, 95%, 100% { opacity: 1; } 96%, 99% { opacity: 0.3; } }
+  .access-sub { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 1rem; }
+  .secret-input-group { display: flex; gap: 0; max-width: 400px; width: 100%; }
+  .secret-input { flex: 1; background: var(--bg2); border: 1px solid var(--red); border-right: none; color: var(--red-bright); padding: 0.8rem 1rem; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; letter-spacing: 3px; outline: none; text-transform: uppercase; }
+  .secret-input::placeholder { color: var(--text-dim); letter-spacing: 1px; }
+  .secret-btn { background: var(--red); border: 1px solid var(--red); color: #fff; padding: 0.8rem 1.5rem; font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; cursor: pointer; transition: background 0.2s; }
+  .secret-btn:hover { background: var(--red-bright); }
+  .access-error { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--red-bright); letter-spacing: 2px; margin-top: 1rem; display: none; }
+
+  /* FICHA */
+  .form-container { max-width: 800px; margin: 0 auto; }
+  .form-section { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
+  .form-section h3 { font-family: 'Orbitron', monospace; font-size: 0.75rem; letter-spacing: 3px; color: var(--red-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; }
+  .form-group input, .form-group textarea, .form-group select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 0.7rem 1rem; font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; width: 100%; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--red); }
+  .form-group textarea { resize: vertical; min-height: 100px; }
+  .form-group select option { background: var(--bg3); }
+
+  /* ATRIBUTOS COM PONTOS */
+  .attrs-form-section { margin-bottom: 1.5rem; }
+  .attrs-points-info { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 1rem; padding: 0.8rem; background: var(--bg3); border: 1px solid var(--border); }
+  .attrs-points-remaining { color: var(--red-bright); font-size: 0.9rem; }
+  .attrs-form-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.8rem; }
+
+  .attr-ctrl { background: var(--bg3); border: 1px solid var(--border); padding: 1rem 0.5rem; text-align: center; }
+  .attr-ctrl-name { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--red-bright); letter-spacing: 1px; display: block; margin-bottom: 0.6rem; }
+  .attr-ctrl-row { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+  .attr-btn { background: none; border: 1px solid var(--border); color: var(--silver); width: 24px; height: 24px; cursor: pointer; font-size: 1rem; line-height: 1; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+  .attr-btn:hover { border-color: var(--red); color: var(--red-bright); }
+  .attr-display { font-family: 'Orbitron', monospace; font-size: 1.2rem; color: var(--silver-bright); font-weight: 700; min-width: 24px; }
+
+  /* PERÍCIAS CHECK */
+  .skills-info { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 1rem; padding: 0.8rem; background: var(--bg3); border: 1px solid var(--border); }
+  .skills-remaining { color: var(--red-bright); font-size: 0.9rem; }
+  .skills-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.5rem; }
+
+  .skill-check { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; background: var(--bg3); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; user-select: none; }
+  .skill-check:hover { border-color: var(--red); }
+  .skill-check.selected { border-color: var(--red-bright); background: rgba(139,0,0,0.15); }
+  .skill-check input { display: none; }
+  .skill-check-box { width: 14px; height: 14px; border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: var(--red-bright); transition: all 0.2s; }
+  .skill-check.selected .skill-check-box { border-color: var(--red-bright); background: rgba(139,0,0,0.3); }
+  .skill-check-name { font-size: 0.8rem; color: var(--text); }
+  .skill-check.selected .skill-check-name { color: var(--silver-bright); }
+
+  .submit-btn { width: 100%; padding: 1rem; background: var(--red); border: 1px solid var(--red-bright); color: #fff; font-family: 'Orbitron', monospace; font-size: 0.8rem; letter-spacing: 4px; cursor: pointer; transition: all 0.2s; margin-top: 1rem; }
+  .submit-btn:hover { background: var(--red-bright); box-shadow: 0 0 20px rgba(204,0,0,0.3); }
+
+  .form-success { display: none; text-align: center; padding: 3rem; background: var(--bg2); border: 1px solid var(--red); }
+  .form-success h3 { font-family: 'Orbitron', monospace; font-size: 1rem; letter-spacing: 3px; color: var(--red-bright); margin-bottom: 1rem; }
+  .form-success p { color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 1px; }
+
+  /* ADMIN */
+  .admin-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 2rem; }
+  .admin-tabs { display: flex; gap: 0; margin-bottom: 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .admin-tab { padding: 0.8rem 1.5rem; background: none; border: none; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .admin-tab:hover, .admin-tab.active { color: var(--red-bright); border-bottom-color: var(--red); }
+  .admin-content { display: none; }
+  .admin-content.active { display: block; }
+
+  .pending-card { background: var(--bg2); border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+  .pending-info h4 { font-family: 'Orbitron', monospace; font-size: 0.8rem; letter-spacing: 2px; color: var(--silver-bright); margin-bottom: 0.3rem; }
+  .pending-info p { font-size: 0.8rem; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; }
+  .pending-actions { display: flex; gap: 0.5rem; }
+
+  .btn-approve { padding: 0.4rem 1rem; background: rgba(76,175,80,0.1); border: 1px solid #4caf50; color: #4caf50; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
+  .btn-approve:hover { background: rgba(76,175,80,0.2); }
+  .btn-reject { padding: 0.4rem 1rem; background: rgba(139,0,0,0.1); border: 1px solid var(--red); color: var(--red-bright); font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
+  .btn-reject:hover { background: rgba(139,0,0,0.2); }
+
+  .empty-state { text-align: center; padding: 3rem; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 2px; border: 1px dashed var(--border); }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; flex-direction: column; position: absolute; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .nav-links.open { display: flex; }
+    .nav-links li a { height: auto; line-height: 1; padding: 1rem 2rem; border-bottom: 1px solid var(--border); }
+    .nav-mobile-btn { display: block; }
+    .profile-layout { grid-template-columns: 1fr; }
+    .profile-sidebar { position: static; }
+    .attrs-grid, .attrs-form-grid { grid-template-columns: repeat(3, 1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <img src="https://i.imgur.com/OSV9nga.png" id="navLogoImg" alt="PARANOIA" style="width:38px;height:38px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 6px rgba(139,0,0,0.6))">
+    <span>PARANOIA</span>
+  </div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#" onclick="showPage('home')" id="nav-home" class="active">Início</a></li>
+    <li><a href="#" onclick="showPage('historia')" id="nav-historia">História</a></li>
+    <li><a href="#" onclick="showPage('regras')" id="nav-regras">Regras</a></li>
+    <li><a href="#" onclick="showPage('personagens')" id="nav-personagens">Personagens</a></li>
+    <li><a href="#" onclick="showPage('federacao')" id="nav-federacao">  <img src="https://i.imgur.com/kQZqKJL.png" id="navFedLogo" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;filter:invert(1) brightness(0.7)" onerror="this.style.display='none'">Federação</a></li>
+    <li><a href="#" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
+    <li><a href="#" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
+  </ul>
+  <button class="nav-mobile-btn" onclick="toggleNav()">☰</button>
+</nav>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <div id="heroLogoWrap" style="margin-bottom:2rem;width:160px;height:160px;position:relative;display:flex;align-items:center;justify-content:center">
+        <img id="heroLogo" src="https://i.imgur.com/OSV9nga.png" alt="PARANOIA" style="width:160px;height:160px;border-radius:50%;object-fit:cover;position:absolute;z-index:2;filter:drop-shadow(0 0 40px rgba(139,0,0,0.9));animation:pulse 4s ease-in-out infinite">
+      </div>
+      <h1>PARANOIA</h1>
+      <div class="hero-divider"></div>
+      <p class="hero-desc">Cercada pelo mar e distante de qualquer grande centro conhecido, a Ilha Quesadilla se tornou o lar de pessoas vindas dos mais diferentes lugares. Cada uma trazendo consigo sua própria história, seus sonhos, seus medos e suas ambições.</p>
+    </div>
+    <div class="scroll-indicator">▼ EXPLORAR</div>
+  </div>
+
+  <div class="highlights">
+    <div class="highlight-card" onclick="showPage('historia')">
+      <div class="icon">📖</div>
+      <h3>HISTÓRIA</h3>
+      <p>Conheça o universo, os eventos que moldaram a ilha e os rastros deixados por quem passou por aqui.</p>
+    </div>
+    <div class="highlight-card" onclick="showPage('personagens')">
+      <div class="icon">👤</div>
+      <h3>PERSONAGENS</h3>
+      <p>Todos os habitantes registrados da Ilha Quesadilla. Seus rostos, suas histórias, seus status.</p>
+    </div>
+    <div class="highlight-card" onclick="showPage('federacao')">
+      <div class="icon">🏛️</div>
+      <h3>A FEDERAÇÃO</h3>
+      <p>A organização que administra a ilha. O que se sabe, o que se suspeita, e o que permanece em silêncio.</p>
+    </div>
+    <div class="highlight-card" onclick="showPage('ficha')">
+      <div class="icon">📋</div>
+      <h3>ENVIAR FICHA</h3>
+      <p>Quer fazer parte da história? Preencha sua ficha de personagem e aguarde aprovação.</p>
+    </div>
+  </div>
+</div>
+
+<!-- HISTÓRIA -->
+<div id="historia" class="page">
+  <div class="section-header">
+    <div class="section-label">// ARQUIVO NARRATIVO //</div>
+    <h1 class="section-title">HISTÓRIA</h1>
+  </div>
+  <div class="section-content">
+    <div class="lore-section">
+      <h2>SINOPSE</h2>
+      <div class="lore-text">
+        <p>Ilha Quesadilla é um lugar difícil de descrever para quem nunca esteve aqui.</p>
+        <p>Cercada pelo mar e distante de qualquer grande centro conhecido, a ilha se tornou o lar de pessoas vindas dos mais diferentes lugares, cada uma trazendo consigo sua própria história, seus sonhos, seus medos e suas ambições.</p>
+        <p>Ao longo do tempo, casas foram erguidas, comunidades surgiram e memórias passaram a ser construídas entre suas praias, florestas e campos. Alguns encontraram um novo começo. Outros encontraram algo pelo qual valia a pena permanecer.</p>
+        <p>Como qualquer lugar habitado, a ilha está longe de ser estática. Novos rostos chegam, velhos conhecidos partem, relações se transformam e acontecimentos deixam marcas que dificilmente serão esquecidas.</p>
+        <p>Entre encontros, despedidas, celebrações e conflitos, a vida segue seu curso em Quesadilla Island, moldada diariamente pelas pessoas que a chamam de lar.</p>
+        <p><em>E toda história deixa rastros para aqueles que sabem onde procurar.</em></p>
+      </div>
+    </div>
+    <div class="lore-section">
+      <h2>REGISTRO DE EVENTOS</h2>
+      <div class="event-card">
+        <div class="event-header">
+          <div class="event-num">EVENTO I</div>
+          <div class="event-title">A CHEGADA</div>
+        </div>
+        <div class="event-text">
+          <p>O sol estava se pondo quando os trens chegaram.</p>
+          <p>Os últimos raios solares do fim do dia batiam contra as janelas das locomotivas, acordando lentamente seus passageiros e tingindo o céu com um belo tom dourado, que logo daria lugar ao início do crepúsculo. Resquícios de estrelas já podiam ser vistos no horizonte. Longe das luzes artificiais das grandes cidades, os trens seguiam seu percurso sobre as águas calmas do mar, que ocasionalmente se chocavam contra as pilastras que sustentavam os trilhos. Era uma viagem bonita. Reconfortante, até. Mas a maior parte dos passageiros não sabia exatamente como havia chegado às poltronas de couro daqueles vagões.</p>
+          <p>Cada um deles havia recebido um convite. Cada um deles havia tomado a mesma decisão: aceitar e descobrir onde aquela jornada os levaria.</p>
+          <p>Os apitos soaram juntos.</p>
+          <p>A estação que os recebeu era impressionante. Bem construída, cuidadosamente preservada e marcada por uma arquitetura rústica que transmitia uma estranha sensação de familiaridade. Ainda assim, algo estava errado. As luzes permaneciam apagadas. As catracas estavam travadas. As portinholas, lacradas. E no centro de tudo havia um muro — uma enorme estrutura de concreto que dividia a estação ao meio, destoando completamente do restante do ambiente.</p>
+          <p>Dois trens. Dois grupos. Uma parede entre eles.</p>
+          <p>De um lado estavam BadBoyHalo, Foolish, Jaiden, Philza e Slimecicle. Do outro, ElMariana, Missa Sinfonia, Roier e Spreen. A única forma de contato entre os dois grupos era uma pequena janela instalada no muro. No entanto, por mais que tentassem se comunicar, nenhuma voz parecia atravessar o vidro.</p>
+          <p>Enquanto exploravam a estação em busca de respostas, um detalhe chamou atenção. Em uma das extremidades do muro havia um terminal antigo acompanhado por uma sequência numérica gravada em uma placa metálica:</p>
+          <p><strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">4 12 15 22 23 12 6 22 2 12 21 17 22 6 1 15 12 16 26 19 8 21 11</strong></p>
+          <p>Do outro lado existia um terminal idêntico, mas com a tela completamente vazia.</p>
+          <p>O que se seguiu foi uma tentativa coletiva de decifrar o enigma. Slimecicle foi o primeiro a interagir com o terminal e, impulsivamente, pressionou Enter sem qualquer resposta válida. O choque elétrico que recebeu foi suficiente para derrubar qualquer entusiasmo inicial.</p>
+          <p>Enquanto isso, Spreen analisava a sequência numérica. Após algumas tentativas, percebeu que se tratava de uma cifra simples. A mensagem oculta era clara:</p>
+          <p><strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">WEHOPEYOUENJOYTHEISLAND</strong></p>
+          <p>A frase precisava ser enviada ao outro grupo. A comunicação, porém, era limitada.</p>
+          <p>Depois de algumas trocas improvisadas através da janela, a solução finalmente chegou ao lado oposto. Mas havia um detalhe que ninguém havia considerado: os espaços.</p>
+          <p>Impaciente, Slimecicle digitou a frase inteira sem separações.</p>
+          <p>O resultado foi imediato.</p>
+          <p>Uma descarga violenta percorreu o terminal e fez seu braço explodir em fragmentos de gosma, espalhando queimaduras em quem estava próximo. Do outro lado, Spreen cometeu o mesmo erro e foi lançado para trás pela força da descarga.</p>
+          <p>Foi Philza quem percebeu o problema. Com uma simples observação sobre a ausência de espaços entre as palavras, levou Jaiden à resposta correta. Sem hesitar, ela digitou:</p>
+          <p><strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">We Hope You Enjoy The Island</strong></p>
+          <p>Por alguns segundos, nada aconteceu. Então um pequeno rosto sorridente surgiu na tela: <strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">:]</strong></p>
+          <p>As luzes da estação começaram a se acender. Os mecanismos voltaram a funcionar. As catracas destravaram. E o enorme muro que os separava começou lentamente a descer.</p>
+          <p>Pela primeira vez desde que chegaram, os dois grupos puderam se ver, se ouvir e se encontrar.</p>
+          <p>Acima dos terminais, uma última mensagem apareceu:</p>
+          <p><strong style="color:var(--silver-bright)">"Esperamos que aproveitem a ilha."</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGRAS -->
+<div id="regras" class="page">
+  <div class="section-header">
+    <div class="section-label">// DIRETRIZES DO SERVIDOR //</div>
+    <h1 class="section-title">REGRAS</h1>
+  </div>
+  <div class="section-content">
+    <div class="rules-block">
+      <h2>CUIDADOS <span>ATENÇÃO</span></h2>
+      <div class="rule-item"><span class="rule-label">OFF-TOPIC</span><span>Não converse nos canais de turno. Caso queira comentar algo, utilize um dos chats off.</span></div>
+      <div class="rule-item"><span class="rule-label">AUSÊNCIA</span><span>Toleramos até 5 dias de ausência antes de você ser notificado sobre o risco de perder sua vaga. Se precisar ficar offline por mais tempo, abra um ticket no suporte e comunique sua justificativa.</span></div>
+      <div class="rule-item"><span class="rule-label">METAGAME</span><span>Não use nos turnos informações que você obteve no off e que seu personagem não teria como saber.</span></div>
+      <div class="rule-item"><span class="rule-label">GATILHOS</span><span>Quando turnar tópicos sensíveis, coloque um aviso de gatilho e censure utilizando || no início e no final do trecho.</span></div>
+    </div>
+    <div class="rules-block">
+      <h2>PROIBIÇÕES <span>OBRIGATÓRIO</span></h2>
+      <div class="rule-item"><span class="rule-label">01</span><span>Ofensas e desrespeito, de qualquer modo, aos membros.</span></div>
+      <div class="rule-item"><span class="rule-label">02</span><span>Exposição de informações pessoais de um membro sem consentimento.</span></div>
+      <div class="rule-item"><span class="rule-label">03</span><span>Criação de panelinhas de qualquer tipo.</span></div>
+      <div class="rule-item"><span class="rule-label">04</span><span>Trazer assuntos do on para o off e vice-versa. Separe o personagem do jogador.</span></div>
+      <div class="rule-item"><span class="rule-label">05</span><span>Construção de plots envolvendo outro personagem sem consentimento prévio.</span></div>
+      <div class="rule-item"><span class="rule-label">06</span><span>Turnos NSFW nos chats públicos.</span></div>
+      <div class="rule-item"><span class="rule-label">07</span><span>Pedidos para adição própria na Staff toda hora.</span></div>
+      <div class="rule-item" style="border-top:1px solid var(--red);margin-top:0.5rem;color:var(--red-bright)"><span class="rule-label" style="color:var(--red-bright)">ZERO</span><span>Preconceito e intolerância de qualquer tipo são terminantemente PROIBIDOS — ban permanente IMEDIATO.</span></div>
+    </div>
+    <div class="rules-block">
+      <h2>PUNIÇÕES <span>SISTEMA</span></h2>
+      <div class="punishment-item"><strong>WARNING</strong>Um aviso verbal da Staff.</div>
+      <div class="punishment-item"><strong>TIMEOUT</strong>Por tempo determinado, você fica impossibilitado de mandar mensagem nos canais ou entrar em calls.</div>
+      <div class="punishment-item"><strong>RESET</strong>Seu inventário na loja é resetado e você perde todo o seu dinheiro e/ou itens.</div>
+      <div class="punishment-item"><strong>BAN PERMANENTE</strong>Você é banido permanentemente do servidor.</div>
+      <div style="margin-top:1rem;padding:1rem;background:var(--bg3);border-left:2px solid var(--text-dim);font-size:0.85rem;color:var(--text-dim)">Cabe aos Administradores a decisão de qual punição aplicar. É proibido evadir punições. Três punições no mesmo mês acarretam em ban.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PERSONAGENS -->
+<div id="personagens" class="page">
+  <div class="section-header">
+    <div class="section-label">// REGISTRO DE HABITANTES //</div>
+    <h1 class="section-title">PERSONAGENS</h1>
+  </div>
+  <div class="section-content">
+    <div class="chars-filter">
+      <button class="filter-btn active" onclick="filterChars('all',this)">TODOS</button>
+      <button class="filter-btn" onclick="filterChars('ocupado',this)">☄️ OCUPADOS</button>
+      <button class="filter-btn" onclick="filterChars('disponivel',this)">💤 DISPONÍVEIS</button>
+      <button class="filter-btn" onclick="filterChars('ingles',this)">🇺🇸 INGLÊS</button>
+      <button class="filter-btn" onclick="filterChars('espanhol',this)">🇪🇸 ESPANHOL</button>
+      <button class="filter-btn" onclick="filterChars('portugues',this)">🇧🇷 PORTUGUÊS</button>
+      <button class="filter-btn" onclick="filterChars('frances',this)">🇫🇷 FRANCÊS</button>
+      <button class="filter-btn" onclick="filterChars('coreano',this)">🇰🇷 COREANO</button>
+      <button class="filter-btn" onclick="filterChars('huevito',this)">🥚 HUEVITOS</button>
+    </div>
+    <div class="chars-grid" id="charsGrid"></div>
+  </div>
+</div>
+
+<!-- CHAR PROFILE -->
+<div id="char-profile" class="page">
+  <div class="profile-back"><button class="back-btn" onclick="showPage('personagens')">← VOLTAR</button></div>
+  <div class="profile-layout" id="profileContent"></div>
+</div>
+
+<!-- FEDERAÇÃO PÚBLICA -->
+<div id="federacao" class="page">
+  <div class="section-header">
+    <div class="section-label">// ARQUIVO PÚBLICO //</div>
+    <h1 class="section-title">A FEDERAÇÃO</h1>
+  </div>
+  <div class="section-content">
+    <div class="fed-header">
+      <img src="https://i.imgur.com/kQZqKJL.png" id="fedHeaderLogo" style="width:90px;height:90px;object-fit:contain;filter:invert(1) brightness(0.85);margin:0 auto 1.5rem;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
+      <div class="fed-motto">
+        <span>"Esperamos que aproveite a ilha."</span><br>
+        <span>"We hope you enjoy the island."</span><br>
+        <span>"Disfruta la isla."</span>
+      </div>
+    </div>
+    <div class="fed-block">
+      <h2>O QUE É A FEDERAÇÃO</h2>
+      <p>A <strong style="color:var(--silver-bright)">Federação de Quesadilla Island</strong> é a organização responsável pela administração e governança da Ilha Quesadilla. Foi ela quem enviou os convites. Foi ela quem preparou os trens. Foi ela quem os recebeu.</p>
+      <p>Seu objetivo declarado é simples: garantir o bem-estar e a segurança de todos os residentes da ilha.</p>
+      <p><em style="color:var(--text-dim)">O quanto isso é verdade, cada um decide por conta própria.</em></p>
+    </div>
+    <div class="fed-block">
+      <h2>ESTRUTURA CONHECIDA</h2>
+      <p>A Federação opera através de uma hierarquia ainda pouco compreendida pelos residentes. No topo, existe uma figura conhecida apenas como <strong style="color:var(--silver-bright)">The Host</strong> — cuja identidade permanece completamente desconhecida.</p>
+      <p>As comunicações oficiais são feitas através do <strong style="color:var(--silver-bright)">Mr. Duck</strong>, gerente oficial da ilha, que se comunica exclusivamente por transmissões e anúncios gravados. Nenhum encontro presencial foi documentado até o momento.</p>
+      <p>Em campo, a Federação é representada pelos <strong style="color:var(--silver-bright)">Cucuruchos</strong> — agentes identificáveis por sua aparência característica, responsáveis pela aplicação das regras e pela interação direta com os residentes.</p>
+      <div class="hierarchy-tree" style="margin-top:1.5rem;padding:1.5rem;background:var(--bg3);border:1px solid var(--border)">
+        <div class="top">▶ THE HOST</div>
+        <div class="mid">└─ MR. DUCK — Gerente da Ilha</div>
+        <div class="bot">└─ CUCURUCHOS — Agentes de Campo</div>
+        <div class="bot2">└─ TRABALHADORES SEM ROSTO</div>
+      </div>
+    </div>
+    <div class="fed-block">
+      <h2>O QUE SE SABE</h2>
+      <p>A Federação está presente na ilha desde o primeiro dia. Foi ela quem construiu a estação. Foi ela quem ergueu o muro que dividia os recém-chegados. E foi ela quem, ao final, deixou sua mensagem nas placas.</p>
+      <p>Ela observa. Ela registra. Ela administra.</p>
+      <p>Por enquanto, é tudo que se sabe com certeza.</p>
+      <div style="margin-top:1.5rem;padding:1rem;background:var(--bg3);border-left:2px solid var(--red);font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px">
+        Informações adicionais serão atualizadas conforme novos dados se tornarem disponíveis.<br>
+        <span style="color:var(--red-bright)">— Arquivo público. Classificação: ABERTO.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEDERAÇÃO SECRETA -->
+<div id="fed-secret" class="page">
+  <div class="section-header">
+    <div class="section-label">// ACESSO RESTRITO //</div>
+    <h1 class="section-title" style="color:var(--red-bright)">FEDERAÇÃO</h1>
+  </div>
+  <div class="fed-secret-gate" id="fedGate">
+    <div class="access-denied">ACESSO NEGADO</div>
+    <div class="access-sub">NÍVEL DE AUTORIZAÇÃO INSUFICIENTE</div>
+    <div class="access-sub" style="margin-bottom:2rem;font-size:0.65rem">INSIRA CREDENCIAIS PARA CONTINUAR</div>
+    <div class="secret-input-group">
+      <input type="password" class="secret-input" id="fedPassword" placeholder="SENHA DE ACESSO" onkeydown="if(event.key==='Enter')checkFedAccess()">
+      <button class="secret-btn" onclick="checkFedAccess()">ACESSAR</button>
+    </div>
+    <div class="access-error" id="fedError">⚠ AUTORIZAÇÃO NEGADA — CREDENCIAIS INVÁLIDAS</div>
+  </div>
+  <div id="fedContent" style="display:none;max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
+    <div class="empty-state">ÁREA DA FEDERAÇÃO — CONTEÚDO SERÁ ADICIONADO PELA ADMINISTRAÇÃO</div>
+  </div>
+</div>
+
+<!-- ENVIAR FICHA -->
+<div id="ficha" class="page">
+  <div class="section-header">
+    <div class="section-label">// REGISTRO DE PERSONAGEM //</div>
+    <h1 class="section-title">ENVIAR FICHA</h1>
+  </div>
+  <div class="section-content">
+    <div class="form-container">
+      <div id="fichaForm">
+        <div class="form-section">
+          <h3>INFORMAÇÕES BÁSICAS</h3>
+          <div class="form-grid">
+            <div class="form-group"><label>Nome do Personagem *</label><input type="text" id="f_nome" placeholder="Ex: Cellbit"></div>
+            <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
+            <div class="form-group"><label>Data de Nascimento</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA"></div>
+            <div class="form-group"><label>Idade</label><input type="number" id="f_idade" placeholder="Ex: 25"></div>
+            <div class="form-group full"><label>Imagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>CARACTERÍSTICAS</h3>
+          <div class="form-grid">
+            <div class="form-group full"><label>Características Físicas *</label><textarea id="f_fisico" placeholder="Descreva a aparência do personagem..."></textarea></div>
+            <div class="form-group full"><label>Personalidade *</label><textarea id="f_personalidade" placeholder="Como é o personagem? Quais seus traços marcantes?"></textarea></div>
+            <div class="form-group full"><label>Backstory *</label><textarea id="f_backstory" placeholder="A história do personagem antes da ilha..." style="min-height:150px"></textarea></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>ATRIBUTOS</h3>
+          <div class="attrs-points-info">
+            Você possui <span class="attrs-points-remaining" id="pointsLeft">4</span> pontos para distribuir. Cada atributo começa com 1 ponto e pode ser reduzido para remanejamento.
+          </div>
+          <div class="attrs-form-grid" id="attrsGrid"></div>
+        </div>
+
+        <div class="form-section">
+          <h3>PERÍCIAS</h3>
+          <div class="skills-info">
+            Escolha até <span class="skills-remaining" id="skillsLeft">8</span> perícias para o seu personagem.
+          </div>
+          <div class="skills-check-grid" id="skillsGrid"></div>
+        </div>
+
+        <button class="submit-btn" onclick="submitFicha()">▶ ENVIAR FICHA PARA APROVAÇÃO</button>
+      </div>
+      <div class="form-success" id="fichaSuccess">
+        <h3>FICHA RECEBIDA</h3>
+        <p>Sua ficha foi enviada e está aguardando aprovação da administração.<br><br>Você será notificado assim que for analisada.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN GATE -->
+<div id="admin-gate" class="page">
+  <div class="section-header">
+    <div class="section-label">// ÁREA RESTRITA //</div>
+    <h1 class="section-title">ADMINISTRAÇÃO</h1>
+  </div>
+  <div class="admin-gate">
+    <div class="access-denied" style="font-size:1.5rem">PAINEL ADMINISTRATIVO</div>
+    <div class="access-sub" style="margin-bottom:2rem">INSIRA SUAS CREDENCIAIS</div>
+    <div style="display:flex;flex-direction:column;gap:0.8rem;width:100%;max-width:400px">
+      <input type="text" class="secret-input" id="adminUser" placeholder="USUÁRIO" style="border-right:1px solid var(--red)">
+      <div class="secret-input-group">
+        <input type="password" class="secret-input" id="adminPass" placeholder="SENHA" onkeydown="if(event.key==='Enter')checkAdmin()">
+        <button class="secret-btn" onclick="checkAdmin()">ENTRAR</button>
+      </div>
+    </div>
+    <div class="access-error" id="adminError">⚠ CREDENCIAIS INVÁLIDAS</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel" class="page">
+  <div class="section-header">
+    <div class="section-label">// PAINEL ADMINISTRATIVO //</div>
+    <h1 class="section-title">ADMINISTRAÇÃO</h1>
+  </div>
+  <div style="max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="showAdminTab('pendentes',this)">FICHAS PENDENTES</button>
+      <button class="admin-tab" onclick="showAdminTab('personagens-admin',this)">PERSONAGENS</button>
+      <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
+      <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
+    </div>
+    <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
+    <div id="personagens-admin" class="admin-content"><div class="empty-state">GERENCIAMENTO DE PERSONAGENS — EM BREVE</div></div>
+    <div id="fed-admin" class="admin-content"><div class="empty-state">GERENCIAMENTO DA FEDERAÇÃO — EM BREVE</div></div>
+    <div id="config" class="admin-content">
+      <div class="form-section">
+        <h3>CONFIGURAÇÕES DO SITE</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Senha da Área Secreta da Federação</label><input type="text" id="cfg_fedPass" placeholder="Defina a senha..."></div>
+          <div class="form-group" style="justify-content:flex-end"><button class="submit-btn" style="margin-top:1.5rem" onclick="saveFedPassword()">SALVAR</button></div>
+        </div>
+        <div id="cfg_msg" style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DADOS =====
+const CHARS_DATA = [
+  {id:'badboyhalo',name:'BadBoyHalo',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'dantdm',name:'DanTDM',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'fitmc',name:'FitMC',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'foolish',name:'Foolish',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'ironmouse',name:'Ironmouse',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'jaiden',name:'Jaiden',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'lenay',name:'Lenay',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'nihachu',name:'Nihachu',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
+  {id:'philza',name:'Philza',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'slimecicle',name:'Slimecicle',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'tinakitten',name:'TinaKitten',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'tubbo',name:'Tubbo',lang:'ingles',status:'ocupado',gameStatus:'vivo'},
+  {id:'carre',name:'Carre',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'elmariana',name:'ElMariana',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'german',name:'German',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'luzu',name:'Luzu',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'maximus',name:'Maximus',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'missasinfonia',name:'Missasinfonia',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'polispol',name:'Polispol',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'quackity',name:'Quackity',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'rivers',name:'Rivers',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'roier',name:'Roier',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'rubius',name:'Rubius',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'spreen',name:'Spreen',lang:'espanhol',status:'ocupado',gameStatus:'vivo'},
+  {id:'vegetta',name:'Vegetta',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'willyrex',name:'Willyrex',lang:'espanhol',status:'disponivel',gameStatus:'vivo'},
+  {id:'bagi',name:'Bagi',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'cellbit',name:'Cellbit',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'felps',name:'Felps',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'mike',name:'Mike',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'pac',name:'Pac',lang:'portugues',status:'ocupado',gameStatus:'vivo'},
+  {id:'antoine',name:'Antoine',lang:'frances',status:'disponivel',gameStatus:'vivo'},
+  {id:'aypierre',name:'Aypierre',lang:'frances',status:'disponivel',gameStatus:'vivo'},
+  {id:'baghera',name:'Baghera',lang:'frances',status:'ocupado',gameStatus:'vivo'},
+  {id:'etoiles',name:'Etoiles',lang:'frances',status:'ocupado',gameStatus:'vivo'},
+  {id:'kameto',name:'Kameto',lang:'frances',status:'disponivel',gameStatus:'vivo'},
+  {id:'bjacau',name:'Bjacau',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
+  {id:'jungryeok',name:'Jungryeok',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
+  {id:'yangdding',name:'Yangdding',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
+  {id:'kongkong',name:'Kongkong',lang:'coreano',status:'disponivel',gameStatus:'vivo'},
+  {id:'bobby',name:'Bobby',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'chayanne',name:'Chayanne',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'chunsik',name:'Chunsik',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'dapper',name:'Dapper',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'empanada',name:'Empanada',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'gegg',name:'Gegg',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'juanaflippa',name:'Juanaflippa',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'leonarda',name:'Leonarda',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'pepito',name:'Pepito',lang:'huevito',status:'disponivel',gameStatus:'vivo'},
+  {id:'pomme',name:'Pomme',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'ramon',name:'Ramón',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'richarlyson',name:'Richarlyson',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'sunnysideup',name:'Sunnysideup',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'tallulah',name:'Tallulah',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'tilin',name:'Tilin',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+  {id:'trump',name:'Trump',lang:'huevito',status:'ocupado',gameStatus:'vivo'},
+];
+
+const SKILLS = ['Acrobacia','Adestramento','Artes','Atletismo','Atualidades','Ciências','Diplomacia','Enganação','Fortitude','Furtividade','Iniciativa','Intimidação','Intuição','Investigação','Luta','Medicina','Ocultismo','Percepção','Pilotagem','Pontaria','Profissão','Reflexos','Religião','Tática','Tecnologia'];
+const ATTRS = ['AGI','FOR','INT','PRE','VIG'];
+const ADMINS = [{user:'Twik',pass:'MestreRP'},{user:'Ryu',pass:'StaffA'}];
+const MAX_ATTR_POINTS = 4;
+const MAX_SKILLS = 8;
+
+let attrValues = {AGI:0,FOR:0,INT:0,PRE:0,VIG:0};
+let selectedSkills = new Set();
+let pendingFichas = JSON.parse(localStorage.getItem('pendingFichas')||'[]');
+let approvedChars = JSON.parse(localStorage.getItem('approvedChars')||'[]');
+
+// ===== IMAGES — substitua as URLs abaixo pelas reais =====
+const LOGO_URL = ''; // URL da logo do PARANOIA
+const FED_LOGO_URL = ''; // URL da logo da Federação
+const BG_PATTERN_URL = ''; // URL do background pattern
+
+function initImages() {
+  if(LOGO_URL) {
+    document.getElementById('navLogoImg').src = LOGO_URL;
+    document.getElementById('heroLogo').src = LOGO_URL;
+    document.getElementById('navLogoFallback').style.display = 'none';
+  }
+  if(FED_LOGO_URL) {
+    document.getElementById('navFedLogo').src = FED_LOGO_URL;
+    document.getElementById('fedHeaderLogo').src = FED_LOGO_URL;
+  }
+  if(BG_PATTERN_URL) {
+    document.getElementById('heroBg').style.backgroundImage = `url('${BG_PATTERN_URL}')`;
+  }
+}
+
+// ===== NAV =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const p = document.getElementById(id);
+  if(p) p.classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const nav = document.getElementById('nav-'+id);
+  if(nav) nav.classList.add('active');
+  document.getElementById('navLinks').classList.remove('open');
+  window.scrollTo(0,0);
+  if(id==='personagens') renderChars('all');
+  if(id==='admin-panel') renderPending();
+}
+
+function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
+
+// ===== CHARS =====
+function renderChars(filter) {
+  const grid = document.getElementById('charsGrid');
+  let list = [...CHARS_DATA, ...approvedChars];
+  if(filter !== 'all') list = list.filter(c => c.status===filter || c.lang===filter);
+  if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
+  grid.innerHTML = list.map(c => {
+    const img = c.imageUrl
+      ? `<img src="${c.imageUrl}" alt="${c.name}">`
+      : c.minecraft
+      ? `<img src="https://mc-heads.net/body/${c.minecraft}/80" alt="${c.name}">`
+      : `<span>👤</span>`;
+    const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
+    const sl = c.gameStatus || 'PENDENTE';
+    return `<div class="char-card" onclick="showCharProfile('${c.id}')">
+      <div class="char-available ${c.status==='ocupado'?'occupied':'available'}"></div>
+      <div class="char-avatar">${img}</div>
+      <div class="char-name">${c.name.toUpperCase()}</div>
+      ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
+      <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterChars(f, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderChars(f);
+}
+
+function showCharProfile(id) {
+  const all = [...CHARS_DATA, ...approvedChars];
+  const c = all.find(x => x.id===id);
+  if(!c) return;
+  const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
+  const sl = c.gameStatus || 'DESCONHECIDO';
+  const imgHtml = c.imageUrl
+    ? `<img src="${c.imageUrl}" alt="${c.name}" class="profile-img">`
+    : c.minecraft
+    ? `<img src="https://mc-heads.net/body/${c.minecraft}/300" alt="${c.name}" class="profile-img">`
+    : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
+
+  const attrsHtml = c.attrs
+    ? `<div class="attrs-grid">${Object.entries(c.attrs).map(([k,v])=>`<div class="attr-box"><span class="attr-name">${k}</span><span class="attr-val">${v||'—'}</span></div>`).join('')}</div>`
+    : '<p style="color:var(--text-dim);font-size:0.85rem">Atributos não definidos.</p>';
+
+  const skillsHtml = c.skills && c.skills.length
+    ? `<div class="skills-grid">${c.skills.map(s=>`<div class="skill-item"><span class="skill-name">${s}</span><span class="skill-val">✓</span></div>`).join('')}</div>`
+    : '<p style="color:var(--text-dim);font-size:0.85rem">Perícias não definidas.</p>';
+
+  const historyHtml = c.history && c.history.length
+    ? c.history.map(h=>`<div class="history-item"><div class="history-date">${h.date||'DATA DESCONHECIDA'}</div><div class="history-desc">${h.desc}</div></div>`).join('')
+    : '<p style="color:var(--text-dim);font-size:0.85rem">Nenhum registro histórico.</p>';
+
+  document.getElementById('profileContent').innerHTML = `
+    <div class="profile-sidebar">
+      <div class="profile-img-container">${imgHtml}</div>
+      <div class="profile-status-box">
+        <div class="profile-status-label">// STATUS ATUAL //</div>
+        <div class="status-badge ${sc}" style="font-size:0.75rem;padding:0.4rem 1rem">${sl.toUpperCase()}</div>
+      </div>
+      <div class="profile-info-box">
+        <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${c.name}</span></div>
+        ${c.player?`<div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.player}</span></div>`:''}
+        ${c.nascimento?`<div class="profile-info-item"><span class="label">NASCIMENTO</span><span class="value">${c.nascimento}</span></div>`:''}
+        ${c.idade?`<div class="profile-info-item"><span class="label">IDADE</span><span class="value">${c.idade} anos</span></div>`:''}
+        <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>
+        <div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${c.status==='ocupado'?'var(--red-bright)':'#4caf50'}">${c.status==='ocupado'?'OCUPADA':'DISPONÍVEL'}</span></div>
+      </div>
+    </div>
+    <div class="profile-main">
+      ${c.fisico||c.personalidade?`<div class="profile-section"><h3>CARACTERÍSTICAS</h3>${c.fisico?`<p style="margin-bottom:1rem"><strong style="color:var(--silver)">Físico:</strong><br>${c.fisico}</p>`:''}${c.personalidade?`<p><strong style="color:var(--silver)">Personalidade:</strong><br>${c.personalidade}</p>`:''}</div>`:''}
+      ${c.backstory?`<div class="profile-section"><h3>HISTÓRIA</h3><p>${c.backstory}</p></div>`:''}
+      <div class="profile-section"><h3>SISTEMA</h3>
+        <div style="margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">ATRIBUTOS</div>
+        ${attrsHtml}
+        <div style="margin:1rem 0;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PERÍCIAS</div>
+        ${skillsHtml}
+      </div>
+      <div class="profile-section"><h3>HISTÓRICO</h3>${historyHtml}</div>
+    </div>`;
+  showPage('char-profile');
+}
+
+// ===== ATRIBUTOS =====
+function getUsedPoints() {
+  return Object.values(attrValues).reduce((s,v) => s+v, 0);
+}
+
+function buildAttrsForm() {
+  const g = document.getElementById('attrsGrid');
+  g.innerHTML = ATTRS.map(a => `
+    <div class="attr-ctrl">
+      <span class="attr-ctrl-name">${a}</span>
+      <div class="attr-ctrl-row">
+        <button class="attr-btn" onclick="changeAttr('${a}',-1)">−</button>
+        <span class="attr-display" id="av_${a}">${attrValues[a]}</span>
+        <button class="attr-btn" onclick="changeAttr('${a}',+1)">+</button>
+      </div>
+    </div>`).join('');
+  updatePointsDisplay();
+}
+
+function changeAttr(attr, delta) {
+  const cur = attrValues[attr];
+  const next = cur + delta;
+  if(next < 0) return; // não pode ir abaixo de 0
+  if(next > 5) return; // máximo 5
+  if(delta > 0 && getUsedPoints() >= MAX_ATTR_POINTS) return; // sem pontos sobrando
+  attrValues[attr] = next;
+  document.getElementById('av_'+attr).textContent = next;
+  // desabilita botão − se valor for 1
+  const btnMinus = document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',-1)"]`);
+  const btnPlus = document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',+1)"]`);
+  if(btnMinus) btnMinus.style.opacity = next <= 0 ? '0.3' : '1';
+  if(btnPlus) btnPlus.style.opacity = (getUsedPoints() >= MAX_ATTR_POINTS && next < 5) || next >= 5 ? '0.3' : '1';
+  updatePointsDisplay();
+}
+
+function updatePointsDisplay() {
+  const left = MAX_ATTR_POINTS - getUsedPoints();
+  document.getElementById('pointsLeft').textContent = left;
+}
+
+// ===== PERÍCIAS =====
+function buildSkillsForm() {
+  const g = document.getElementById('skillsGrid');
+  g.innerHTML = SKILLS.map(s => `
+    <label class="skill-check" id="sc_${s}" onclick="toggleSkill('${s}')">
+      <div class="skill-check-box" id="sb_${s}"></div>
+      <span class="skill-check-name">${s}</span>
+    </label>`).join('');
+  updateSkillsDisplay();
+}
+
+function toggleSkill(s) {
+  if(selectedSkills.has(s)) {
+    selectedSkills.delete(s);
+    document.getElementById('sc_'+s).classList.remove('selected');
+    document.getElementById('sb_'+s).textContent = '';
+  } else {
+    if(selectedSkills.size >= MAX_SKILLS) return;
+    selectedSkills.add(s);
+    document.getElementById('sc_'+s).classList.add('selected');
+    document.getElementById('sb_'+s).textContent = '✓';
+  }
+  updateSkillsDisplay();
+}
+
+function updateSkillsDisplay() {
+  document.getElementById('skillsLeft').textContent = MAX_SKILLS - selectedSkills.size;
+}
+
+// ===== SUBMIT =====
+function submitFicha() {
+  const nome = document.getElementById('f_nome').value.trim();
+  const player = document.getElementById('f_player').value.trim();
+  if(!nome || !player) { alert('Preencha ao menos o nome do personagem e do player.'); return; }
+  const imgVal = document.getElementById('f_imagem').value.trim();
+  const errEl = document.getElementById('f_imagem_err');
+  if(imgVal && !imgVal.match(/^https?:\/\/(i\.)?imgur\.com\//i)) {
+    errEl.style.display = 'block';
+    document.getElementById('f_imagem').focus();
+    return;
+  }
+  errEl.style.display = 'none';
+  const ficha = {
+    id: Date.now().toString(),
+    name: nome, player,
+    nascimento: document.getElementById('f_nascimento').value,
+    idade: document.getElementById('f_idade').value,
+    imageUrl: imgVal || '',
+    minecraft: '',
+    fisico: document.getElementById('f_fisico').value,
+    personalidade: document.getElementById('f_personalidade').value,
+    backstory: document.getElementById('f_backstory').value,
+    attrs: {...attrValues},
+    skills: [...selectedSkills],
+    gameStatus: 'vivo', status: 'disponivel', lang: 'custom', history: [], pending: true
+  };
+  pendingFichas.push(ficha);
+  localStorage.setItem('pendingFichas', JSON.stringify(pendingFichas));
+  document.getElementById('fichaForm').style.display = 'none';
+  document.getElementById('fichaSuccess').style.display = 'block';
+}
+
+// ===== ADMIN =====
+function checkAdmin() {
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value;
+  if(ADMINS.find(a => a.user.toLowerCase()===u.toLowerCase() && a.pass===p)) {
+    showPage('admin-panel'); renderPending();
+  } else {
+    document.getElementById('adminError').style.display = 'block';
+  }
+}
+
+function showAdminTab(id, btn) {
+  document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function renderPending() {
+  const list = document.getElementById('pendingList');
+  if(!list) return;
+  if(!pendingFichas.length) { list.innerHTML = '<div class="empty-state">NENHUMA FICHA PENDENTE</div>'; return; }
+  list.innerHTML = pendingFichas.map(f => `
+    <div class="pending-card" id="pc_${f.id}">
+      <div class="pending-info">
+        <h4>${f.name.toUpperCase()}</h4>
+        <p>// Player: ${f.player} // Enviado: ${new Date(parseInt(f.id)).toLocaleDateString('pt-BR')}</p>
+      </div>
+      <div class="pending-actions">
+        <button class="btn-approve" onclick="approveFicha('${f.id}')">✓ APROVAR</button>
+        <button class="btn-reject" onclick="rejectFicha('${f.id}')">✗ REJEITAR</button>
+      </div>
+    </div>`).join('');
+}
+
+function approveFicha(id) {
+  const idx = pendingFichas.findIndex(f => f.id===id);
+  if(idx===-1) return;
+  approvedChars.push({...pendingFichas[idx], pending:false});
+  pendingFichas.splice(idx,1);
+  localStorage.setItem('pendingFichas', JSON.stringify(pendingFichas));
+  localStorage.setItem('approvedChars', JSON.stringify(approvedChars));
+  renderPending();
+}
+
+function rejectFicha(id) {
+  pendingFichas = pendingFichas.filter(f => f.id!==id);
+  localStorage.setItem('pendingFichas', JSON.stringify(pendingFichas));
+  renderPending();
+}
+
+function saveFedPassword() {
+  localStorage.setItem('fedPassword', document.getElementById('cfg_fedPass').value);
+  document.getElementById('cfg_msg').style.display = 'block';
+  setTimeout(() => document.getElementById('cfg_msg').style.display='none', 2000);
+}
+
+// ===== FEDERAÇÃO SECRETA =====
+function checkFedAccess() {
+  const p = document.getElementById('fedPassword').value;
+  const stored = localStorage.getItem('fedPassword')||'';
+  if(stored && p===stored) {
+    document.getElementById('fedGate').style.display='none';
+    document.getElementById('fedContent').style.display='block';
+  } else {
+    document.getElementById('fedError').style.display='block';
+    setTimeout(()=>document.getElementById('fedError').style.display='none',3000);
+  }
+}
+
+// ===== INIT =====
+initImages();
+buildAttrsForm();
+buildSkillsForm();
+renderChars('all');
+</script>
+</body>
+</html>
