@@ -843,6 +843,22 @@
     await addDoc(collection(db, 'pendingFichas'), ficha);
   };
 
+  window._logAcaoAdmin = async function(acao, charName, player, adminUser) {
+    const { collection, addDoc } = window._fbModules;
+    const db = window._db;
+    await addDoc(collection(db, 'adminLog'), {
+      acao, charName, player, adminUser,
+      timestamp: new Date().toISOString()
+    });
+  };
+
+  window._getAdminLog = async function() {
+    const { collection, getDocs, query, orderBy } = window._fbModules;
+    const db = window._db;
+    const snap = await getDocs(query(collection(db, 'adminLog'), orderBy('timestamp','desc')));
+    return snap.docs.map(d => d.data());
+  };
+
   window._approveFichaFirebase = async function(ficha, fichaId) {
     const { collection, addDoc, doc, deleteDoc } = window._fbModules;
     const db = window._db;
@@ -1513,6 +1529,7 @@
       <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
       <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
       <button class="admin-tab" onclick="showAdminTab('senha-admin',this)">🔐 MINHA SENHA</button>
+      <button class="admin-tab" onclick="showAdminTab('log-admin',this);renderLogAdmin()">📋 LOG</button>
     </div>
     <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
     <div id="personagens-admin" class="admin-content"><div id="approvedList"><div class="empty-state">CARREGANDO...</div></div></div>
@@ -1546,6 +1563,14 @@
           </div>
         </div>
         <div id="fotosAdminGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem"></div>
+      </div>
+    </div>
+
+    <div id="log-admin" class="admin-content">
+      <div class="form-section">
+        <h3>LOG DE AÇÕES</h3>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem">Registro de todas as aprovações e rejeições de fichas.</p>
+        <div id="logAdminList"></div>
       </div>
     </div>
 
@@ -2175,16 +2200,16 @@ async function approveFicha(id) {
   const { id: _localId, ...fichaData } = ficha;
   try {
     if(fichaData.editRequest && fichaData.originalId) {
-      // Edição: atualiza a ficha original no Firestore em vez de criar nova
       const { doc, updateDoc } = window._fbModules;
       const db = window._db;
       const { editRequest, originalId, pending, ...cleanData } = fichaData;
       await updateDoc(doc(db, 'approvedChars', originalId), {...cleanData, pending: false, status: 'ocupado'});
-      // Remove da fila de pendentes
       await window._rejectFichaFirebase(id);
     } else {
       await window._approveFichaFirebase({...fichaData, pending:false, status: 'ocupado'}, id);
     }
+    // Log da ação
+    if(window._logAcaoAdmin) await window._logAcaoAdmin('APROVAÇÃO', ficha.name||'?', ficha.player||'?', window._adminUser||'?');
     return true;
   } catch(err) {
     console.error('Erro ao aprovar:', err);
@@ -2193,13 +2218,45 @@ async function approveFicha(id) {
 }
 
 async function rejectFicha(id) {
+  const ficha = (window.pendingFichas||[]).find(f => f.id===id);
   try {
     await window._rejectFichaFirebase(id);
+    // Log da ação
+    if(window._logAcaoAdmin && ficha) await window._logAcaoAdmin('REJEIÇÃO', ficha.name||'?', ficha.player||'?', window._adminUser||'?');
     return true;
   } catch(err) {
     console.error('Erro ao rejeitar:', err);
     return false;
   }
+}
+
+async function renderLogAdmin() {
+  const el = document.getElementById('logAdminList');
+  if(!el) return;
+  el.innerHTML = '<div style="font-family:\'Share Tech Mono\',monospace;font-size:0.75rem;color:var(--text-dim)">Carregando...</div>';
+  const logs = await window._getAdminLog();
+  if(!logs.length) { el.innerHTML = '<div class="empty-state">NENHUMA AÇÃO REGISTRADA</div>'; return; }
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+    <thead><tr style="border-bottom:2px solid var(--red)">
+      <th style="text-align:left;padding:0.6rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">DATA/HORA</th>
+      <th style="text-align:left;padding:0.6rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">AÇÃO</th>
+      <th style="text-align:left;padding:0.6rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PERSONAGEM</th>
+      <th style="text-align:left;padding:0.6rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PLAYER</th>
+      <th style="text-align:left;padding:0.6rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">ADMIN</th>
+    </tr></thead>
+    <tbody>${logs.map((l,i) => {
+      const cor = l.acao === 'APROVAÇÃO' ? '#4caf50' : 'var(--red-bright)';
+      const data = new Date(l.timestamp).toLocaleString('pt-BR');
+      const bg = i%2===0 ? 'var(--bg3)' : 'var(--bg2)';
+      return `<tr style="background:${bg};border-bottom:1px solid var(--border)">
+        <td style="padding:0.7rem 1rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.7rem">${data}</td>
+        <td style="padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;font-weight:700;color:${cor}">${l.acao}</td>
+        <td style="padding:0.7rem 1rem;color:var(--silver-bright)">${l.charName||'—'}</td>
+        <td style="padding:0.7rem 1rem;color:var(--text)">${l.player||'—'}</td>
+        <td style="padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;color:var(--pink)">${(l.adminUser||'?').toUpperCase()}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
 }
 
 async function redefinirSenhaAdmin() {
