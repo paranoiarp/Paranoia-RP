@@ -23,415 +23,103 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--red); }
 
   /* NAV */
   nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    background: rgba(10,10,10,0.97);
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(10px);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 60px;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,10,0.97); border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px); padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between; height: 60px;
   }
-
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-  }
-
-  .nav-logo img {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  .nav-logo span {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: #fff;
-    letter-spacing: 4px;
-  }
-
+  .nav-logo-wrap { position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .nav-logo-wrap img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; filter: drop-shadow(0 0 6px rgba(139,0,0,0.6)); }
+  /* FIX: nome PARANOIA na nav usa Orbitron igual ao hero */
+  .nav-logo-wrap span { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 900; color: #fff; letter-spacing: 4px; }
+  .admin-notify-badge { position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; background: #4caf50; border-radius: 50%; border: 2px solid var(--bg); animation: badgePulse 1s ease-in-out infinite; display: none; }
+  @keyframes badgePulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:0.7} }
   .nav-links { display: flex; gap: 0; list-style: none; }
+  .nav-links li a { display: block; padding: 0 1rem; height: 60px; line-height: 60px; color: var(--silver); text-decoration: none; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; transition: all 0.2s; border-bottom: 2px solid transparent; }
+  .nav-links li a:hover, .nav-links li a.active { color: #fff; border-bottom-color: var(--red-bright); }
+  .nav-mobile-btn { display: none; background: none; border: none; color: var(--silver); font-size: 1.5rem; cursor: pointer; }
 
-  .nav-links li a {
-    display: block;
-    padding: 0 1rem;
-    height: 60px;
-    line-height: 60px;
-    color: var(--silver);
-    text-decoration: none;
-    font-size: 0.75rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: 600;
-    transition: all 0.2s;
-    border-bottom: 2px solid transparent;
-  }
-
-  .nav-links li a:hover, .nav-links li a.active {
-    color: #fff;
-    border-bottom-color: var(--red-bright);
-  }
-
-  .nav-fed-logo {
-    width: 20px;
-    height: 20px;
-    vertical-align: middle;
-    margin-right: 4px;
-    filter: invert(1) brightness(0.6);
-  }
-
-  .nav-mobile-btn {
-    display: none;
-    background: none;
-    border: none;
-    color: var(--silver);
-    font-size: 1.5rem;
-    cursor: pointer;
-  }
-
-  /* PAGES */
+  /* PAGES — só mostra a ativa */
   .page { display: none; padding-top: 60px; min-height: 100vh; }
   .page.active { display: block; }
   #home { display: none; flex-direction: column; }
   #home.active { display: flex; }
 
   /* HERO */
-  .hero {
-    position: relative;
-    min-height: calc(100vh - 60px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 2rem;
-    overflow: hidden;
-  }
+  .hero { position: relative; min-height: calc(100vh - 60px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: repeat; opacity: 0.12; z-index: 0; }
+  .hero-overlay { position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.85) 70%, rgba(10,10,10,0.98) 100%); z-index: 1; }
+  .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(139,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(139,0,0,0.04) 1px, transparent 1px); background-size: 40px 40px; z-index: 2; }
+  .hero-content { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; }
+  .hero-logo { width: 160px; height: 160px; border-radius: 50%; margin-bottom: 2rem; filter: drop-shadow(0 0 40px rgba(139,0,0,0.9)); animation: pulse 4s ease-in-out infinite; object-fit: cover; }
+  @keyframes pulse { 0%,100%{filter:drop-shadow(0 0 20px rgba(139,0,0,0.4))} 50%{filter:drop-shadow(0 0 50px rgba(139,0,0,0.9))} }
+  .hero h1 { font-family: 'Orbitron', monospace; font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; color: #fff; letter-spacing: 12px; text-shadow: 0 0 40px rgba(139,0,0,0.8); }
+  .hero-divider { width: 200px; height: 1px; background: linear-gradient(90deg, transparent, var(--red), transparent); margin: 2rem auto; }
+  .hero-desc { max-width: 600px; font-size: 1.1rem; line-height: 1.9; color: var(--silver); font-weight: 400; }
+  .scroll-indicator { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; animation: bounce 2s infinite; z-index: 3; }
+  @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
 
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: repeat;
-    opacity: 0.12;
-    z-index: 0;
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.85) 70%, rgba(10,10,10,0.98) 100%);
-    z-index: 1;
-  }
-
-  .hero-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(139,0,0,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(139,0,0,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    z-index: 2;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .hero-logo {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    margin-bottom: 2rem;
-    filter: drop-shadow(0 0 30px rgba(139,0,0,0.6));
-    animation: pulse 4s ease-in-out infinite;
-    object-fit: cover;
-  }
-
-  @keyframes pulse {
-    0%, 100% { filter: drop-shadow(0 0 20px rgba(139,0,0,0.4)); }
-    50% { filter: drop-shadow(0 0 50px rgba(139,0,0,0.9)); }
-  }
-
-  .hero h1 {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(3rem, 8vw, 6rem);
-    font-weight: 900;
-    color: #fff;
-    letter-spacing: 12px;
-    text-shadow: 0 0 40px rgba(139,0,0,0.8);
-  }
-
-  .hero-divider {
-    width: 200px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--red), transparent);
-    margin: 2rem auto;
-  }
-
-  .hero-desc {
-    max-width: 600px;
-    font-size: 1.1rem;
-    line-height: 1.9;
-    color: var(--silver);
-    font-weight: 400;
-  }
-
-  .scroll-indicator {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-dim);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 2px;
-    animation: bounce 2s infinite;
-    z-index: 3;
-  }
-
-  @keyframes bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(8px); }
-  }
-
-  .highlights {
-    padding: 4rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .highlight-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 2rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .highlight-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px; height: 0;
-    background: var(--red-bright);
-    transition: height 0.3s;
-  }
-
+  .highlights { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+  .highlight-card { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+  .highlight-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 0; background: var(--red-bright); transition: height 0.3s; }
   .highlight-card:hover { border-color: var(--red); transform: translateY(-2px); }
   .highlight-card:hover::before { height: 100%; }
-
   .highlight-card .icon { font-size: 1.5rem; margin-bottom: 1rem; }
-
-  .highlight-card h3 {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.8rem;
-    letter-spacing: 3px;
-    color: var(--silver-bright);
-    margin-bottom: 0.8rem;
-  }
-
-  .highlight-card p { font-size: 1rem; color: var(--text-dim); line-height: 1.7; font-weight: 400; }
+  .highlight-card h3 { font-family: 'Orbitron', monospace; font-size: 0.8rem; letter-spacing: 3px; color: var(--silver-bright); margin-bottom: 0.8rem; }
+  .highlight-card p { font-size: 1rem; color: var(--text-dim); line-height: 1.7; }
 
   /* SECTION */
-  .section-header {
-    padding: 3rem 2rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 2rem;
-  }
-
-  .section-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--red-bright);
-    letter-spacing: 4px;
-    margin-bottom: 0.5rem;
-  }
-
-  .section-title {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(1.5rem, 4vw, 2.5rem);
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 4px;
-  }
-
+  .section-header { padding: 3rem 2rem 2rem; max-width: 1200px; margin: 0 auto; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  .section-label { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--red-bright); letter-spacing: 4px; margin-bottom: 0.5rem; }
+  .section-title { font-family: 'Orbitron', monospace; font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; color: #fff; letter-spacing: 4px; }
   .section-content { max-width: 1200px; margin: 0 auto; padding: 0 2rem 4rem; }
 
   /* HISTÓRIA */
   .lore-section { margin-bottom: 3rem; }
-
-  .lore-section h2 {
-    font-family: 'Orbitron', monospace;
-    font-size: 1rem;
-    letter-spacing: 3px;
-    color: var(--silver-bright);
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .lore-text { font-size: 1.05rem; line-height: 2; color: var(--text); font-weight: 400; max-width: 800px; }
+  .lore-section h2 { font-family: 'Orbitron', monospace; font-size: 1rem; letter-spacing: 3px; color: var(--silver-bright); margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .lore-text { font-size: 1.05rem; line-height: 2; color: var(--text); max-width: 800px; }
   .lore-text p { margin-bottom: 1.2rem; }
-
-  .event-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--red);
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-  }
-
+  .event-card { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--red); padding: 2rem; margin-bottom: 1.5rem; }
   .event-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-
-  .event-num {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--red-bright);
-    letter-spacing: 2px;
-    background: rgba(139,0,0,0.1);
-    padding: 0.3rem 0.6rem;
-    border: 1px solid var(--red);
-  }
-
+  .event-num { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--red-bright); letter-spacing: 2px; background: rgba(139,0,0,0.1); padding: 0.3rem 0.6rem; border: 1px solid var(--red); }
   .event-title { font-family: 'Orbitron', monospace; font-size: 0.9rem; letter-spacing: 2px; color: var(--silver-bright); }
-  .event-text { font-size: 1.05rem; line-height: 2; color: var(--text); font-weight: 400; }
+  .event-text { font-size: 1.05rem; line-height: 2; color: var(--text); }
   .event-text p { margin-bottom: 0.8rem; }
 
   /* REGRAS */
   .rules-block { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
-
-  .rules-block h2 {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.85rem;
-    letter-spacing: 3px;
-    color: var(--silver-bright);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .rules-block h2 span {
-    font-size: 0.65rem;
-    color: var(--red-bright);
-    border: 1px solid var(--red);
-    padding: 0.2rem 0.5rem;
-    font-family: 'Share Tech Mono', monospace;
-  }
-
-  .rule-item {
-    padding: 0.8rem 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 1rem;
-    line-height: 1.75;
-    color: var(--text);
-    display: flex;
-    gap: 1rem;
-  }
-
+  .rules-block h2 { font-family: 'Orbitron', monospace; font-size: 0.85rem; letter-spacing: 3px; color: var(--silver-bright); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .rules-block h2 span { font-size: 0.65rem; color: var(--red-bright); border: 1px solid var(--red); padding: 0.2rem 0.5rem; font-family: 'Share Tech Mono', monospace; }
+  .rule-item { padding: 0.8rem 0; border-bottom: 1px solid var(--border); font-size: 1rem; line-height: 1.75; color: var(--text); display: flex; gap: 1rem; }
   .rule-item:last-child { border-bottom: none; }
   .rule-item .rule-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--red-bright); min-width: 80px; padding-top: 0.2rem; letter-spacing: 1px; }
-
   .punishment-item { padding: 0.8rem 1rem; margin-bottom: 0.5rem; background: var(--bg3); border-left: 2px solid var(--red); font-size: 0.95rem; }
   .punishment-item strong { color: var(--red-bright); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 1px; display: block; margin-bottom: 0.3rem; }
 
   /* PERSONAGENS */
   .chars-filter { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
-
-  .filter-btn {
-    padding: 0.4rem 1rem;
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
-  }
-
+  .filter-btn { padding: 0.4rem 1rem; background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
   .filter-btn:hover, .filter-btn.active { border-color: var(--red); color: var(--red-bright); background: rgba(139,0,0,0.1); }
-
   .chars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
-
-  .char-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 1.5rem 1rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-
+  .char-card { background: var(--bg2); border: 1px solid var(--border); padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
   .char-card:hover { border-color: var(--red); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(139,0,0,0.2); }
-
-  .char-avatar {
-    width: 80px; height: 80px;
-    margin: 0 auto 1rem;
-    border-radius: 4px;
-    background: var(--bg3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-
+  .char-avatar { width: 80px; height: 80px; margin: 0 auto 1rem; border-radius: 4px; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 2rem; border: 1px solid var(--border); overflow: hidden; }
   .char-avatar img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
-
   .char-name { font-family: 'Orbitron', monospace; font-size: 0.7rem; letter-spacing: 2px; color: var(--silver-bright); margin-bottom: 0.5rem; }
   .char-player { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.8rem; font-family: 'Share Tech Mono', monospace; }
-
   .status-badge { display: inline-block; padding: 0.2rem 0.6rem; font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; border: 1px solid; }
   .status-vivo { color: #4caf50; border-color: #4caf50; background: rgba(76,175,80,0.1); }
-  .status-morto { color: #666; border-color: #444; background: rgba(0,0,0,0.3); }
+  .status-morto { color: #666; border-color: #444; }
   .status-desaparecido { color: #ff9800; border-color: #ff9800; background: rgba(255,152,0,0.1); }
   .status-contido { color: var(--red-bright); border-color: var(--red); background: rgba(139,0,0,0.1); }
   .status-pendente { color: var(--silver); border-color: var(--border); }
-
   .char-available { position: absolute; top: 0.5rem; right: 0.5rem; width: 8px; height: 8px; border-radius: 50%; }
   .available { background: #4caf50; box-shadow: 0 0 6px #4caf50; }
   .occupied { background: var(--red-bright); box-shadow: 0 0 6px var(--red-bright); }
@@ -439,23 +127,9 @@
   /* PROFILE */
   #char-profile { display: none; padding-top: 60px; min-height: 100vh; }
   #char-profile.active { display: block; }
-
   .profile-back { padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; }
-
-  .back-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--silver);
-    padding: 0.5rem 1.2rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
+  .back-btn { background: none; border: 1px solid var(--border); color: var(--silver); padding: 0.5rem 1.2rem; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
   .back-btn:hover { border-color: var(--red); color: var(--red-bright); }
-
   .profile-layout { max-width: 1200px; margin: 0 auto; padding: 0 2rem 4rem; display: grid; grid-template-columns: 300px 1fr; gap: 2rem; }
   .profile-sidebar { position: sticky; top: 80px; height: fit-content; }
   .profile-img-container { background: var(--bg2); border: 1px solid var(--border); padding: 1.5rem; text-align: center; margin-bottom: 1rem; }
@@ -469,18 +143,15 @@
   .profile-info-item .value { color: var(--silver-bright); font-weight: 500; }
   .profile-section { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
   .profile-section h3 { font-family: 'Orbitron', monospace; font-size: 0.75rem; letter-spacing: 3px; color: var(--red-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
-  .profile-section p { font-size: 1rem; line-height: 1.9; color: var(--text); font-weight: 400; }
-
+  .profile-section p { font-size: 1rem; line-height: 1.9; color: var(--text); }
   .attrs-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.8rem; margin-bottom: 2rem; }
   .attr-box { background: var(--bg3); border: 1px solid var(--border); padding: 1rem 0.5rem; text-align: center; }
   .attr-name { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--red-bright); letter-spacing: 1px; display: block; margin-bottom: 0.3rem; }
   .attr-val { font-family: 'Orbitron', monospace; font-size: 1.3rem; color: var(--silver-bright); font-weight: 700; }
-
   .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.5rem; }
   .skill-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.8rem; background: var(--bg3); border: 1px solid var(--border); font-size: 0.8rem; }
   .skill-name { color: var(--text); }
   .skill-val { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--red-bright); }
-
   .history-item { padding: 1rem; border-left: 2px solid var(--border); margin-bottom: 1rem; position: relative; }
   .history-item::before { content: ''; position: absolute; left: -5px; top: 1.2rem; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
   .history-date { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--red-bright); letter-spacing: 1px; margin-bottom: 0.3rem; }
@@ -490,11 +161,10 @@
   .fed-header { background: var(--bg2); border: 1px solid var(--border); border-top: 3px solid var(--red); padding: 3rem 2rem; text-align: center; margin-bottom: 2rem; position: relative; overflow: hidden; }
   .fed-header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(139,0,0,0.08) 0%, transparent 70%); }
   .fed-motto { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 1.5rem; position: relative; z-index: 1; line-height: 2.2; }
-  .fed-motto span { color: var(--red-bright); }
   .fed-block { background: var(--bg2); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; }
   .fed-block h2 { font-family: 'Orbitron', monospace; font-size: 0.85rem; letter-spacing: 3px; color: var(--silver-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
-  .fed-block p { font-size: 1rem; line-height: 2; color: var(--text); font-weight: 400; margin-bottom: 1rem; }
-  .hierarchy-tree { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; line-height: 2.2; color: var(--text-dim); }
+  .fed-block p { font-size: 1rem; line-height: 2; color: var(--text); margin-bottom: 1rem; }
+  .hierarchy-tree { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; line-height: 2.2; }
   .hierarchy-tree .top { color: var(--red-bright); }
   .hierarchy-tree .mid { color: var(--silver); padding-left: 1.5rem; }
   .hierarchy-tree .bot { color: var(--text-dim); padding-left: 3rem; }
@@ -503,9 +173,9 @@
   /* ACESSO NEGADO */
   .fed-secret-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 2rem; }
   .access-denied { font-family: 'Orbitron', monospace; font-size: clamp(1.5rem, 5vw, 3rem); color: var(--red-bright); letter-spacing: 8px; margin-bottom: 1rem; animation: flicker 3s infinite; }
-  @keyframes flicker { 0%, 95%, 100% { opacity: 1; } 96%, 99% { opacity: 0.3; } }
+  @keyframes flicker { 0%,95%,100%{opacity:1} 96%,99%{opacity:0.3} }
   .access-sub { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--text-dim); letter-spacing: 3px; margin-bottom: 1rem; }
-  .secret-input-group { display: flex; gap: 0; max-width: 400px; width: 100%; }
+  .secret-input-group { display: flex; max-width: 400px; width: 100%; }
   .secret-input { flex: 1; background: var(--bg2); border: 1px solid var(--red); border-right: none; color: var(--red-bright); padding: 0.8rem 1rem; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; letter-spacing: 3px; outline: none; text-transform: uppercase; }
   .secret-input::placeholder { color: var(--text-dim); letter-spacing: 1px; }
   .secret-btn { background: var(--red); border: 1px solid var(--red); color: #fff; padding: 0.8rem 1.5rem; font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; cursor: pointer; transition: background 0.2s; }
@@ -518,43 +188,32 @@
   .form-section h3 { font-family: 'Orbitron', monospace; font-size: 0.75rem; letter-spacing: 3px; color: var(--red-bright); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
   .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-  .form-group.full { grid-column: 1 / -1; }
+  .form-group.full { grid-column: 1/-1; }
   .form-group label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; }
   .form-group input, .form-group textarea, .form-group select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 0.7rem 1rem; font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; width: 100%; }
-  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--red); }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--red); }
   .form-group textarea { resize: vertical; min-height: 100px; }
-  .form-group select option { background: var(--bg3); }
-
-  /* ATRIBUTOS COM PONTOS */
-  .attrs-form-section { margin-bottom: 1.5rem; }
   .attrs-points-info { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 1rem; padding: 0.8rem; background: var(--bg3); border: 1px solid var(--border); }
   .attrs-points-remaining { color: var(--red-bright); font-size: 0.9rem; }
   .attrs-form-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.8rem; }
-
   .attr-ctrl { background: var(--bg3); border: 1px solid var(--border); padding: 1rem 0.5rem; text-align: center; }
   .attr-ctrl-name { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--red-bright); letter-spacing: 1px; display: block; margin-bottom: 0.6rem; }
   .attr-ctrl-row { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
-  .attr-btn { background: none; border: 1px solid var(--border); color: var(--silver); width: 24px; height: 24px; cursor: pointer; font-size: 1rem; line-height: 1; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+  .attr-btn { background: none; border: 1px solid var(--border); color: var(--silver); width: 24px; height: 24px; cursor: pointer; font-size: 1rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
   .attr-btn:hover { border-color: var(--red); color: var(--red-bright); }
   .attr-display { font-family: 'Orbitron', monospace; font-size: 1.2rem; color: var(--silver-bright); font-weight: 700; min-width: 24px; }
-
-  /* PERÍCIAS CHECK */
   .skills-info { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 1rem; padding: 0.8rem; background: var(--bg3); border: 1px solid var(--border); }
   .skills-remaining { color: var(--red-bright); font-size: 0.9rem; }
   .skills-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.5rem; }
-
   .skill-check { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; background: var(--bg3); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; user-select: none; }
   .skill-check:hover { border-color: var(--red); }
   .skill-check.selected { border-color: var(--red-bright); background: rgba(139,0,0,0.15); }
-  .skill-check input { display: none; }
-  .skill-check-box { width: 14px; height: 14px; border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: var(--red-bright); transition: all 0.2s; }
+  .skill-check-box { width: 14px; height: 14px; border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: var(--red-bright); }
   .skill-check.selected .skill-check-box { border-color: var(--red-bright); background: rgba(139,0,0,0.3); }
   .skill-check-name { font-size: 0.8rem; color: var(--text); }
   .skill-check.selected .skill-check-name { color: var(--silver-bright); }
-
   .submit-btn { width: 100%; padding: 1rem; background: var(--red); border: 1px solid var(--red-bright); color: #fff; font-family: 'Orbitron', monospace; font-size: 0.8rem; letter-spacing: 4px; cursor: pointer; transition: all 0.2s; margin-top: 1rem; }
   .submit-btn:hover { background: var(--red-bright); box-shadow: 0 0 20px rgba(204,0,0,0.3); }
-
   .form-success { display: none; text-align: center; padding: 3rem; background: var(--bg2); border: 1px solid var(--red); }
   .form-success h3 { font-family: 'Orbitron', monospace; font-size: 1rem; letter-spacing: 3px; color: var(--red-bright); margin-bottom: 1rem; }
   .form-success p { color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 1px; }
@@ -566,40 +225,18 @@
   .admin-tab:hover, .admin-tab.active { color: var(--red-bright); border-bottom-color: var(--red); }
   .admin-content { display: none; }
   .admin-content.active { display: block; }
-
   .pending-card { background: var(--bg2); border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
   .pending-info h4 { font-family: 'Orbitron', monospace; font-size: 0.8rem; letter-spacing: 2px; color: var(--silver-bright); margin-bottom: 0.3rem; }
   .pending-info p { font-size: 0.8rem; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; }
   .pending-actions { display: flex; gap: 0.5rem; }
-
   .btn-approve { padding: 0.4rem 1rem; background: rgba(76,175,80,0.1); border: 1px solid #4caf50; color: #4caf50; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
   .btn-approve:hover { background: rgba(76,175,80,0.2); }
   .btn-reject { padding: 0.4rem 1rem; background: rgba(139,0,0,0.1); border: 1px solid var(--red); color: var(--red-bright); font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
   .btn-reject:hover { background: rgba(139,0,0,0.2); }
-
   .empty-state { text-align: center; padding: 3rem; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 2px; border: 1px dashed var(--border); }
 
-  /* NOTIFICAÇÃO ADMIN */
-  .admin-notify-badge {
-    position: absolute;
-    top: -4px; right: -4px;
-    width: 12px; height: 12px;
-    background: #4caf50;
-    border-radius: 50%;
-    border: 2px solid var(--bg);
-    animation: badgePulse 1s ease-in-out infinite;
-    display: none;
-  }
-  @keyframes badgePulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.4); opacity: 0.7; }
-  }
-  .nav-logo-wrap { position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-  @keyframes logoPulseNotify {
-    0%, 100% { filter: drop-shadow(0 0 6px rgba(139,0,0,0.6)); }
-    50% { filter: drop-shadow(0 0 22px rgba(76,175,80,1)); }
-  }
-  .nav-logo-notify img { animation: logoPulseNotify 0.8s ease-in-out infinite !important; }
+  /* POPUP */
+  #charSelectPopup { display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,0.85); overflow-y:auto; padding:2rem; }
 
   @media (max-width: 768px) {
     .nav-links { display: none; flex-direction: column; position: absolute; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
@@ -617,138 +254,58 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, setDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
+  const app = initializeApp({
     apiKey: "AIzaSyAzdSLf-pBDkN8Z5kEh4JJXfEaNwRlph0",
     authDomain: "paranoia-rp.firebaseapp.com",
     projectId: "paranoia-rp",
     storageBucket: "paranoia-rp.firebasestorage.app",
     messagingSenderId: "1022899063017",
     appId: "1:1022899063017:web:48d614418df7bdb4234878"
-  };
-
-  const app = initializeApp(firebaseConfig);
+  });
   const db = getFirestore(app);
-
-  // Expor funções globais para o resto do script
   window._db = db;
-  window._fbModules = { collection, addDoc, getDocs, doc, deleteDoc, setDoc, onSnapshot, query, orderBy };
+  window._fbModules = { collection, addDoc, getDocs, doc, deleteDoc, setDoc, onSnapshot };
 
-  // Carregar fichas pendentes e aprovadas do Firestore
-  async function loadFromFirestore() {
-    const { getDocs, collection, onSnapshot, query, orderBy } = window._fbModules;
-    const db = window._db;
+  onSnapshot(collection(db,'pendingFichas'), snap => {
+    window.pendingFichas = snap.docs.map(d=>({id:d.id,...d.data()}));
+    pendingFichas = window.pendingFichas;
+    if(typeof renderPending==='function') renderPending();
+    if(typeof renderPopupChars==='function') renderPopupChars();
+    if(window._adminLogado) updateAdminNotify();
+  });
+  onSnapshot(collection(db,'approvedChars'), snap => {
+    window.approvedChars = snap.docs.map(d=>({id:d.id,...d.data()}));
+    approvedChars = window.approvedChars;
+    if(typeof renderChars==='function') renderChars('all');
+    if(typeof renderApprovedAdmin==='function') renderApprovedAdmin();
+    if(typeof renderPopupChars==='function') renderPopupChars();
+  });
 
-    // Pendentes
-    onSnapshot(collection(db, 'pendingFichas'), snap => {
-      window.pendingFichas = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      pendingFichas = window.pendingFichas;
-      if(typeof renderPending === 'function') renderPending();
-      if(typeof renderPopupChars === 'function') renderPopupChars();
-      // Atualiza notificação só se admin estiver logado
-      if(window._adminLogado) updateAdminNotify();
-    });
-
-    // Aprovados
-    onSnapshot(collection(db, 'approvedChars'), snap => {
-      window.approvedChars = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      approvedChars = window.approvedChars;
-      if(typeof renderChars === 'function') renderChars('all');
-      if(typeof renderApprovedAdmin === 'function') renderApprovedAdmin();
-      if(typeof renderPopupChars === 'function') renderPopupChars();
-    });
-  }
-
-  window._submitFichaFirebase = async function(ficha) {
-    const { collection, addDoc } = window._fbModules;
-    const db = window._db;
-    await addDoc(collection(db, 'pendingFichas'), ficha);
+  window._submitFichaFirebase = async ficha => { await addDoc(collection(db,'pendingFichas'),ficha); };
+  window._approveFichaFirebase = async (ficha,fichaId) => { await addDoc(collection(db,'approvedChars'),ficha); await deleteDoc(doc(db,'pendingFichas',fichaId)); };
+  window._rejectFichaFirebase = async fichaId => { await deleteDoc(doc(db,'pendingFichas',fichaId)); };
+  window._hashPassword = async pass => { const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pass)); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); };
+  window._checkAdminFirebase = async (user,pass) => {
+    const {getDoc} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const hash=await window._hashPassword(pass);
+    const snap=await getDoc(doc(db,'adminAuth',user.toLowerCase()));
+    return snap.exists() && snap.data().hash===hash;
   };
-
-  window._approveFichaFirebase = async function(ficha, fichaId) {
-    const { collection, addDoc, doc, deleteDoc } = window._fbModules;
-    const db = window._db;
-    await addDoc(collection(db, 'approvedChars'), ficha);
-    await deleteDoc(doc(db, 'pendingFichas', fichaId));
-  };
-
-  window._rejectFichaFirebase = async function(fichaId) {
-    const { doc, deleteDoc } = window._fbModules;
-    const db = window._db;
-    await deleteDoc(doc(db, 'pendingFichas', fichaId));
-  };
-
-  // ===== ADMIN AUTH VIA FIRESTORE =====
-  window._hashPassword = async function(pass) {
-    const enc = new TextEncoder().encode(pass);
-    const buf = await crypto.subtle.digest('SHA-256', enc);
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-  };
-
-  window._checkAdminFirebase = async function(user, pass) {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const db = window._db;
-    const hash = await window._hashPassword(pass);
-    const snap = await getDoc(doc(db, 'adminAuth', user.toLowerCase()));
-    if(!snap.exists()) return false;
-    return snap.data().hash === hash;
-  };
-
-  window._setAdminPasswordFirebase = async function(user, newPass) {
-    const { doc, setDoc } = window._fbModules;
-    const db = window._db;
-    const hash = await window._hashPassword(newPass);
-    await setDoc(doc(db, 'adminAuth', user.toLowerCase()), { hash, user });
-  };
-
-  window._adminExistsFirebase = async function(user) {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const db = window._db;
-    const snap = await getDoc(doc(db, 'adminAuth', user.toLowerCase()));
-    return snap.exists();
-  };
-
-  window._saveFedPasswordFirebase = async function(pass) {
-    const { doc, setDoc } = window._fbModules;
-    const db = window._db;
-    await setDoc(doc(db, 'config', 'fedPassword'), { value: pass });
-  };
-
-  window._getFedPasswordFirebase = async function() {
-    const { doc } = window._fbModules;
-    const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const db = window._db;
-    const snap = await getDoc(doc(db, 'config', 'fedPassword'));
-    return snap.exists() ? snap.data().value : '';
-  };
-
-  window._getPlayerEditKey = async function(senha) {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const db = window._db;
-    // Search all approved chars for matching edit key
-    const snap = await getDocs(collection(db, 'approvedChars'));
-    const found = snap.docs.find(d => d.data().editKey === senha);
-    return found ? found.data().player : null;
-  };
-
-  window._generateEditKey = async function(charId) {
-    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const db = window._db;
-    const key = Math.random().toString(36).substring(2, 8).toUpperCase();
-    await updateDoc(doc(db, 'approvedChars', charId), { editKey: key });
-    return key;
-  };
-
-  loadFromFirestore();
+  window._setAdminPasswordFirebase = async (user,pass) => { const hash=await window._hashPassword(pass); await setDoc(doc(db,'adminAuth',user.toLowerCase()),{hash,user}); };
+  window._adminExistsFirebase = async user => { const {getDoc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"); const snap=await getDoc(doc(db,'adminAuth',user.toLowerCase())); return snap.exists(); };
+  window._saveFedPasswordFirebase = async pass => { await setDoc(doc(db,'config','fedPassword'),{value:pass}); };
+  window._getFedPasswordFirebase = async () => { const {getDoc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"); const snap=await getDoc(doc(db,'config','fedPassword')); return snap.exists()?snap.data().value:''; };
+  window._generateEditKey = async charId => { const {updateDoc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"); const key=Math.random().toString(36).substring(2,8).toUpperCase(); await updateDoc(doc(db,'approvedChars',charId),{editKey:key}); return key; };
+  window._getPlayerEditKey = async senha => { const snap=await getDocs(collection(db,'approvedChars')); const found=snap.docs.find(d=>d.data().editKey===senha); return found?found.data().player:null; };
 </script>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-logo-wrap" onclick="showPage('home')" id="navLogoWrap2">
-    <img src="https://i.imgur.com/OSV9nga.png" id="navLogoImg" alt="PARANOIA" style="width:38px;height:38px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 6px rgba(139,0,0,0.6))">
+    <img src="https://i.imgur.com/OSV9nga.png" id="navLogoImg" alt="PARANOIA">
     <div class="admin-notify-badge" id="adminNotifyBadge"></div>
     <span>PARANOIA</span>
   </div>
@@ -772,46 +329,24 @@
     <div class="hero-overlay"></div>
     <div class="hero-grid"></div>
     <div class="hero-content">
-      <div id="heroLogoWrap" style="margin-bottom:2rem;width:160px;height:160px;position:relative;display:flex;align-items:center;justify-content:center">
-        <img id="heroLogo" src="https://i.imgur.com/OSV9nga.png" alt="PARANOIA" style="width:160px;height:160px;border-radius:50%;object-fit:cover;position:absolute;z-index:2;filter:drop-shadow(0 0 40px rgba(139,0,0,0.9));animation:pulse 4s ease-in-out infinite">
-      </div>
+      <img src="https://i.imgur.com/OSV9nga.png" class="hero-logo" alt="PARANOIA">
       <h1>PARANOIA</h1>
       <div class="hero-divider"></div>
       <p class="hero-desc">Cercada pelo mar e distante de qualquer grande centro conhecido, a Ilha Quesadilla se tornou o lar de pessoas vindas dos mais diferentes lugares. Cada uma trazendo consigo sua própria história, seus sonhos, seus medos e suas ambições.</p>
     </div>
     <div class="scroll-indicator">▼ EXPLORAR</div>
   </div>
-
   <div class="highlights">
-    <div class="highlight-card" onclick="showPage('historia')">
-      <div class="icon">📖</div>
-      <h3>HISTÓRIA</h3>
-      <p>Conheça o universo, os eventos que moldaram a ilha e os rastros deixados por quem passou por aqui.</p>
-    </div>
-    <div class="highlight-card" onclick="showPage('personagens')">
-      <div class="icon">👤</div>
-      <h3>PERSONAGENS</h3>
-      <p>Todos os habitantes registrados da Ilha Quesadilla. Seus rostos, suas histórias, seus status.</p>
-    </div>
-    <div class="highlight-card" onclick="showPage('federacao')">
-      <div class="icon">🏛️</div>
-      <h3>A FEDERAÇÃO</h3>
-      <p>A organização que administra a ilha. O que se sabe, o que se suspeita, e o que permanece em silêncio.</p>
-    </div>
-    <div class="highlight-card" onclick="showPage('ficha')">
-      <div class="icon">📋</div>
-      <h3>ENVIAR FICHA</h3>
-      <p>Quer fazer parte da história? Preencha sua ficha de personagem e aguarde aprovação.</p>
-    </div>
+    <div class="highlight-card" onclick="showPage('historia')"><div class="icon">📖</div><h3>HISTÓRIA</h3><p>Conheça o universo, os eventos que moldaram a ilha e os rastros deixados por quem passou por aqui.</p></div>
+    <div class="highlight-card" onclick="showPage('personagens')"><div class="icon">👤</div><h3>PERSONAGENS</h3><p>Todos os habitantes registrados da Ilha Quesadilla. Seus rostos, suas histórias, seus status.</p></div>
+    <div class="highlight-card" onclick="showPage('federacao')"><div class="icon">🏛️</div><h3>A FEDERAÇÃO</h3><p>A organização que administra a ilha. O que se sabe, o que se suspeita, e o que permanece em silêncio.</p></div>
+    <div class="highlight-card" onclick="showPage('ficha')"><div class="icon">📋</div><h3>ENVIAR FICHA</h3><p>Quer fazer parte da história? Preencha sua ficha de personagem e aguarde aprovação.</p></div>
   </div>
 </div>
 
 <!-- HISTÓRIA -->
 <div id="historia" class="page">
-  <div class="section-header">
-    <div class="section-label">// ARQUIVO NARRATIVO //</div>
-    <h1 class="section-title">HISTÓRIA</h1>
-  </div>
+  <div class="section-header"><div class="section-label">// ARQUIVO NARRATIVO //</div><h1 class="section-title">HISTÓRIA</h1></div>
   <div class="section-content">
     <div class="lore-section">
       <h2>SINOPSE</h2>
@@ -827,36 +362,17 @@
     <div class="lore-section">
       <h2>REGISTRO DE EVENTOS</h2>
       <div class="event-card">
-        <div class="event-header">
-          <div class="event-num">EVENTO I</div>
-          <div class="event-title">A CHEGADA</div>
-        </div>
+        <div class="event-header"><div class="event-num">EVENTO I</div><div class="event-title">A CHEGADA</div></div>
         <div class="event-text">
           <p>O sol estava se pondo quando os trens chegaram.</p>
-          <p>Os últimos raios solares do fim do dia batiam contra as janelas das locomotivas, acordando lentamente seus passageiros e tingindo o céu com um belo tom dourado, que logo daria lugar ao início do crepúsculo. Resquícios de estrelas já podiam ser vistos no horizonte. Longe das luzes artificiais das grandes cidades, os trens seguiam seu percurso sobre as águas calmas do mar, que ocasionalmente se chocavam contra as pilastras que sustentavam os trilhos. Era uma viagem bonita. Reconfortante, até. Mas a maior parte dos passageiros não sabia exatamente como havia chegado às poltronas de couro daqueles vagões.</p>
+          <p>Os últimos raios solares do fim do dia batiam contra as janelas das locomotivas, acordando lentamente seus passageiros e tingindo o céu com um belo tom dourado, que logo daria lugar ao início do crepúsculo. Longe das luzes artificiais das grandes cidades, os trens seguiam seu percurso sobre as águas calmas do mar. Era uma viagem bonita. Reconfortante, até. Mas a maior parte dos passageiros não sabia exatamente como havia chegado às poltronas de couro daqueles vagões.</p>
           <p>Cada um deles havia recebido um convite. Cada um deles havia tomado a mesma decisão: aceitar e descobrir onde aquela jornada os levaria.</p>
-          <p>Os apitos soaram juntos.</p>
-          <p>A estação que os recebeu era impressionante. Bem construída, cuidadosamente preservada e marcada por uma arquitetura rústica que transmitia uma estranha sensação de familiaridade. Ainda assim, algo estava errado. As luzes permaneciam apagadas. As catracas estavam travadas. As portinholas, lacradas. E no centro de tudo havia um muro — uma enorme estrutura de concreto que dividia a estação ao meio, destoando completamente do restante do ambiente.</p>
-          <p>Dois trens. Dois grupos. Uma parede entre eles.</p>
-          <p>De um lado estavam BadBoyHalo, Foolish, Jaiden, Philza e Slimecicle. Do outro, ElMariana, Missa Sinfonia, Roier e Spreen. A única forma de contato entre os dois grupos era uma pequena janela instalada no muro. No entanto, por mais que tentassem se comunicar, nenhuma voz parecia atravessar o vidro.</p>
-          <p>Enquanto exploravam a estação em busca de respostas, um detalhe chamou atenção. Em uma das extremidades do muro havia um terminal antigo acompanhado por uma sequência numérica gravada em uma placa metálica:</p>
-          <p><strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">4 12 15 22 23 12 6 22 2 12 21 17 22 6 1 15 12 16 26 19 8 21 11</strong></p>
-          <p>Do outro lado existia um terminal idêntico, mas com a tela completamente vazia.</p>
-          <p>O que se seguiu foi uma tentativa coletiva de decifrar o enigma. Slimecicle foi o primeiro a interagir com o terminal e, impulsivamente, pressionou Enter sem qualquer resposta válida. O choque elétrico que recebeu foi suficiente para derrubar qualquer entusiasmo inicial.</p>
-          <p>Enquanto isso, Spreen analisava a sequência numérica. Após algumas tentativas, percebeu que se tratava de uma cifra simples. A mensagem oculta era clara:</p>
-          <p><strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">WEHOPEYOUENJOYTHEISLAND</strong></p>
-          <p>A frase precisava ser enviada ao outro grupo. A comunicação, porém, era limitada.</p>
-          <p>Depois de algumas trocas improvisadas através da janela, a solução finalmente chegou ao lado oposto. Mas havia um detalhe que ninguém havia considerado: os espaços.</p>
-          <p>Impaciente, Slimecicle digitou a frase inteira sem separações.</p>
-          <p>O resultado foi imediato.</p>
-          <p>Uma descarga violenta percorreu o terminal e fez seu braço explodir em fragmentos de gosma, espalhando queimaduras em quem estava próximo. Do outro lado, Spreen cometeu o mesmo erro e foi lançado para trás pela força da descarga.</p>
-          <p>Foi Philza quem percebeu o problema. Com uma simples observação sobre a ausência de espaços entre as palavras, levou Jaiden à resposta correta. Sem hesitar, ela digitou:</p>
-          <p><strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">We Hope You Enjoy The Island</strong></p>
-          <p>Por alguns segundos, nada aconteceu. Então um pequeno rosto sorridente surgiu na tela: <strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">:]</strong></p>
-          <p>As luzes da estação começaram a se acender. Os mecanismos voltaram a funcionar. As catracas destravaram. E o enorme muro que os separava começou lentamente a descer.</p>
-          <p>Pela primeira vez desde que chegaram, os dois grupos puderam se ver, se ouvir e se encontrar.</p>
-          <p>Acima dos terminais, uma última mensagem apareceu:</p>
-          <p><strong style="color:var(--silver-bright)">"Esperamos que aproveitem a ilha."</strong></p>
+          <p>A estação que os recebeu era impressionante — bem construída e cuidadosamente preservada. Ainda assim, algo estava errado. As luzes permaneciam apagadas. As catracas, travadas. E no centro de tudo havia um muro que dividia a estação ao meio. Dois trens. Dois grupos. Uma parede entre eles.</p>
+          <p>De um lado estavam BadBoyHalo, Foolish, Jaiden, Philza e Slimecicle. Do outro, ElMariana, Missa Sinfonia, Roier e Spreen. A única forma de contato era uma pequena janela no muro, por onde nenhuma voz atravessava.</p>
+          <p>Em uma das extremidades havia um terminal antigo com uma sequência gravada em placa metálica: <strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">4 12 15 22 23 12 6 22 2 12 21 17 22 6 1 15 12 16 26 19 8 21 11</strong></p>
+          <p>Slimecicle foi o primeiro a interagir com o terminal — e o primeiro a levar um choque. Spreen decifrou a cifra: <strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">WEHOPEYOUENJOYTHEISLAND</strong>. A mensagem chegou ao outro lado, mas os espaços foram ignorados. Slimecicle e Spreen pagaram o preço — um com o braço explodido em gosma, o outro arremessado pela descarga.</p>
+          <p>Foi Philza quem percebeu o problema. Com uma simples observação sobre os espaços, levou Jaiden à resposta. Ela digitou: <strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">We Hope You Enjoy The Island</strong></p>
+          <p>As luzes se acenderam. O muro desceu. Pela primeira vez, os dois grupos puderam se ver. E acima dos terminais, uma última mensagem: <strong style="color:var(--silver-bright)">"Esperamos que aproveitem a ilha."</strong></p>
         </div>
       </div>
     </div>
@@ -865,202 +381,107 @@
 
 <!-- REGRAS -->
 <div id="regras" class="page">
-  <div class="section-header">
-    <div class="section-label">// DIRETRIZES DO SERVIDOR //</div>
-    <h1 class="section-title">REGRAS</h1>
-  </div>
+  <div class="section-header"><div class="section-label">// DIRETRIZES DO SERVIDOR //</div><h1 class="section-title">REGRAS</h1></div>
   <div class="section-content">
     <div class="rules-block">
       <h2>CUIDADOS <span>ATENÇÃO</span></h2>
       <div class="rule-item"><span class="rule-label">OFF-TOPIC</span><span>Não converse nos canais de turno. Caso queira comentar algo, utilize um dos chats off.</span></div>
-      <div class="rule-item"><span class="rule-label">AUSÊNCIA</span><span>Toleramos até 5 dias de ausência antes de você ser notificado sobre o risco de perder sua vaga. Se precisar ficar offline por mais tempo, abra um ticket no suporte e comunique sua justificativa.</span></div>
+      <div class="rule-item"><span class="rule-label">AUSÊNCIA</span><span>Toleramos até 5 dias de ausência antes de você ser notificado sobre o risco de perder sua vaga. Se precisar ficar offline por mais tempo, abra um ticket no suporte.</span></div>
       <div class="rule-item"><span class="rule-label">METAGAME</span><span>Não use nos turnos informações que você obteve no off e que seu personagem não teria como saber.</span></div>
       <div class="rule-item"><span class="rule-label">GATILHOS</span><span>Quando turnar tópicos sensíveis, coloque um aviso de gatilho e censure utilizando || no início e no final do trecho.</span></div>
     </div>
     <div class="rules-block">
       <h2>PROIBIÇÕES <span>OBRIGATÓRIO</span></h2>
-      <div class="rule-item"><span class="rule-label">01</span><span>Ofensas e desrespeito, de qualquer modo, aos membros.</span></div>
+      <div class="rule-item"><span class="rule-label">01</span><span>Ofensas e desrespeito de qualquer modo aos membros.</span></div>
       <div class="rule-item"><span class="rule-label">02</span><span>Exposição de informações pessoais de um membro sem consentimento.</span></div>
       <div class="rule-item"><span class="rule-label">03</span><span>Criação de panelinhas de qualquer tipo.</span></div>
       <div class="rule-item"><span class="rule-label">04</span><span>Trazer assuntos do on para o off e vice-versa. Separe o personagem do jogador.</span></div>
       <div class="rule-item"><span class="rule-label">05</span><span>Construção de plots envolvendo outro personagem sem consentimento prévio.</span></div>
       <div class="rule-item"><span class="rule-label">06</span><span>Turnos NSFW nos chats públicos.</span></div>
       <div class="rule-item"><span class="rule-label">07</span><span>Pedidos para adição própria na Staff toda hora.</span></div>
-      <div class="rule-item" style="border-top:1px solid var(--red);margin-top:0.5rem;color:var(--red-bright)"><span class="rule-label" style="color:var(--red-bright)">ZERO</span><span>Preconceito e intolerância de qualquer tipo são terminantemente PROIBIDOS — ban permanente IMEDIATO.</span></div>
+      <div class="rule-item" style="color:var(--red-bright);border-top:1px solid var(--red);margin-top:0.5rem"><span class="rule-label" style="color:var(--red-bright)">ZERO</span><span>Preconceito e intolerância de qualquer tipo — ban permanente IMEDIATO.</span></div>
     </div>
     <div class="rules-block">
       <h2>PUNIÇÕES <span>SISTEMA</span></h2>
       <div class="punishment-item"><strong>WARNING</strong>Um aviso verbal da Staff.</div>
-      <div class="punishment-item"><strong>TIMEOUT</strong>Por tempo determinado, você fica impossibilitado de mandar mensagem nos canais ou entrar em calls.</div>
-      <div class="punishment-item"><strong>RESET</strong>Seu inventário na loja é resetado e você perde todo o seu dinheiro e/ou itens.</div>
-      <div class="punishment-item"><strong>BAN PERMANENTE</strong>Você é banido permanentemente do servidor.</div>
-      <div style="margin-top:1rem;padding:1rem;background:var(--bg3);border-left:2px solid var(--text-dim);font-size:0.85rem;color:var(--text-dim)">Cabe aos Administradores a decisão de qual punição aplicar. É proibido evadir punições. Três punições no mesmo mês acarretam em ban.</div>
+      <div class="punishment-item"><strong>TIMEOUT</strong>Por tempo determinado, impossibilitado de mandar mensagem nos canais ou entrar em calls.</div>
+      <div class="punishment-item"><strong>RESET</strong>Inventário resetado — perde dinheiro e/ou itens.</div>
+      <div class="punishment-item"><strong>BAN PERMANENTE</strong>Banido permanentemente do servidor.</div>
+      <div style="margin-top:1rem;padding:1rem;background:var(--bg3);border-left:2px solid var(--text-dim);font-size:0.85rem;color:var(--text-dim)">Cabe aos Administradores a decisão de qual punição aplicar. Três punições no mesmo mês acarretam em ban.</div>
     </div>
   </div>
 </div>
 
 <!-- SISTEMA DO RP -->
 <div id="sistema" class="page">
-  <div class="section-header">
-    <div class="section-label">// MANUAL DE REGRAS //</div>
-    <h1 class="section-title">SISTEMA DO RP</h1>
-  </div>
+  <div class="section-header"><div class="section-label">// MANUAL DE REGRAS //</div><h1 class="section-title">SISTEMA DO RP</h1></div>
   <div class="section-content">
-
-    <!-- INICIATIVA -->
     <div class="rules-block" style="border-top:3px solid var(--red)">
       <h2>🎲 DADOS DE INICIATIVA <span>INÍCIO DO COMBATE</span></h2>
-      <div class="rule-item">
-        <span class="rule-label">PADRÃO</span>
-        <span><strong style="color:var(--silver-bright)">1d20</strong> — Aplicado a todos os participantes do combate.</span>
-      </div>
-      <div class="rule-item">
-        <span class="rule-label">VANTAGEM</span>
-        <span><strong style="color:var(--silver-bright)">2d20</strong> (utiliza-se o maior resultado) — Ocorre apenas se o jogador identificar o perigo antes do combate, com validação do mestre.</span>
-      </div>
+      <div class="rule-item"><span class="rule-label">PADRÃO</span><span><strong style="color:var(--silver-bright)">1d20</strong> — Aplicado a todos os participantes do combate.</span></div>
+      <div class="rule-item"><span class="rule-label">VANTAGEM</span><span><strong style="color:var(--silver-bright)">2d20</strong> (utiliza-se o maior resultado) — Ocorre apenas se o jogador identificar o perigo antes do combate, com validação do mestre.</span></div>
     </div>
-
-    <!-- DANO -->
     <div class="rules-block">
       <h2>⚔️ DADOS DE DANO <span>ARMAS E BRIGA</span></h2>
-      <div class="rule-item"><span class="rule-label">BRIGA</span><span><strong style="color:var(--silver-bright)">1d5 + FOR</strong> — Desarmado, usa o valor de Força do personagem.</span></div>
+      <div class="rule-item"><span class="rule-label">BRIGA</span><span><strong style="color:var(--silver-bright)">1d5 + FOR</strong> — Desarmado.</span></div>
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
         <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">CORPO A CORPO (ARMADO)</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Madeira → 1d4</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Pedra → 1d5</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Ferro → 1d6</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Diamante → 1d7</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Netherite → 1d8</div>
-        </div>`).join('')}
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace">Madeira → 1d4</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace">Pedra → 1d5</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace">Ferro → 1d6</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace">Diamante → 1d7</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace">Netherite → 1d8</div>
         </div>
       </div>
       <div style="padding:0.8rem 0">
         <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.8rem">DISTÂNCIA</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Arco → 1d6</div>
-          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace;color:var(--text)">Besta → 1d7</div>
-        </div>`).join('')}
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace">Arco → 1d6</div>
+          <div style="padding:0.6rem 0.8rem;background:var(--bg3);border:1px solid var(--border);font-size:0.85rem;font-family:'Share Tech Mono',monospace">Besta → 1d7</div>
         </div>
       </div>
     </div>
-
-    <!-- DEFESA -->
     <div class="rules-block">
       <h2>🛡️ DADOS DE DEFESA <span>ESCUDO E ARMADURA</span></h2>
-      <div class="rule-item">
-        <span class="rule-label">ESCUDO</span>
-        <span><strong style="color:var(--silver-bright)">1d3</strong> — Defesa ativa. Requer declaração de ação no turno.<br>
-        <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim)">
-          Resultado 3 → Bloqueio Total (dano anulado) &nbsp;|&nbsp;
-          Resultado 2 → Bloqueio Parcial (dano reduzido à metade) &nbsp;|&nbsp;
-          Resultado 1 → Falha (dano passa para armadura)
-        </span></span>
-      </div>
-      <div class="rule-item">
-        <span class="rule-label">ARMADURA</span>
-        <span>Defesa passiva. Requer anúncio prévio de que está equipada.<br>
-        <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim)">
-          Ferro → reduz 1d4 &nbsp;|&nbsp; Diamante → reduz 1d6 &nbsp;|&nbsp; Netherite → reduz 1d7
-        </span></span>
-      </div>
+      <div class="rule-item"><span class="rule-label">ESCUDO</span><span><strong style="color:var(--silver-bright)">1d3</strong> — Defesa ativa. Requer declaração de ação no turno.<br><span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim)">3 → Bloqueio Total &nbsp;|&nbsp; 2 → Bloqueio Parcial (metade do dano) &nbsp;|&nbsp; 1 → Falha</span></span></div>
+      <div class="rule-item"><span class="rule-label">ARMADURA</span><span>Defesa passiva.<br><span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim)">Ferro → reduz 1d4 &nbsp;|&nbsp; Diamante → reduz 1d6 &nbsp;|&nbsp; Netherite → reduz 1d7</span></span></div>
     </div>
-
-    <!-- FLUXO DE TURNO -->
     <div class="rules-block">
       <h2>🔄 FLUXO DE TURNO <span>COMBATE</span></h2>
-      <div class="rule-item"><span class="rule-label">AÇÕES</span><span><strong style="color:var(--silver-bright)">1 Ação Principal + 1 Ação Secundária</strong> + Narrativa livre por turno.</span></div>
-      <div class="rule-item">
-        <span class="rule-label">RESOLUÇÃO</span>
-        <span>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;line-height:2.2;color:var(--text-dim)">
-            <span style="color:var(--red-bright)">1.</span> Ataque acerta &nbsp;→&nbsp;
-            <span style="color:var(--red-bright)">2.</span> Escudo (1d3) tenta defender &nbsp;→&nbsp;
-            <span style="color:var(--red-bright)">3.</span> Dano restante vai à armadura &nbsp;→&nbsp;
-            <span style="color:var(--red-bright)">4.</span> Armadura reduz &nbsp;→&nbsp;
-            <span style="color:var(--red-bright)">5.</span> Resultado final é subtraído do HP
-          </div>
-        </span>
-      </div>
+      <div class="rule-item"><span class="rule-label">AÇÕES</span><span><strong style="color:var(--silver-bright)">1 Ação Principal + 1 Ação Secundária</strong> + Narrativa livre.</span></div>
+      <div class="rule-item"><span class="rule-label">RESOLUÇÃO</span><span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-dim)">Ataque → Escudo (1d3) → Armadura → HP</span></div>
     </div>
-
-    <!-- HP E ESTADOS -->
     <div class="rules-block">
       <h2>❤️ VIDA E ESTADOS <span>HP BASE: 20</span></h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem;margin-bottom:1rem">
-        <div style="padding:1rem;background:var(--bg3);border:1px solid #4caf50;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#4caf50;letter-spacing:1px;margin-bottom:0.3rem">NORMAL</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">20 – 15</div>
-        </div>
-        <div style="padding:1rem;background:var(--bg3);border:1px solid #ff9800;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#ff9800;letter-spacing:1px;margin-bottom:0.3rem">FERIDO</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">14 – 10</div>
-        </div>
-        <div style="padding:1rem;background:var(--bg3);border:1px solid #f44336;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#f44336;letter-spacing:1px;margin-bottom:0.3rem">GRAVE</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">9 – 5</div>
-        </div>
-        <div style="padding:1rem;background:rgba(139,0,0,0.3);border:1px solid var(--red-bright);text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.3rem">CRÍTICO</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">4 – 1</div>
-        </div>
-        <div style="padding:1rem;background:rgba(0,0,0,0.5);border:1px solid #444;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#666;letter-spacing:1px;margin-bottom:0.3rem">INCONSCIENTE</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:#555">0</div>
-        </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem;margin-bottom:1rem">
+        <div style="padding:1rem;background:var(--bg3);border:1px solid #4caf50;text-align:center"><div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#4caf50;margin-bottom:0.3rem">NORMAL</div><div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">20–15</div></div>
+        <div style="padding:1rem;background:var(--bg3);border:1px solid #ff9800;text-align:center"><div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#ff9800;margin-bottom:0.3rem">FERIDO</div><div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">14–10</div></div>
+        <div style="padding:1rem;background:var(--bg3);border:1px solid #f44336;text-align:center"><div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#f44336;margin-bottom:0.3rem">GRAVE</div><div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">9–5</div></div>
+        <div style="padding:1rem;background:rgba(139,0,0,0.3);border:1px solid var(--red-bright);text-align:center"><div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);margin-bottom:0.3rem">CRÍTICO</div><div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">4–1</div></div>
+        <div style="padding:1rem;background:rgba(0,0,0,0.5);border:1px solid #444;text-align:center"><div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#666;margin-bottom:0.3rem">INCONSCIENTE</div><div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:#555">0</div></div>
       </div>
-      <div class="rule-item">
-        <span class="rule-label">IMPACTO</span>
-        <span>Receber mais de <strong style="color:var(--silver-bright)">10 de dano</strong> em um único ataque: personagem fica <strong style="color:var(--red-bright)">incapacitado por 2 turnos</strong> (sem atacar ou usar escudo). O mestre pode ajustar.</span>
-      </div>
+      <div class="rule-item"><span class="rule-label">IMPACTO</span><span>Receber mais de <strong style="color:var(--silver-bright)">10 de dano</strong> em um único ataque: <strong style="color:var(--red-bright)">incapacitado por 2 turnos</strong>.</span></div>
     </div>
-
-    <!-- MORTE E ESTABILIZAÇÃO -->
     <div class="rules-block">
       <h2>💀 MORTE E ESTABILIZAÇÃO <span>0 HP</span></h2>
-      <div class="rule-item"><span class="rule-label">TEMPO</span><span>O personagem tem até <strong style="color:var(--silver-bright)">3 rodadas</strong> após chegar a 0 HP.</span></div>
-      <div class="rule-item"><span class="rule-label">AÇÃO</span><span>Um aliado deve usar seu turno para realizar um <strong style="color:var(--silver-bright)">Teste de Medicina</strong> — ficando vulnerável a ataques.</span></div>
-      <div class="rule-item"><span class="rule-label">SUCESSO</span><span>Estabilização rola <strong style="color:var(--silver-bright)">1d6</strong> de HP recuperado instantaneamente.</span></div>
-      <div class="rule-item" style="color:var(--red-bright)"><span class="rule-label">FALHA</span><span>Se as 3 rodadas passarem sem estabilização — <strong style="color:var(--red-bright)">o personagem morre.</strong></span></div>
+      <div class="rule-item"><span class="rule-label">TEMPO</span><span>Até <strong style="color:var(--silver-bright)">3 rodadas</strong> após chegar a 0 HP.</span></div>
+      <div class="rule-item"><span class="rule-label">AÇÃO</span><span>Aliado usa turno para <strong style="color:var(--silver-bright)">Teste de Medicina</strong>.</span></div>
+      <div class="rule-item"><span class="rule-label">SUCESSO</span><span>Rola <strong style="color:var(--silver-bright)">1d6</strong> de HP recuperado.</span></div>
+      <div class="rule-item" style="color:var(--red-bright)"><span class="rule-label">FALHA</span><span><strong style="color:var(--red-bright)">O personagem morre.</strong></span></div>
     </div>
-
-    <!-- DURABILIDADE -->
-    <div class="rules-block">
-      <h2>🔧 DURABILIDADE DE ITENS <span>DESGASTE</span></h2>
-      <div class="rule-item"><span class="rule-label">GATILHO</span><span>Cada dano que ultrapassar a absorção do item exige um <strong style="color:var(--silver-bright)">Teste de Resistência</strong> (ex: 1d6).</span></div>
-      <div class="rule-item">
-        <span class="rule-label">ESTADOS</span>
-        <span>
-          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.4rem">
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#4caf50">Inteiro</span>
-            <span style="color:var(--text-dim);align-self:center">→</span>
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#ff9800">Danificado</span>
-            <span style="color:var(--text-dim);align-self:center">→</span>
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#f44336">Muito Danificado</span>
-            <span style="color:var(--text-dim);align-self:center">→</span>
-            <span style="padding:0.3rem 0.7rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;border:1px solid var(--border);color:#666">Quebrado</span>
-          </div>
-        </span>
-      </div>
-    </div>
-
-    <!-- RESPAWN -->
     <div class="rules-block">
       <h2>🔁 RESPAWN <span>APÓS A MORTE</span></h2>
       <div class="rule-item"><span class="rule-label">TEMPO</span><span><strong style="color:var(--silver-bright)">3 horas reais</strong> após o fim do combate.</span></div>
       <div class="rule-item"><span class="rule-label">LOCAL</span><span>Spawn do servidor, casa do jogador ou local definido pelo mestre.</span></div>
-      <div class="rule-item"><span class="rule-label">PENALIDADES</span><span>Perda total de inventário, retorno tardio e impactos narrativos.</span></div>
+      <div class="rule-item"><span class="rule-label">PENALIDADES</span><span>Perda total de inventário e impactos narrativos.</span></div>
     </div>
-
   </div>
 </div>
 
 <!-- PERSONAGENS -->
 <div id="personagens" class="page">
-  <div class="section-header">
-    <div class="section-label">// REGISTRO DE HABITANTES //</div>
-    <h1 class="section-title">PERSONAGENS</h1>
-  </div>
+  <div class="section-header"><div class="section-label">// REGISTRO DE HABITANTES //</div><h1 class="section-title">PERSONAGENS</h1></div>
   <div class="section-content">
     <div class="chars-filter">
       <button class="filter-btn active" onclick="filterChars('all',this)">TODOS</button>
@@ -1084,17 +505,14 @@
   <div class="profile-layout" id="profileContent"></div>
 </div>
 
-<!-- FEDERAÇÃO PÚBLICA -->
+<!-- FEDERAÇÃO -->
 <div id="federacao" class="page">
-  <div class="section-header">
-    <div class="section-label">// ARQUIVO PÚBLICO //</div>
-    <h1 class="section-title">A FEDERAÇÃO</h1>
-  </div>
+  <div class="section-header"><div class="section-label">// ARQUIVO PÚBLICO //</div><h1 class="section-title">A FEDERAÇÃO</h1></div>
   <div class="section-content">
     <div class="fed-header">
-      <img src="https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png" id="fedHeaderLogo" style="width:280px;height:280px;object-fit:contain;filter:invert(1) brightness(2);mix-blend-mode:screen;margin:0 auto 1.5rem;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
+      <img src="https://i.imgur.com/kQZqKJL.png" style="width:200px;height:200px;object-fit:contain;filter:invert(1) brightness(0.85);margin:0 auto 1.5rem;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
       <div class="fed-motto">
-        <span>"Esperamos que aproveite a ilha."</span><br>
+        <span style="color:var(--red-bright)">"Esperamos que aproveite a ilha."</span><br>
         <span>"We hope you enjoy the island."</span><br>
         <span>"Disfruta la isla."</span>
       </div>
@@ -1107,9 +525,7 @@
     </div>
     <div class="fed-block">
       <h2>ESTRUTURA CONHECIDA</h2>
-      <p>A Federação opera através de uma hierarquia ainda pouco compreendida pelos residentes. No topo, existe uma figura conhecida apenas como <strong style="color:var(--silver-bright)">The Host</strong> — cuja identidade permanece completamente desconhecida.</p>
-      <p>As comunicações oficiais são feitas através do <strong style="color:var(--silver-bright)">Mr. Duck</strong>, gerente oficial da ilha, que se comunica exclusivamente por transmissões e anúncios gravados. Nenhum encontro presencial foi documentado até o momento.</p>
-      <p>Em campo, a Federação é representada pelos <strong style="color:var(--silver-bright)">Cucuruchos</strong> — agentes identificáveis por sua aparência característica, responsáveis pela aplicação das regras e pela interação direta com os residentes.</p>
+      <p>No topo existe uma figura conhecida apenas como <strong style="color:var(--silver-bright)">The Host</strong> — cuja identidade permanece completamente desconhecida. As comunicações oficiais são feitas através do <strong style="color:var(--silver-bright)">Mr. Duck</strong>, gerente oficial da ilha. Em campo, a Federação é representada pelos <strong style="color:var(--silver-bright)">Cucuruchos</strong>.</p>
       <div class="hierarchy-tree" style="margin-top:1.5rem;padding:1.5rem;background:var(--bg3);border:1px solid var(--border)">
         <div class="top">▶ THE HOST</div>
         <div class="mid">└─ MR. DUCK — Gerente da Ilha</div>
@@ -1119,9 +535,7 @@
     </div>
     <div class="fed-block">
       <h2>O QUE SE SABE</h2>
-      <p>A Federação está presente na ilha desde o primeiro dia. Foi ela quem construiu a estação. Foi ela quem ergueu o muro que dividia os recém-chegados. E foi ela quem, ao final, deixou sua mensagem nas placas.</p>
-      <p>Ela observa. Ela registra. Ela administra.</p>
-      <p>Por enquanto, é tudo que se sabe com certeza.</p>
+      <p>Ela observa. Ela registra. Ela administra. Por enquanto, é tudo que se sabe com certeza.</p>
       <div style="margin-top:1.5rem;padding:1rem;background:var(--bg3);border-left:2px solid var(--red);font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px">
         Informações adicionais serão atualizadas conforme novos dados se tornarem disponíveis.<br>
         <span style="color:var(--red-bright)">— Arquivo público. Classificação: ABERTO.</span>
@@ -1132,10 +546,7 @@
 
 <!-- FEDERAÇÃO SECRETA -->
 <div id="fed-secret" class="page">
-  <div class="section-header">
-    <div class="section-label">// ACESSO RESTRITO //</div>
-    <h1 class="section-title" style="color:var(--red-bright)">FEDERAÇÃO</h1>
-  </div>
+  <div class="section-header"><div class="section-label">// ACESSO RESTRITO //</div><h1 class="section-title" style="color:var(--red-bright)">FEDERAÇÃO</h1></div>
   <div class="fed-secret-gate" id="fedGate">
     <div class="access-denied">ACESSO NEGADO</div>
     <div class="access-sub">NÍVEL DE AUTORIZAÇÃO INSUFICIENTE</div>
@@ -1144,16 +555,13 @@
       <input type="password" class="secret-input" id="fedPassword" placeholder="SENHA DE ACESSO" onkeydown="if(event.key==='Enter')checkFedAccess()">
       <button class="secret-btn" onclick="checkFedAccess()">ACESSAR</button>
     </div>
-    <div class="access-error" id="fedError">⚠ AUTORIZAÇÃO NEGADA — CREDENCIAIS INVÁLIDAS</div>
+    <div class="access-error" id="fedError">⚠ AUTORIZAÇÃO NEGADA</div>
   </div>
-  <div id="fedContent" style="display:none;max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
-    <div class="empty-state">ÁREA DA FEDERAÇÃO — CONTEÚDO SERÁ ADICIONADO PELA ADMINISTRAÇÃO</div>
-  </div>
+  <div id="fedContent" style="display:none;max-width:1200px;margin:0 auto;padding:0 2rem 4rem"><div class="empty-state">ÁREA DA FEDERAÇÃO — CONTEÚDO SERÁ ADICIONADO PELA ADMINISTRAÇÃO</div></div>
 </div>
 
-
 <!-- POPUP SELEÇÃO DE PERSONAGEM -->
-<div id="charSelectPopup" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);overflow-y:auto;padding:2rem">
+<div id="charSelectPopup">
   <div style="max-width:900px;margin:0 auto;background:var(--bg2);border:1px solid var(--red);padding:2rem">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
       <h2 style="font-family:'Orbitron',monospace;font-size:1rem;letter-spacing:3px;color:#fff">ESCOLHER PERSONAGEM</h2>
@@ -1162,63 +570,57 @@
     <div id="popupCharList"></div>
   </div>
 </div>
+
 <!-- ENVIAR FICHA -->
 <div id="ficha" class="page">
-  <div class="section-header">
-    <div class="section-label">// REGISTRO DE PERSONAGEM //</div>
-    <h1 class="section-title">ENVIAR FICHA</h1>
-  </div>
+  <div class="section-header"><div class="section-label">// REGISTRO DE PERSONAGEM //</div><h1 class="section-title">ENVIAR FICHA</h1></div>
   <div class="section-content">
     <div class="form-container">
       <div id="fichaForm">
         <div class="form-section">
           <h3>INFORMAÇÕES BÁSICAS</h3>
           <div class="form-grid">
-            <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em escolher..." readonly style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div></div>
-            <div class="form-group full" id="f_cucurucho_nome_group" style="display:none;grid-column:1/-1"><label>Nome do Cucurucho (como será chamado in-game) *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho, Cucurucho 03..."></div>
+            <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em ESCOLHER..." readonly style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div></div>
+            <div class="form-group full" id="f_cucurucho_nome_group" style="display:none"><label>Nome do Cucurucho in-game *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho..."></div>
             <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
-            <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
-            <div class="form-group"><label>Idade do Player</label><input type="text" id="f_idade_player" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
-            <div class="form-group"><label>Data de Nascimento do Personagem</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA"></div>
-            <div class="form-group"><label>Idade do Personagem</label><input type="text" id="f_idade" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
-            <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div>
-<div id="f_imagem_err2" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ A imagem precisa ser quadrada (largura = altura). Edite antes de enviar.</div></div>
+            <div class="form-group"><label>Nasc. do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA" maxlength="10"></div>
+            <div class="form-group"><label>Idade do Player</label><input type="text" id="f_idade_player" readonly style="opacity:0.5"></div>
+            <div class="form-group"><label>Nasc. do Personagem</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA" maxlength="10"></div>
+            <div class="form-group"><label>Idade do Personagem</label><input type="text" id="f_idade" readonly style="opacity:0.5"></div>
+            <div class="form-group full">
+              <label>Foto — URL do Imgur</label>
+              <input type="text" id="f_imagem" placeholder="https://i.imgur.com/...">
+              <div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright)">⚠ Apenas imagens do Imgur são aceitas</div>
+              <div id="f_imagem_err2" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright)">⚠ A imagem precisa ser quadrada</div>
+            </div>
           </div>
         </div>
-
         <div class="form-section">
           <h3>CARACTERÍSTICAS</h3>
           <div class="form-grid">
-            <div class="form-group full"><label>Características Físicas *</label><textarea id="f_fisico" placeholder="Descreva a aparência do personagem..."></textarea></div>
-            <div class="form-group full"><label>Personalidade *</label><textarea id="f_personalidade" placeholder="Como é o personagem? Quais seus traços marcantes?"></textarea></div>
-            <div class="form-group full"><label>Backstory *</label><textarea id="f_backstory" placeholder="A história do personagem antes da ilha..." style="min-height:150px"></textarea></div>
+            <div class="form-group full"><label>Características Físicas *</label><textarea id="f_fisico" placeholder="Descreva a aparência..."></textarea></div>
+            <div class="form-group full"><label>Personalidade *</label><textarea id="f_personalidade" placeholder="Traços marcantes..."></textarea></div>
+            <div class="form-group full"><label>Backstory *</label><textarea id="f_backstory" placeholder="A história antes da ilha..." style="min-height:150px"></textarea></div>
           </div>
         </div>
-
         <div class="form-section">
           <h3>ATRIBUTOS</h3>
-          <div class="attrs-points-info">
-            Você possui <span class="attrs-points-remaining" id="pointsLeft">5</span> pontos para distribuir. Cada atributo começa com 1 ponto. Reduzir um atributo abaixo de 1 devolve esse ponto para distribuição.
-          </div>
+          <div class="attrs-points-info">Você possui <span class="attrs-points-remaining" id="pointsLeft">5</span> pontos para distribuir. Cada atributo começa em 1. Pode reduzir para remanejamento (mínimo 0).</div>
           <div class="attrs-form-grid" id="attrsGrid"></div>
         </div>
-
         <div class="form-section">
           <h3>PERÍCIAS</h3>
-          <div class="skills-info">
-            Escolha até <span class="skills-remaining" id="skillsLeft">8</span> perícias para o seu personagem.
-          </div>
+          <div class="skills-info">Escolha até <span class="skills-remaining" id="skillsLeft">8</span> perícias.</div>
           <div class="skills-check-grid" id="skillsGrid"></div>
         </div>
-
-        <div id="fichaEditNotice" style="display:none;padding:0.8rem 1rem;background:rgba(139,0,0,0.15);border:1px solid var(--red);margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--red-bright);letter-spacing:1px">⚠ MODO EDIÇÃO — Sua edição será enviada para aprovação da administração.</div>
+        <div id="fichaEditNotice" style="display:none;padding:0.8rem 1rem;background:rgba(139,0,0,0.15);border:1px solid var(--red);margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--red-bright)">⚠ MODO EDIÇÃO — Sua edição será enviada para aprovação.</div>
         <button class="submit-btn" id="submitBtn" onclick="submitFicha()">▶ ENVIAR FICHA PARA APROVAÇÃO</button>
         <button class="submit-btn" onclick="showEditFicha()" style="margin-top:0.5rem;background:none;border:1px solid var(--border);color:var(--text-dim)">✎ EDITAR FICHA EXISTENTE</button>
       </div>
       <div class="form-success" id="fichaSuccess">
         <h3>FICHA RECEBIDA</h3>
-        <p>Sua ficha foi enviada e está aguardando aprovação da administração.<br><br>Você será notificado assim que for analisada.</p>
-        <button onclick="resetFichaForm()" style="margin-top:2rem;padding:0.8rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='var(--red-bright)'" onmouseout="this.style.background='var(--red)'">← VOLTAR AO INÍCIO</button>
+        <p>Sua ficha foi enviada e está aguardando aprovação da administração.</p>
+        <button onclick="resetFichaForm()" style="margin-top:2rem;padding:0.8rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer">← VOLTAR AO INÍCIO</button>
       </div>
     </div>
   </div>
@@ -1226,10 +628,7 @@
 
 <!-- ADMIN GATE -->
 <div id="admin-gate" class="page">
-  <div class="section-header">
-    <div class="section-label">// ÁREA RESTRITA //</div>
-    <h1 class="section-title">ADMINISTRAÇÃO</h1>
-  </div>
+  <div class="section-header"><div class="section-label">// ÁREA RESTRITA //</div><h1 class="section-title">ADMINISTRAÇÃO</h1></div>
   <div class="admin-gate">
     <div class="access-denied" style="font-size:1.5rem">PAINEL ADMINISTRATIVO</div>
     <div class="access-sub" style="margin-bottom:2rem">INSIRA SUAS CREDENCIAIS</div>
@@ -1246,24 +645,19 @@
 
 <!-- ADMIN PANEL -->
 <div id="admin-panel" class="page">
-  <div class="section-header">
-    <div class="section-label">// PAINEL ADMINISTRATIVO //</div>
-    <h1 class="section-title">ADMINISTRAÇÃO</h1>
-  </div>
+  <div class="section-header"><div class="section-label">// PAINEL ADMINISTRATIVO //</div><h1 class="section-title">ADMINISTRAÇÃO</h1></div>
   <div style="max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="showAdminTab('pendentes',this)">FICHAS PENDENTES</button>
       <button class="admin-tab" onclick="showAdminTab('personagens-admin',this)">PERSONAGENS</button>
-      <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
       <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
       <button class="admin-tab" onclick="showAdminTab('senha-admin',this)">🔐 MINHA SENHA</button>
     </div>
     <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
     <div id="personagens-admin" class="admin-content"><div id="approvedList"><div class="empty-state">CARREGANDO...</div></div></div>
-    <div id="fed-admin" class="admin-content"><div class="empty-state">GERENCIAMENTO DA FEDERAÇÃO — EM BREVE</div></div>
     <div id="config" class="admin-content">
       <div class="form-section">
-        <h3>CONFIGURAÇÕES DO SITE</h3>
+        <h3>CONFIGURAÇÕES</h3>
         <div class="form-grid">
           <div class="form-group"><label>Senha da Área Secreta da Federação</label><input type="text" id="cfg_fedPass" placeholder="Defina a senha..."></div>
           <div class="form-group" style="justify-content:flex-end"><button class="submit-btn" style="margin-top:1.5rem" onclick="saveFedPassword()">SALVAR</button></div>
@@ -1271,27 +665,16 @@
         <div id="cfg_msg" style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
       </div>
     </div>
-
     <div id="senha-admin" class="admin-content">
       <div class="form-section" style="max-width:500px">
         <h3>ALTERAR MINHA SENHA</h3>
-        <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">A senha é armazenada como hash no Firebase — ninguém, nem a staff, consegue ver sua senha.</p>
         <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.2rem">
-          <div class="form-group">
-            <label>SENHA ATUAL</label>
-            <input type="password" id="cfg_passAtual" placeholder="Digite sua senha atual" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-          </div>
-          <div class="form-group">
-            <label>NOVA SENHA</label>
-            <input type="password" id="cfg_passNova" placeholder="Mínimo 6 caracteres" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-          </div>
-          <div class="form-group">
-            <label>CONFIRMAR NOVA SENHA</label>
-            <input type="password" id="cfg_passConfirm" placeholder="Repita a nova senha" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-          </div>
+          <div class="form-group"><label>SENHA ATUAL</label><input type="password" id="cfg_passAtual" placeholder="Senha atual"></div>
+          <div class="form-group"><label>NOVA SENHA</label><input type="password" id="cfg_passNova" placeholder="Mínimo 6 caracteres"></div>
+          <div class="form-group"><label>CONFIRMAR</label><input type="password" id="cfg_passConfirm" placeholder="Repita a nova senha"></div>
         </div>
         <div id="cfg_pass_err" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:0.8rem;display:none"></div>
-        <div id="cfg_pass_ok" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#4caf50;margin-bottom:0.8rem;display:none">✓ SENHA ALTERADA COM SUCESSO</div>
+        <div id="cfg_pass_ok" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#4caf50;margin-bottom:0.8rem;display:none">✓ SENHA ALTERADA</div>
         <button class="submit-btn" onclick="changeAdminPassword()" id="cfg_passBtnSave">SALVAR NOVA SENHA</button>
       </div>
     </div>
@@ -1299,7 +682,6 @@
 </div>
 
 <script>
-// ===== DADOS =====
 const CHARS_DATA = [
   {id:'badboyhalo',name:'BadBoyHalo',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
   {id:'dantdm',name:'DanTDM',lang:'ingles',status:'disponivel',gameStatus:'vivo'},
@@ -1365,9 +747,7 @@ const CHARS_DATA = [
 
 const SKILLS = ['Acrobacia','Adestramento','Artes','Atletismo','Atualidades','Ciências','Crime','Diplomacia','Enganação','Fortitude','Furtividade','Iniciativa','Intimidação','Intuição','Investigação','Luta','Medicina','Ocultismo','Percepção','Pilotagem','Pontaria','Profissão','Reflexos','Religião','Sobrevivência','Tática','Tecnologia','Vontade'];
 const ATTRS = ['AGI','FOR','INT','PRE','VIG'];
-// Lista de usuários admin válidos (apenas nomes — senhas ficam no Firestore)
 const ADMIN_USERS = ['twik','ryu','andy','ali'];
-function isValidAdminUser(u) { return ADMIN_USERS.includes(u.toLowerCase()); }
 const MAX_ATTR_POINTS = 5;
 const MAX_SKILLS = 8;
 
@@ -1375,29 +755,9 @@ let attrValues = {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
 let selectedSkills = new Set();
 let pendingFichas = [];
 let approvedChars = [];
+let selectedCharId = null;
 
-// ===== IMAGES — substitua as URLs abaixo pelas reais =====
-const LOGO_URL = ''; // URL da logo do PARANOIA
-const FED_LOGO_URL = ''; // URL da logo da Federação
-const BG_PATTERN_URL = ''; // URL do background pattern
-
-function initImages() {
-  const safe = (id, fn) => { const el = document.getElementById(id); if(el) fn(el); };
-  if(LOGO_URL) {
-    safe('navLogoImg', el => el.src = LOGO_URL);
-    safe('heroLogo', el => el.src = LOGO_URL);
-    safe('navLogoFallback', el => el.style.display = 'none');
-  }
-  if(FED_LOGO_URL) {
-    safe('navFedLogo', el => el.src = FED_LOGO_URL);
-    safe('fedHeaderLogo', el => el.src = FED_LOGO_URL);
-  }
-  if(BG_PATTERN_URL) {
-    safe('heroBg', el => el.style.backgroundImage = `url('${BG_PATTERN_URL}')`);
-  }
-}
-
-// ===== NAV =====
+// NAV
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById(id);
@@ -1409,122 +769,73 @@ function showPage(id) {
   window.scrollTo(0,0);
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
-  if(id==='ficha') {
-    // Se a tela de sucesso estava aberta, reseta o form
-    if(document.getElementById('fichaSuccess').style.display === 'block' && !window._editingFichaId) {
-      document.getElementById('fichaForm').style.display = 'block';
-      document.getElementById('fichaSuccess').style.display = 'none';
-    }
-    buildAttrsForm(); buildSkillsForm(); initDateMasks();
-  }
+  if(id==='ficha') { buildAttrsForm(); buildSkillsForm(); initDateMasks(); }
 }
 
 function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
 
-// ===== CHARS =====
+// CHARS
 function renderChars(filter) {
   const grid = document.getElementById('charsGrid');
-  // Constrói lista: personagens aprovados têm prioridade sobre os estáticos
-  const approvedCharIds = new Set(approvedChars.map(c => c.charId).filter(Boolean));
-  // Remove da lista estática os que já têm ficha aprovada
-  const staticList = CHARS_DATA.filter(c => !approvedCharIds.has(c.id));
-  let list = [...staticList, ...approvedChars];
-  if(filter !== 'all') list = list.filter(c => c.status===filter || c.lang===filter);
-  if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
-  grid.innerHTML = list.map(c => {
-    // Para approved chars, o id de clique é o charId original (se existir) ou o doc id
-    const clickId = c.charId || c.id;
-    const img = c.imageUrl
-      ? `<img src="${c.imageUrl}" alt="${c.name}">`
-      : c.minecraft
-      ? `<img src="https://mc-heads.net/body/${c.minecraft}/80" alt="${c.name}">`
-      : `<span>👤</span>`;
-    const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
-    const sl = c.gameStatus || 'PENDENTE';
-    return `<div class="char-card" onclick="showCharProfile('${clickId}')">
+  const approvedIds = new Set(approvedChars.map(c=>c.charId).filter(Boolean));
+  const staticList = CHARS_DATA.filter(c=>!approvedIds.has(c.id));
+  let list = [...staticList,...approvedChars];
+  if(filter!=='all') list = list.filter(c=>c.status===filter||c.lang===filter);
+  if(!list.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>';return;}
+  grid.innerHTML = list.map(c=>{
+    const cid = c.charId||c.id;
+    const img = c.imageUrl?`<img src="${c.imageUrl}" alt="${c.name}">`:c.minecraft?`<img src="https://mc-heads.net/body/${c.minecraft}/80" alt="${c.name}">`:'<span>👤</span>';
+    const sc = c.gameStatus?`status-${c.gameStatus}`:'status-pendente';
+    return `<div class="char-card" onclick="showCharProfile('${cid}')">
       <div class="char-available ${c.status==='ocupado'?'occupied':'available'}"></div>
       <div class="char-avatar">${img}</div>
       <div class="char-name">${c.name.toUpperCase()}</div>
       ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
-      <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
+      <div class="status-badge ${sc}">${(c.gameStatus||'PENDENTE').toUpperCase()}</div>
     </div>`;
   }).join('');
 }
 
-function filterChars(f, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+function filterChars(f,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderChars(f);
 }
 
-function showCharProfile(id) {
-  // Busca primeiro em approvedChars pelo charId original, depois por doc id
-  let c = approvedChars.find(x => x.charId === id || x.id === id);
-  // Fallback: busca no estático
-  if(!c) c = CHARS_DATA.find(x => x.id === id);
+function showCharProfile(id){
+  let c = approvedChars.find(x=>x.charId===id||x.id===id) || CHARS_DATA.find(x=>x.id===id);
   if(!c) return;
-  const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
-  const sl = c.gameStatus || 'DESCONHECIDO';
-  const imgHtml = c.imageUrl
-    ? `<img src="${c.imageUrl}" alt="${c.name}" class="profile-img">`
-    : c.minecraft
-    ? `<img src="https://mc-heads.net/body/${c.minecraft}/300" alt="${c.name}" class="profile-img">`
-    : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
-
-  const attrsHtml = c.attrs
-    ? `<div class="attrs-grid">${Object.entries(c.attrs).map(([k,v])=>`<div class="attr-box"><span class="attr-name">${k}</span><span class="attr-val">${v||'—'}</span></div>`).join('')}</div>`
-    : '<p style="color:var(--text-dim);font-size:0.85rem">Atributos não definidos.</p>';
-
-  const skillsHtml = c.skills && c.skills.length
-    ? `<div class="skills-grid">${c.skills.map(s=>`<div class="skill-item"><span class="skill-name">${s}</span><span class="skill-val">✓</span></div>`).join('')}</div>`
-    : '<p style="color:var(--text-dim);font-size:0.85rem">Perícias não definidas.</p>';
-
-  const historyHtml = c.history && c.history.length
-    ? c.history.map(h=>`<div class="history-item"><div class="history-date">${h.date||'DATA DESCONHECIDA'}</div><div class="history-desc">${h.desc}</div></div>`).join('')
-    : '<p style="color:var(--text-dim);font-size:0.85rem">Nenhum registro histórico.</p>';
-
+  const sc = c.gameStatus?`status-${c.gameStatus}`:'status-pendente';
+  const imgHtml = c.imageUrl?`<img src="${c.imageUrl}" alt="${c.name}" class="profile-img">`:c.minecraft?`<img src="https://mc-heads.net/body/${c.minecraft}/300" alt="${c.name}" class="profile-img">`:`<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
+  const attrsHtml = c.attrs?`<div class="attrs-grid">${Object.entries(c.attrs).map(([k,v])=>`<div class="attr-box"><span class="attr-name">${k}</span><span class="attr-val">${v||'—'}</span></div>`).join('')}</div>`:'<p style="color:var(--text-dim);font-size:0.85rem">Atributos não definidos.</p>';
+  const skillsHtml = c.skills&&c.skills.length?`<div class="skills-grid">${c.skills.map(s=>`<div class="skill-item"><span class="skill-name">${s}</span><span class="skill-val">✓</span></div>`).join('')}</div>`:'<p style="color:var(--text-dim);font-size:0.85rem">Perícias não definidas.</p>';
+  const historyHtml = c.history&&c.history.length?c.history.map(h=>`<div class="history-item"><div class="history-date">${h.date||'?'}</div><div class="history-desc">${h.desc}</div></div>`).join(''):'<p style="color:var(--text-dim);font-size:0.85rem">Nenhum registro histórico.</p>';
   document.getElementById('profileContent').innerHTML = `
     <div class="profile-sidebar">
       <div class="profile-img-container">${imgHtml}</div>
-      <div class="profile-status-box">
-        <div class="profile-status-label">// STATUS ATUAL //</div>
-        <div class="status-badge ${sc}" style="font-size:0.75rem;padding:0.4rem 1rem">${sl.toUpperCase()}</div>
-      </div>
+      <div class="profile-status-box"><div class="profile-status-label">// STATUS ATUAL //</div><div class="status-badge ${sc}" style="font-size:0.75rem;padding:0.4rem 1rem">${(c.gameStatus||'DESCONHECIDO').toUpperCase()}</div></div>
       <div class="profile-info-box">
         <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${c.name}</span></div>
         <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.player||'—'}</span></div>
-        ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
-        ${(()=>{const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
-        ${c.lang==='cucurucho' ? `<div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>` : `<div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>`}
+        ${c.nascimento?`<div class="profile-info-item"><span class="label">NASCIMENTO</span><span class="value">${c.nascimento}</span></div>`:''}
+        ${c.idade?`<div class="profile-info-item"><span class="label">IDADE</span><span class="value">${c.idade} anos</span></div>`:''}
         <div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${c.status==='ocupado'?'var(--red-bright)':'#4caf50'}">${c.status==='ocupado'?'OCUPADA':'DISPONÍVEL'}</span></div>
       </div>
     </div>
     <div class="profile-main">
       ${c.fisico||c.personalidade?`<div class="profile-section"><h3>CARACTERÍSTICAS</h3>${c.fisico?`<p style="margin-bottom:1rem"><strong style="color:var(--silver)">Físico:</strong><br>${c.fisico}</p>`:''}${c.personalidade?`<p><strong style="color:var(--silver)">Personalidade:</strong><br>${c.personalidade}</p>`:''}</div>`:''}
       ${c.backstory?`<div class="profile-section"><h3>HISTÓRIA</h3><p>${c.backstory}</p></div>`:''}
-      <div class="profile-section"><h3>SISTEMA</h3>
-        <div style="margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">ATRIBUTOS</div>
-        ${attrsHtml}
-        <div style="margin:1rem 0;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PERÍCIAS</div>
-        ${skillsHtml}
-      </div>
+      <div class="profile-section"><h3>SISTEMA</h3><div style="margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">ATRIBUTOS</div>${attrsHtml}<div style="margin:1rem 0;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PERÍCIAS</div>${skillsHtml}</div>
       <div class="profile-section"><h3>HISTÓRICO</h3>${historyHtml}</div>
     </div>`;
   showPage('char-profile');
 }
 
-// ===== ATRIBUTOS =====
-function getUsedPoints() {
-  // Points spent from pool: each point above base(1) costs 1, each zeroed attr refunds 1
-  const vals = Object.values(attrValues);
-  const spent = vals.reduce((s,v) => s + Math.max(v - 1, 0), 0);
-  const refunded = vals.filter(v => v === 0).length;
-  return spent - refunded;
-}
+// ATRIBUTOS
+function getUsedPoints(){ return Object.values(attrValues).reduce((s,v)=>s+Math.max(v-1,0),0) - Object.values(attrValues).filter(v=>v===0).length; }
 
-function buildAttrsForm() {
-  const g = document.getElementById('attrsGrid');
-  g.innerHTML = ATTRS.map(a => `
+function buildAttrsForm(){
+  document.getElementById('attrsGrid').innerHTML = ATTRS.map(a=>`
     <div class="attr-ctrl">
       <span class="attr-ctrl-name">${a}</span>
       <div class="attr-ctrl-row">
@@ -1536,457 +847,248 @@ function buildAttrsForm() {
   updatePointsDisplay();
 }
 
-function changeAttr(attr, delta) {
-  const cur = attrValues[attr];
-  const next = cur + delta;
-  if(next < 0) return; // não pode ir abaixo de 0
-  if(next > 5) return; // máximo 5
-  if(delta > 0 && getUsedPoints() >= MAX_ATTR_POINTS) return; // sem pontos sobrando
-  attrValues[attr] = next;
-  document.getElementById('av_'+attr).textContent = next;
-  const btnMinus = document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',-1)"]`);
-  const btnPlus = document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',+1)"]`);
-  if(btnMinus) btnMinus.style.opacity = next <= 0 ? '0.3' : '1';
-  if(btnPlus) btnPlus.style.opacity = (getUsedPoints() >= MAX_ATTR_POINTS) || next >= 5 ? '0.3' : '1';
+function changeAttr(attr,delta){
+  const next = attrValues[attr]+delta;
+  if(next<0||next>5) return;
+  if(delta>0 && getUsedPoints()>=MAX_ATTR_POINTS) return;
+  attrValues[attr]=next;
+  document.getElementById('av_'+attr).textContent=next;
+  const bm=document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',-1)"]`);
+  const bp=document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',+1)"]`);
+  if(bm) bm.style.opacity=next<=0?'0.3':'1';
+  if(bp) bp.style.opacity=(getUsedPoints()>=MAX_ATTR_POINTS||next>=5)?'0.3':'1';
   updatePointsDisplay();
 }
 
-function updatePointsDisplay() {
-  const left = MAX_ATTR_POINTS - getUsedPoints();
-  document.getElementById('pointsLeft').textContent = left;
-}
+function updatePointsDisplay(){ document.getElementById('pointsLeft').textContent=MAX_ATTR_POINTS-getUsedPoints(); }
 
-// ===== PERÍCIAS =====
-function buildSkillsForm() {
-  const g = document.getElementById('skillsGrid');
-  g.innerHTML = SKILLS.map(s => {
-    const isSelected = selectedSkills.has(s);
-    return `
-    <label class="skill-check${isSelected?' selected':''}" id="sc_${s}" onclick="toggleSkill('${s}')">
-      <div class="skill-check-box" id="sb_${s}">${isSelected?'✓':''}</div>
-      <span class="skill-check-name">${s}</span>
-    </label>`;
+// PERÍCIAS
+function buildSkillsForm(){
+  document.getElementById('skillsGrid').innerHTML=SKILLS.map(s=>{
+    const sel=selectedSkills.has(s);
+    return `<label class="skill-check${sel?' selected':''}" id="sc_${s}" onclick="toggleSkill('${s}')"><div class="skill-check-box" id="sb_${s}">${sel?'✓':''}</div><span class="skill-check-name">${s}</span></label>`;
   }).join('');
   updateSkillsDisplay();
 }
 
-function toggleSkill(s) {
-  if(selectedSkills.has(s)) {
-    selectedSkills.delete(s);
-    document.getElementById('sc_'+s).classList.remove('selected');
-    document.getElementById('sb_'+s).textContent = '';
-  } else {
-    if(selectedSkills.size >= MAX_SKILLS) return;
-    selectedSkills.add(s);
-    document.getElementById('sc_'+s).classList.add('selected');
-    document.getElementById('sb_'+s).textContent = '✓';
-  }
+function toggleSkill(s){
+  if(selectedSkills.has(s)){ selectedSkills.delete(s); document.getElementById('sc_'+s).classList.remove('selected'); document.getElementById('sb_'+s).textContent=''; }
+  else{ if(selectedSkills.size>=MAX_SKILLS) return; selectedSkills.add(s); document.getElementById('sc_'+s).classList.add('selected'); document.getElementById('sb_'+s).textContent='✓'; }
   updateSkillsDisplay();
 }
 
-function updateSkillsDisplay() {
-  document.getElementById('skillsLeft').textContent = MAX_SKILLS - selectedSkills.size;
+function updateSkillsDisplay(){ document.getElementById('skillsLeft').textContent=MAX_SKILLS-selectedSkills.size; }
+
+// DATAS
+function calcAge(d){ if(!d||d.length<10) return ''; const [dd,mm,yy]=d.split('/').map(Number); if(!dd||!mm||!yy||yy<1900) return ''; const t=new Date(); let a=t.getFullYear()-yy; if(t.getMonth()+1<mm||(t.getMonth()+1===mm&&t.getDate()<dd)) a--; return a>=0?String(a):''; }
+
+function maskDate(input){
+  if(input._mk) return; input._mk=true;
+  input.addEventListener('input',function(){ let v=this.value.replace(/\D/g,'').slice(0,8); if(v.length>=5) v=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4); else if(v.length>=3) v=v.slice(0,2)+'/'+v.slice(2); this.value=v; });
+  input.addEventListener('keydown',function(e){ if(e.key==='Backspace'&&this.value.endsWith('/')){ this.value=this.value.slice(0,-1); e.preventDefault(); } });
 }
 
-// ===== IDADE AUTOMÁTICA =====
-function calcAge(dateStr) {
-  if(!dateStr || dateStr.length < 10) return '';
-  const [d,m,y] = dateStr.split('/').map(Number);
-  if(!d||!m||!y||y<1900) return '';
-  const today = new Date();
-  let age = today.getFullYear() - y;
-  if(today.getMonth()+1 < m || (today.getMonth()+1===m && today.getDate()<d)) age--;
-  return age >= 0 ? String(age) : '';
-}
-
-// ===== MÁSCARA DE DATA =====
-function maskDate(input) {
-  if(input._maskInitialized) return; // evita duplicar listeners
-  input._maskInitialized = true;
-  input.addEventListener('input', function() {
-    let v = this.value.replace(/\D/g, '').slice(0, 8);
-    if(v.length >= 5) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
-    else if(v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
-    this.value = v;
-  });
-  input.addEventListener('keydown', function(e) {
-    if(e.key === 'Backspace' && this.value.endsWith('/')) { this.value = this.value.slice(0,-1); e.preventDefault(); }
-  });
-  input.setAttribute('placeholder', 'DD/MM/AAAA');
-  input.setAttribute('maxlength', '10');
-}
-function initDateMasks() {
-  const pairs = [
-    ['f_nascimento_player', 'f_idade_player'],
-    ['f_nascimento', 'f_idade']
-  ];
-  pairs.forEach(([dateId, ageId]) => {
-    const el = document.getElementById(dateId);
-    if(!el) return;
+function initDateMasks(){
+  [['f_nascimento_player','f_idade_player'],['f_nascimento','f_idade']].forEach(([di,ai])=>{
+    const el=document.getElementById(di); if(!el) return;
     maskDate(el);
-    if(!el._ageListenerInitialized) {
-      el._ageListenerInitialized = true;
-      el.addEventListener('input', function() {
-        const ageEl = document.getElementById(ageId);
-        if(ageEl) ageEl.value = calcAge(this.value);
-      });
-    }
+    if(!el._al){ el._al=true; el.addEventListener('input',function(){ const ae=document.getElementById(ai); if(ae) ae.value=calcAge(this.value); }); }
   });
 }
 
-// ===== SUBMIT =====
-async function submitFicha() {
-  const nome = document.getElementById('f_nome').value.trim();
-  const player = document.getElementById('f_player').value.trim();
-  if(!nome || !player) { alert('Preencha ao menos o nome do personagem e do player.'); return; }
-  // Validar se personagem foi selecionado no popup
-  if(!selectedCharId && !window._editingFichaId) {
-    alert('Selecione um personagem clicando em "ESCOLHER".');
-    return;
+// SUBMIT
+async function submitFicha(){
+  const nome=document.getElementById('f_nome').value.trim();
+  const player=document.getElementById('f_player').value.trim();
+  if(!nome||!player){alert('Preencha nome do personagem e do player.');return;}
+  if(!selectedCharId&&!window._editingFichaId){alert('Selecione um personagem clicando em ESCOLHER.');return;}
+  const imgVal=document.getElementById('f_imagem').value.trim();
+  document.getElementById('f_imagem_err').style.display='none';
+  document.getElementById('f_imagem_err2').style.display='none';
+  if(imgVal&&!imgVal.match(/^https?:\/\/(i\.)?imgur\.com\//i)){document.getElementById('f_imagem_err').style.display='block';return;}
+  if(imgVal){
+    const sq=await new Promise(res=>{const i=new Image();i.onload=()=>res(i.naturalWidth===i.naturalHeight);i.onerror=()=>res(true);i.src=imgVal;});
+    if(!sq){document.getElementById('f_imagem_err2').style.display='block';return;}
   }
-  const imgVal = document.getElementById('f_imagem').value.trim();
-  const errEl = document.getElementById('f_imagem_err');
-  const errEl2 = document.getElementById('f_imagem_err2');
-  errEl.style.display = 'none';
-  errEl2.style.display = 'none';
-  if(imgVal && !imgVal.match(/^https?:\/\/(i\.)?imgur\.com\//i)) {
-    errEl.style.display = 'block';
-    document.getElementById('f_imagem').focus();
-    return;
-  }
-  if(imgVal) {
-    const isSquare = await new Promise(res => {
-      const img = new Image();
-      img.onload = () => res(img.naturalWidth === img.naturalHeight);
-      img.onerror = () => res(true); // se não carregar, deixa passar
-      img.src = imgVal;
-    });
-    if(!isSquare) {
-      errEl2.style.display = 'block';
-      document.getElementById('f_imagem').focus();
-      return;
-    }
-  }
-  // Validar atributos — obrigar distribuir todos os pontos
-  const pontosUsados = getUsedPoints();
-  if(pontosUsados < MAX_ATTR_POINTS) {
-    alert(`Distribua todos os ${MAX_ATTR_POINTS} pontos de atributo antes de enviar. Você usou ${pontosUsados} de ${MAX_ATTR_POINTS}.`);
-    return;
-  }
-  const charData = CHARS_DATA.find(c => c.id === selectedCharId);
-  const cucuruchoNome = document.getElementById('f_cucurucho_nome').value.trim();
-  if(charData?.lang === 'cucurucho' && !cucuruchoNome) {
-    alert('Preencha o nome do Cucurucho.');
-    return;
-  }
-  const ficha = {
-    charId: selectedCharId || '',
-    cucuruchoNome: cucuruchoNome || '',
-    name: nome, player,
-    nascimento_player: document.getElementById('f_nascimento_player').value,
-    idade_player: document.getElementById('f_idade_player').value,
-    nascimento: document.getElementById('f_nascimento').value,
-    idade: document.getElementById('f_idade').value,
-    imageUrl: imgVal || '',
-    minecraft: '',
-    fisico: document.getElementById('f_fisico').value,
-    personalidade: document.getElementById('f_personalidade').value,
-    backstory: document.getElementById('f_backstory').value,
-    attrs: {...attrValues},
-    skills: [...selectedSkills],
-    gameStatus: 'vivo', status: 'disponivel', lang: charData?.lang || 'custom', history: [], pending: true
+  if(getUsedPoints()<MAX_ATTR_POINTS){alert(`Distribua todos os ${MAX_ATTR_POINTS} pontos de atributo.`);return;}
+  const charData=CHARS_DATA.find(c=>c.id===selectedCharId);
+  if(charData?.lang==='cucurucho'&&!document.getElementById('f_cucurucho_nome').value.trim()){alert('Preencha o nome do Cucurucho.');return;}
+  const ficha={
+    charId:selectedCharId||'',cucuruchoNome:document.getElementById('f_cucurucho_nome').value.trim(),
+    name:nome,player,
+    nascimento_player:document.getElementById('f_nascimento_player').value,
+    idade_player:document.getElementById('f_idade_player').value,
+    nascimento:document.getElementById('f_nascimento').value,
+    idade:document.getElementById('f_idade').value,
+    imageUrl:imgVal||'',minecraft:'',
+    fisico:document.getElementById('f_fisico').value,
+    personalidade:document.getElementById('f_personalidade').value,
+    backstory:document.getElementById('f_backstory').value,
+    attrs:{...attrValues},skills:[...selectedSkills],
+    gameStatus:'vivo',status:'disponivel',lang:charData?.lang||'custom',history:[],pending:true
   };
-  // Edit mode
-  if(window._editingFichaId) {
-    ficha.editRequest = true;
-    ficha.originalId = window._editingFichaId;
-  }
-  if(!window._submitFichaFirebase) {
-    alert('Conexão com o banco de dados ainda está carregando. Aguarde um momento e tente novamente.');
-    return;
-  }
-  window._submitFichaFirebase(ficha).then(() => {
-    document.getElementById('fichaForm').style.display = 'none';
-    document.getElementById('fichaSuccess').style.display = 'block';
-    // Scroll para o topo da seção
-    window.scrollTo(0, 0);
-  }).catch(err => {
-    alert('Erro ao enviar ficha. Tente novamente.');
-    console.error(err);
-  });
+  if(window._editingFichaId){ficha.editRequest=true;ficha.originalId=window._editingFichaId;}
+  if(!window._submitFichaFirebase){alert('Aguarde a conexão com o banco de dados.');return;}
+  window._submitFichaFirebase(ficha).then(()=>{
+    document.getElementById('fichaForm').style.display='none';
+    document.getElementById('fichaSuccess').style.display='block';
+    window.scrollTo(0,0);
+  }).catch(err=>{alert('Erro ao enviar. Tente novamente.');console.error(err);});
 }
 
-// ===== ADMIN =====
-function updateAdminNotify() {
-  const badge = document.getElementById('adminNotifyBadge');
-  const logoWrap = document.getElementById('navLogoWrap2');
-  if(!badge || !logoWrap) return;
-  if(window.pendingFichas && window.pendingFichas.length > 0) {
-    badge.style.display = 'block';
-    logoWrap.classList.add('nav-logo-notify');
-    badge.title = window.pendingFichas.length + ' ficha(s) aguardando aprovação';
-  } else {
-    badge.style.display = 'none';
-    logoWrap.classList.remove('nav-logo-notify');
-  }
+// ADMIN
+function updateAdminNotify(){
+  const badge=document.getElementById('adminNotifyBadge');
+  if(!badge) return;
+  const n=window.pendingFichas&&window.pendingFichas.length>0;
+  badge.style.display=n?'block':'none';
 }
 
-async function checkAdmin() {
-  const u = document.getElementById('adminUser').value.trim();
-  const p = document.getElementById('adminPass').value;
-  const errEl = document.getElementById('adminError');
-  const btn = document.querySelector('#admin-gate .secret-btn');
-  if(!u || !p) { errEl.style.display = 'block'; return; }
-  if(!isValidAdminUser(u)) { errEl.style.display = 'block'; return; }
-  // Desabilita botão durante verificação
-  if(btn) { btn.disabled = true; btn.textContent = '...'; }
-  try {
-    // Verifica se admin já tem senha cadastrada no Firestore
-    const exists = await window._adminExistsFirebase(u);
-    if(!exists) {
-      // Primeiro acesso: pede criação de senha
-      errEl.style.display = 'none';
-      showFirstAccessSetup(u, p);
-      if(btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
-      return;
-    }
-    const ok = await window._checkAdminFirebase(u, p);
-    if(ok) {
-      window._adminLogado = true;
-      window._adminUser = u.toLowerCase();
-      updateAdminNotify();
-      showPage('admin-panel'); renderPending(); renderApprovedAdmin();
-    } else {
-      errEl.textContent = '⚠ CREDENCIAIS INVÁLIDAS';
-      errEl.style.display = 'block';
-    }
-  } catch(e) {
-    console.error(e);
-    errEl.textContent = '⚠ ERRO DE CONEXÃO — TENTE NOVAMENTE';
-    errEl.style.display = 'block';
-  }
-  if(btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
+async function checkAdmin(){
+  const u=document.getElementById('adminUser').value.trim();
+  const p=document.getElementById('adminPass').value;
+  const errEl=document.getElementById('adminError');
+  const btn=document.querySelector('#admin-gate .secret-btn');
+  if(!ADMIN_USERS.includes(u.toLowerCase())){errEl.style.display='block';return;}
+  if(btn){btn.disabled=true;btn.textContent='...';}
+  try{
+    const exists=await window._adminExistsFirebase(u);
+    if(!exists){showFirstAccessSetup(u);if(btn){btn.disabled=false;btn.textContent='ENTRAR';}return;}
+    const ok=await window._checkAdminFirebase(u,p);
+    if(ok){window._adminLogado=true;window._adminUser=u.toLowerCase();updateAdminNotify();showPage('admin-panel');renderPending();renderApprovedAdmin();}
+    else{errEl.textContent='⚠ CREDENCIAIS INVÁLIDAS';errEl.style.display='block';}
+  }catch(e){errEl.textContent='⚠ ERRO DE CONEXÃO';errEl.style.display='block';}
+  if(btn){btn.disabled=false;btn.textContent='ENTRAR';}
 }
 
-function showFirstAccessSetup(user, initialPass) {
-  // Modal para cadastrar senha pela primeira vez
-  const existing = document.getElementById('firstAccessModal');
-  if(existing) existing.remove();
-  const modal = document.createElement('div');
-  modal.id = 'firstAccessModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
-  modal.innerHTML = `
-    <div style="background:var(--bg2);border:1px solid var(--red);padding:2.5rem;max-width:420px;width:100%">
-      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.5rem">// PRIMEIRO ACESSO //</div>
-      <h3 style="font-family:'Orbitron',monospace;font-size:1rem;color:#fff;letter-spacing:3px;margin-bottom:0.5rem">${user.toUpperCase()}</h3>
-      <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);line-height:1.8;margin-bottom:1.5rem">Nenhuma senha cadastrada para este usuário. Defina sua senha agora para continuar.</p>
-      <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.5rem">
-        <input type="password" id="firstPass1" placeholder="NOVA SENHA" style="background:var(--bg3);border:1px solid var(--red);color:var(--red-bright);padding:0.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;letter-spacing:2px;outline:none;width:100%;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-        <input type="password" id="firstPass2" placeholder="CONFIRMAR SENHA" style="background:var(--bg3);border:1px solid var(--red);color:var(--red-bright);padding:0.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;letter-spacing:2px;outline:none;width:100%;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')confirmFirstAccess('${user}')">
-      </div>
-      <div id="firstAccessErr" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:1rem;display:none"></div>
-      <button onclick="confirmFirstAccess('${user}')" style="width:100%;padding:0.9rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer" id="firstAccessBtn">CADASTRAR SENHA</button>
-    </div>`;
-  document.body.appendChild(modal);
+function showFirstAccessSetup(user){
+  const m=document.createElement('div');
+  m.id='firstAccessModal';
+  m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  m.innerHTML=`<div style="background:var(--bg2);border:1px solid var(--red);padding:2.5rem;max-width:420px;width:100%">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem">// PRIMEIRO ACESSO — ${user.toUpperCase()} //</div>
+    <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);line-height:1.8;margin-bottom:1.5rem">Defina sua senha para continuar.</p>
+    <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.5rem">
+      <input type="password" id="fp1" placeholder="NOVA SENHA" style="background:var(--bg3);border:1px solid var(--red);color:var(--red-bright);padding:0.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;letter-spacing:2px;outline:none;width:100%">
+      <input type="password" id="fp2" placeholder="CONFIRMAR SENHA" style="background:var(--bg3);border:1px solid var(--red);color:var(--red-bright);padding:0.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;letter-spacing:2px;outline:none;width:100%" onkeydown="if(event.key==='Enter')confirmFA('${user}')">
+    </div>
+    <div id="faErr" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:1rem;display:none"></div>
+    <button onclick="confirmFA('${user}')" id="faBtn" style="width:100%;padding:0.9rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer">CADASTRAR SENHA</button>
+  </div>`;
+  document.body.appendChild(m);
 }
 
-async function confirmFirstAccess(user) {
-  const p1 = document.getElementById('firstPass1').value;
-  const p2 = document.getElementById('firstPass2').value;
-  const errEl = document.getElementById('firstAccessErr');
-  const btn = document.getElementById('firstAccessBtn');
-  if(p1.length < 6) { errEl.textContent = '⚠ Senha precisa ter pelo menos 6 caracteres.'; errEl.style.display='block'; return; }
-  if(p1 !== p2) { errEl.textContent = '⚠ Senhas não coincidem.'; errEl.style.display='block'; return; }
-  btn.disabled = true; btn.textContent = 'SALVANDO...';
-  try {
-    await window._setAdminPasswordFirebase(user, p1);
+async function confirmFA(user){
+  const p1=document.getElementById('fp1').value, p2=document.getElementById('fp2').value;
+  const err=document.getElementById('faErr'), btn=document.getElementById('faBtn');
+  if(p1.length<6){err.textContent='⚠ Mínimo 6 caracteres.';err.style.display='block';return;}
+  if(p1!==p2){err.textContent='⚠ Senhas não coincidem.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='SALVANDO...';
+  try{
+    await window._setAdminPasswordFirebase(user,p1);
     document.getElementById('firstAccessModal').remove();
-    // Loga automaticamente
-    window._adminLogado = true;
-    window._adminUser = user.toLowerCase();
-    updateAdminNotify();
-    showPage('admin-panel'); renderPending(); renderApprovedAdmin();
-  } catch(e) {
-    console.error(e);
-    errEl.textContent = '⚠ Erro ao salvar. Tente novamente.';
-    errEl.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'CADASTRAR SENHA';
-  }
+    window._adminLogado=true;window._adminUser=user.toLowerCase();
+    updateAdminNotify();showPage('admin-panel');renderPending();renderApprovedAdmin();
+  }catch(e){err.textContent='⚠ Erro ao salvar.';err.style.display='block';btn.disabled=false;btn.textContent='CADASTRAR SENHA';}
 }
 
-function showAdminTab(id, btn) {
-  document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
+function showAdminTab(id,btn){
+  document.querySelectorAll('.admin-content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');btn.classList.add('active');
 }
 
-function renderPending() {
-  const list = document.getElementById('pendingList');
-  if(!list) return;
-  const fichas = window.pendingFichas || [];
-  if(!fichas.length) { list.innerHTML = '<div class="empty-state">NENHUMA FICHA PENDENTE</div>'; return; }
-  list.innerHTML = fichas.map(f => `
-    <div class="pending-card" id="pc_${f.id}">
-      <div class="pending-info">
-        <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome ? ' — ' + f.cucuruchoNome : ''}</h4>
-        <p>// Player: ${f.player} // Personagem: ${f.name} // Tipo: ${f.editRequest ? 'EDIÇÃO' : 'NOVA FICHA'}</p>
-      </div>
+function renderPending(){
+  const list=document.getElementById('pendingList');if(!list) return;
+  const fichas=window.pendingFichas||[];
+  if(!fichas.length){list.innerHTML='<div class="empty-state">NENHUMA FICHA PENDENTE</div>';return;}
+  list.innerHTML=fichas.map(f=>`
+    <div class="pending-card">
+      <div class="pending-info"><h4>${(f.name||'?').toUpperCase()}</h4><p>// Player: ${f.player} // ${f.editRequest?'EDIÇÃO':'NOVA FICHA'}</p></div>
       <div class="pending-actions">
         <button class="btn-approve" onclick="viewPendingFicha('${f.id}')">👁 VER</button>
-        <button class="btn-approve" onclick="if(confirm('Aprovar a ficha de ${f.player}?')){(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await approveFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✓ APROVAR';}})(this)}">✓ APROVAR</button>
-        <button class="btn-reject" onclick="if(confirm('Rejeitar a ficha de ${f.player}? Esta ação não pode ser desfeita.')){(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await rejectFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✗ REJEITAR';}})(this)}">✗ REJEITAR</button>
+        <button class="btn-approve" onclick="(async(b)=>{b.disabled=true;b.textContent='⏳';await approveFicha('${f.id}');b.textContent='✓'})(this)">✓ APROVAR</button>
+        <button class="btn-reject" onclick="(async(b)=>{b.disabled=true;b.textContent='⏳';await rejectFicha('${f.id}');})(this)">✗ REJEITAR</button>
       </div>
     </div>`).join('');
 }
 
-async function approveFicha(id) {
-  const ficha = (window.pendingFichas||[]).find(f => f.id===id);
-  if(!ficha) return false;
-  const { id: _localId, ...fichaData } = ficha;
-  try {
-    if(fichaData.editRequest && fichaData.originalId) {
-      // Edição: atualiza a ficha original no Firestore em vez de criar nova
-      const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const db = window._db;
-      const { editRequest, originalId, pending, ...cleanData } = fichaData;
-      await updateDoc(doc(db, 'approvedChars', originalId), {...cleanData, pending: false});
-      // Remove da fila de pendentes
+async function approveFicha(id){
+  const ficha=(window.pendingFichas||[]).find(f=>f.id===id);
+  if(!ficha) return;
+  const {id:_,...data}=ficha;
+  try{
+    if(data.editRequest&&data.originalId){
+      const {doc,updateDoc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const {editRequest,originalId,pending,...clean}=data;
+      await updateDoc(doc(window._db,'approvedChars',originalId),{...clean,pending:false});
       await window._rejectFichaFirebase(id);
-    } else {
-      await window._approveFichaFirebase({...fichaData, pending:false}, id);
-    }
-    return true;
-  } catch(err) {
-    console.error('Erro ao aprovar:', err);
-    return false;
-  }
+    }else{ await window._approveFichaFirebase({...data,pending:false},id); }
+  }catch(e){console.error(e);}
 }
 
-async function rejectFicha(id) {
-  try {
-    await window._rejectFichaFirebase(id);
-    return true;
-  } catch(err) {
-    console.error('Erro ao rejeitar:', err);
-    return false;
-  }
-}
+async function rejectFicha(id){ try{await window._rejectFichaFirebase(id);}catch(e){console.error(e);} }
 
-function saveFedPassword() {
-  const pass = document.getElementById('cfg_fedPass').value;
-  window._saveFedPasswordFirebase(pass).then(() => {
-    document.getElementById('cfg_msg').style.display = 'block';
-    setTimeout(() => document.getElementById('cfg_msg').style.display='none', 2000);
+function saveFedPassword(){
+  window._saveFedPasswordFirebase(document.getElementById('cfg_fedPass').value).then(()=>{
+    document.getElementById('cfg_msg').style.display='block';
+    setTimeout(()=>document.getElementById('cfg_msg').style.display='none',2000);
   });
 }
 
-async function changeAdminPassword() {
-  const atual = document.getElementById('cfg_passAtual').value;
-  const nova = document.getElementById('cfg_passNova').value;
-  const confirm = document.getElementById('cfg_passConfirm').value;
-  const errEl = document.getElementById('cfg_pass_err');
-  const okEl = document.getElementById('cfg_pass_ok');
-  const btn = document.getElementById('cfg_passBtnSave');
-  errEl.style.display = 'none';
-  okEl.style.display = 'none';
-  if(!atual || !nova || !confirm) {
-    errEl.textContent = '⚠ Preencha todos os campos.'; errEl.style.display='block'; return;
-  }
-  if(nova.length < 6) {
-    errEl.textContent = '⚠ Nova senha precisa ter pelo menos 6 caracteres.'; errEl.style.display='block'; return;
-  }
-  if(nova !== confirm) {
-    errEl.textContent = '⚠ Nova senha e confirmação não coincidem.'; errEl.style.display='block'; return;
-  }
-  if(!window._adminUser) {
-    errEl.textContent = '⚠ Sessão expirada. Faça login novamente.'; errEl.style.display='block'; return;
-  }
-  btn.disabled = true; btn.textContent = 'VERIFICANDO...';
-  try {
-    // Verifica senha atual
-    const ok = await window._checkAdminFirebase(window._adminUser, atual);
-    if(!ok) {
-      errEl.textContent = '⚠ Senha atual incorreta.'; errEl.style.display='block';
-      btn.disabled = false; btn.textContent = 'SALVAR NOVA SENHA'; return;
-    }
-    btn.textContent = 'SALVANDO...';
-    await window._setAdminPasswordFirebase(window._adminUser, nova);
-    // Limpa os campos
-    document.getElementById('cfg_passAtual').value = '';
-    document.getElementById('cfg_passNova').value = '';
-    document.getElementById('cfg_passConfirm').value = '';
-    okEl.style.display = 'block';
-    setTimeout(() => okEl.style.display='none', 4000);
-  } catch(e) {
-    console.error(e);
-    errEl.textContent = '⚠ Erro ao salvar. Tente novamente.'; errEl.style.display='block';
-  }
-  btn.disabled = false; btn.textContent = 'SALVAR NOVA SENHA';
+async function changeAdminPassword(){
+  const at=document.getElementById('cfg_passAtual').value,nv=document.getElementById('cfg_passNova').value,cf=document.getElementById('cfg_passConfirm').value;
+  const err=document.getElementById('cfg_pass_err'),ok=document.getElementById('cfg_pass_ok'),btn=document.getElementById('cfg_passBtnSave');
+  err.style.display='none';ok.style.display='none';
+  if(!at||!nv||!cf){err.textContent='⚠ Preencha todos os campos.';err.style.display='block';return;}
+  if(nv.length<6){err.textContent='⚠ Mínimo 6 caracteres.';err.style.display='block';return;}
+  if(nv!==cf){err.textContent='⚠ Senhas não coincidem.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='VERIFICANDO...';
+  try{
+    const valid=await window._checkAdminFirebase(window._adminUser,at);
+    if(!valid){err.textContent='⚠ Senha atual incorreta.';err.style.display='block';btn.disabled=false;btn.textContent='SALVAR NOVA SENHA';return;}
+    await window._setAdminPasswordFirebase(window._adminUser,nv);
+    ['cfg_passAtual','cfg_passNova','cfg_passConfirm'].forEach(id=>document.getElementById(id).value='');
+    ok.style.display='block';setTimeout(()=>ok.style.display='none',4000);
+  }catch(e){err.textContent='⚠ Erro ao salvar.';err.style.display='block';}
+  btn.disabled=false;btn.textContent='SALVAR NOVA SENHA';
 }
 
-// ===== FEDERAÇÃO SECRETA =====
-function checkFedAccess() {
-  const p = document.getElementById('fedPassword').value;
-  window._getFedPasswordFirebase().then(stored => {
-    if(stored && p===stored) {
-      document.getElementById('fedGate').style.display='none';
-      document.getElementById('fedContent').style.display='block';
-    } else {
-      document.getElementById('fedError').style.display='block';
-      setTimeout(()=>document.getElementById('fedError').style.display='none',3000);
-    }
+function checkFedAccess(){
+  const p=document.getElementById('fedPassword').value;
+  window._getFedPasswordFirebase().then(stored=>{
+    if(stored&&p===stored){document.getElementById('fedGate').style.display='none';document.getElementById('fedContent').style.display='block';}
+    else{document.getElementById('fedError').style.display='block';setTimeout(()=>document.getElementById('fedError').style.display='none',3000);}
   });
 }
 
+// POPUP
+function openCharPopup(){document.getElementById('charSelectPopup').style.display='block';renderPopupChars();}
+function closeCharPopup(){document.getElementById('charSelectPopup').style.display='none';}
 
-// ===== POPUP PERSONAGEM =====
-let selectedCharId = null;
-
-function openCharPopup() {
-  const popup = document.getElementById('charSelectPopup');
-  popup.style.display = 'block';
-  renderPopupChars();
-}
-
-function closeCharPopup() {
-  document.getElementById('charSelectPopup').style.display = 'none';
-}
-
-function getCharStatus(charId) {
-  // Aprovado = ocupado
-  if(approvedChars.find(c => c.charId === charId || c.id === charId)) return 'ocupado';
-  // Pendente = reservado
-  if(pendingFichas.find(f => f.charId === charId)) return 'reservado';
+function getCharStatus(id){
+  if(approvedChars.find(c=>c.charId===id||c.id===id)) return 'ocupado';
+  if(pendingFichas.find(f=>f.charId===id)) return 'reservado';
   return 'disponivel';
 }
 
-function renderPopupChars() {
-  const cats = [
-    {key:'ingles', label:'🇺🇸 INGLÊS'},
-    {key:'espanhol', label:'🇪🇸 ESPANHOL'},
-    {key:'portugues', label:'🇧🇷 PORTUGUÊS'},
-    {key:'frances', label:'🇫🇷 FRANCÊS'},
-    {key:'coreano', label:'🇰🇷 COREANO'},
-    {key:'huevito', label:'🥚 HUEVITOS'},
-    {key:'cucurucho', label:'🎭 CUCURUCHOS'},
-  ];
-  const container = document.getElementById('popupCharList');
-  container.innerHTML = cats.map(cat => {
-    const chars = CHARS_DATA.filter(c => c.lang === cat.key);
+function renderPopupChars(){
+  const cats=[{key:'ingles',label:'🇺🇸 INGLÊS'},{key:'espanhol',label:'🇪🇸 ESPANHOL'},{key:'portugues',label:'🇧🇷 PORTUGUÊS'},{key:'frances',label:'🇫🇷 FRANCÊS'},{key:'coreano',label:'🇰🇷 COREANO'},{key:'huevito',label:'🥚 HUEVITOS'},{key:'cucurucho',label:'🎭 CUCURUCHOS'}];
+  document.getElementById('popupCharList').innerHTML=cats.map(cat=>{
+    const chars=CHARS_DATA.filter(c=>c.lang===cat.key);
     if(!chars.length) return '';
     return `<div style="margin-bottom:1.5rem">
       <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)">${cat.label}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        ${chars.map(c => {
-          const st = getCharStatus(c.id);
-          const bloqueado = st !== 'disponivel';
-          const cor = st==='ocupado'?'var(--red)': st==='reservado'?'#ff9800':'var(--border)';
-          const label = st==='ocupado'?'🔴 OCUPADO': st==='reservado'?'🟡 RESERVADO':'🟢 DISPONÍVEL';
-          const labelCor = st==='ocupado'?'var(--red-bright)': st==='reservado'?'#ff9800':'#4caf50';
-          return `<div onclick="selectChar('${c.id}','${c.name}','${c.lang}')" style="padding:0.8rem;background:var(--bg3);border:1px solid ${cor};cursor:${bloqueado?'not-allowed':'pointer'};opacity:${bloqueado?'0.5':'1'};transition:all 0.2s" ${!bloqueado?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
-            <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:${bloqueado?'var(--text-dim)':'#fff'}">${c.name}</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:${labelCor}">${label}</div>
+        ${chars.map(c=>{
+          const st=getCharStatus(c.id);
+          const bl=st!=='disponivel';
+          const cor=st==='ocupado'?'var(--red)':st==='reservado'?'#ff9800':'var(--border)';
+          const lbl=st==='ocupado'?'🔴 OCUPADO':st==='reservado'?'🟡 RESERVADO':'🟢 DISPONÍVEL';
+          const lcor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';
+          return `<div onclick="selectChar('${c.id}','${c.name}','${c.lang}')" style="padding:0.8rem;background:var(--bg3);border:1px solid ${cor};cursor:${bl?'not-allowed':'pointer'};opacity:${bl?'0.5':'1'};transition:all 0.2s" ${!bl?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
+            <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:${bl?'var(--text-dim)':'#fff'}">${c.name}</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:${lcor}">${lbl}</div>
           </div>`;
         }).join('')}
       </div>
@@ -1994,219 +1096,94 @@ function renderPopupChars() {
   }).join('');
 }
 
-function selectChar(id, name, lang) {
-  const st = getCharStatus(id);
-  if(st !== 'disponivel') return;
-  selectedCharId = id;
-  document.getElementById('f_nome').value = name;
-  // Se cucurucho, muda label e mostra campo de nome real
-  if(lang === 'cucurucho') {
-    document.getElementById('f_nome_label').textContent = 'Cucurucho Escolhido *';
-    document.getElementById('f_cucurucho_nome_group').style.display = 'block';
-  } else {
-    document.getElementById('f_nome_label').textContent = 'Personagem *';
-    document.getElementById('f_cucurucho_nome_group').style.display = 'none';
-    document.getElementById('f_cucurucho_nome').value = '';
-  }
+function selectChar(id,name,lang){
+  if(getCharStatus(id)!=='disponivel') return;
+  selectedCharId=id;
+  document.getElementById('f_nome').value=name;
+  if(lang==='cucurucho'){document.getElementById('f_nome_label').textContent='Cucurucho Escolhido *';document.getElementById('f_cucurucho_nome_group').style.display='block';}
+  else{document.getElementById('f_nome_label').textContent='Personagem *';document.getElementById('f_cucurucho_nome_group').style.display='none';document.getElementById('f_cucurucho_nome').value='';}
   closeCharPopup();
 }
 
-// ===== EDIÇÃO DE FICHA =====
-async function showEditFicha() {
-  const senha = prompt('Digite sua senha de edição (solicitada via ticket no Discord):');
+// EDIÇÃO
+async function showEditFicha(){
+  const senha=prompt('Digite sua senha de edição:');
   if(!senha) return;
-  // Verifica se é admin: testa todos os usuários admin válidos
-  for(const u of ADMIN_USERS) {
-    try {
-      const ok = await window._checkAdminFirebase(u, senha);
-      if(ok) { openEditForm(u, senha); return; }
-    } catch(e) { /* continua */ }
-  }
-  // Verifica senha de player no Firestore
-  window._getPlayerEditKey(senha).then(player => {
-    if(player) {
-      openEditForm(player, senha);
-    } else {
-      alert('Senha inválida. Solicite acesso via ticket no Discord.');
-    }
-  });
+  for(const u of ADMIN_USERS){ try{ if(await window._checkAdminFirebase(u,senha)){openEditForm(u,senha);return;} }catch(e){} }
+  window._getPlayerEditKey(senha).then(player=>{ if(player) openEditForm(player,senha); else alert('Senha inválida.'); });
 }
 
-function openEditForm(playerName, senha) {
-  // Busca ficha aprovada do player
-  const ficha = approvedChars.find(c => c.player && c.player.toLowerCase() === playerName.toLowerCase());
-  if(!ficha) {
-    alert('Nenhuma ficha aprovada encontrada para ' + playerName);
-    return;
-  }
-  // Garante que fichaSuccess não está visível
-  document.getElementById('fichaForm').style.display = 'block';
-  document.getElementById('fichaSuccess').style.display = 'none';
-  // Preenche o formulário com os dados existentes
-  document.getElementById('f_nome').value = ficha.name || '';
-  document.getElementById('f_player').value = ficha.player || '';
-  document.getElementById('f_nascimento_player').value = ficha.nascimento_player || '';
-  document.getElementById('f_idade_player').value = ficha.idade_player || '';
-  document.getElementById('f_nascimento').value = ficha.nascimento || '';
-  document.getElementById('f_idade').value = ficha.idade || '';
-  document.getElementById('f_imagem').value = ficha.imageUrl || '';
-  document.getElementById('f_fisico').value = ficha.fisico || '';
-  document.getElementById('f_personalidade').value = ficha.personalidade || '';
-  document.getElementById('f_backstory').value = ficha.backstory || '';
-  if(ficha.attrs) { Object.assign(attrValues, ficha.attrs); buildAttrsForm(); }
-  if(ficha.skills) { selectedSkills = new Set(ficha.skills); buildSkillsForm(); }
-  // selectedCharId = charId original (para validação do popup)
-  selectedCharId = ficha.charId || ficha.id;
-  // _editingFichaId = doc ID do Firestore (para updateDoc na aprovação)
-  window._editingFichaId = ficha.id;
-  window._editingSenha = senha;
-  // Muda botão
-  document.getElementById('submitBtn').textContent = '▶ ENVIAR EDIÇÃO PARA APROVAÇÃO';
-  document.getElementById('fichaEditNotice').style.display = 'block';
-  showPage('ficha');
-  initDateMasks();
+function openEditForm(playerName){
+  const ficha=approvedChars.find(c=>c.player&&c.player.toLowerCase()===playerName.toLowerCase());
+  if(!ficha){alert('Nenhuma ficha encontrada para '+playerName);return;}
+  document.getElementById('fichaForm').style.display='block';
+  document.getElementById('fichaSuccess').style.display='none';
+  document.getElementById('f_nome').value=ficha.name||'';
+  document.getElementById('f_player').value=ficha.player||'';
+  document.getElementById('f_nascimento_player').value=ficha.nascimento_player||'';
+  document.getElementById('f_idade_player').value=ficha.idade_player||'';
+  document.getElementById('f_nascimento').value=ficha.nascimento||'';
+  document.getElementById('f_idade').value=ficha.idade||'';
+  document.getElementById('f_imagem').value=ficha.imageUrl||'';
+  document.getElementById('f_fisico').value=ficha.fisico||'';
+  document.getElementById('f_personalidade').value=ficha.personalidade||'';
+  document.getElementById('f_backstory').value=ficha.backstory||'';
+  if(ficha.attrs){Object.assign(attrValues,ficha.attrs);buildAttrsForm();}
+  if(ficha.skills){selectedSkills=new Set(ficha.skills);buildSkillsForm();}
+  selectedCharId=ficha.charId||ficha.id;
+  window._editingFichaId=ficha.id;
+  document.getElementById('submitBtn').textContent='▶ ENVIAR EDIÇÃO PARA APROVAÇÃO';
+  document.getElementById('fichaEditNotice').style.display='block';
+  showPage('ficha');initDateMasks();
 }
 
-function viewPendingFicha(id) {
-  const f = (window.pendingFichas||[]).find(x => x.id === id);
-  if(!f) return;
-
-  const attrsHtml = f.attrs
-    ? `<div class="attrs-grid">${Object.entries(f.attrs).map(([k,v])=>`<div class="attr-box"><span class="attr-name">${k}</span><span class="attr-val">${v}</span></div>`).join('')}</div>`
-    : '<p style="color:var(--text-dim);font-size:0.85rem">Atributos não definidos.</p>';
-
-  const skillsHtml = f.skills && f.skills.length
-    ? `<div class="skills-grid">${f.skills.map(s=>`<div class="skill-item"><span class="skill-name">${s}</span><span class="skill-val">✓</span></div>`).join('')}</div>`
-    : '<p style="color:var(--text-dim);font-size:0.85rem">Nenhuma perícia definida.</p>';
-
-  const imgHtml = f.imageUrl
-    ? `<img src="${f.imageUrl}" alt="${f.name}" class="profile-img">`
-    : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
-
-  const modal = document.createElement('div');
-  modal.id = 'fichaPreviewModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:80px 2rem 2rem;display:flex;align-items:flex-start;justify-content:center';
-  modal.innerHTML = `
-    <div style="max-width:1100px;width:100%;margin:auto">
-      <!-- Header -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--red)">
-        <div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// FICHA PENDENTE — REVISÃO ADMIN //</div>
-          <h2 style="font-family:'Orbitron',monospace;font-size:1.4rem;color:#fff;letter-spacing:4px">${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' <span style="color:var(--silver);font-size:1rem">— '+f.cucuruchoNome+'</span>':''}</h2>
-          ${f.editRequest?`<div style="margin-top:0.5rem;display:inline-block;padding:0.2rem 0.8rem;background:rgba(139,0,0,0.3);border:1px solid var(--red);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:2px">⚠ EDIÇÃO DE FICHA EXISTENTE</div>`:''}
-        </div>
-        <div style="display:flex;gap:0.5rem;align-items:center">
-          <button id="btnAprovarTop_${f.id}" class="btn-approve" onclick="adminAprovar('${f.id}',this)" style="padding:0.6rem 1.2rem;font-size:0.75rem;letter-spacing:2px">✓ APROVAR</button>
-          <button id="btnRejeitarTop_${f.id}" class="btn-reject" onclick="adminRejeitar('${f.id}',this)" style="padding:0.6rem 1.2rem;font-size:0.75rem;letter-spacing:2px">✗ REJEITAR</button>
-          <button onclick="document.getElementById('fichaPreviewModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.6rem 1.2rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='#fff'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">✕ FECHAR</button>
+function viewPendingFicha(id){
+  const f=(window.pendingFichas||[]).find(x=>x.id===id);if(!f) return;
+  const attrsHtml=f.attrs?`<div class="attrs-grid">${Object.entries(f.attrs).map(([k,v])=>`<div class="attr-box"><span class="attr-name">${k}</span><span class="attr-val">${v}</span></div>`).join('')}</div>`:'<p>—</p>';
+  const skillsHtml=f.skills&&f.skills.length?`<div class="skills-grid">${f.skills.map(s=>`<div class="skill-item"><span class="skill-name">${s}</span><span class="skill-val">✓</span></div>`).join('')}</div>`:'<p>—</p>';
+  const imgHtml=f.imageUrl?`<img src="${f.imageUrl}" alt="${f.name}" class="profile-img">`:`<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
+  const modal=document.createElement('div');
+  modal.id='fichaPreviewModal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:80px 2rem 2rem;display:flex;align-items:flex-start;justify-content:center';
+  modal.innerHTML=`<div style="max-width:1100px;width:100%;margin:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--red)">
+      <h2 style="font-family:'Orbitron',monospace;font-size:1.4rem;color:#fff;letter-spacing:4px">${(f.name||'?').toUpperCase()}</h2>
+      <div style="display:flex;gap:0.5rem">
+        <button class="btn-approve" onclick="adminAprovar('${f.id}',this)">✓ APROVAR</button>
+        <button class="btn-reject" onclick="adminRejeitar('${f.id}',this)">✗ REJEITAR</button>
+        <button onclick="document.getElementById('fichaPreviewModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.6rem 1.2rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕</button>
+      </div>
+    </div>
+    <div class="profile-layout">
+      <div class="profile-sidebar">
+        <div class="profile-img-container">${imgHtml}</div>
+        <div class="profile-info-box">
+          <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${f.player||'—'}</span></div>
+          <div class="profile-info-item"><span class="label">NASC. PLAYER</span><span class="value">${f.nascimento_player||'—'}</span></div>
+          <div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${f.nascimento||'—'}</span></div>
+          <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${(f.lang||'—').toUpperCase()}</span></div>
         </div>
       </div>
-      <div class="profile-layout">
-        <!-- Sidebar -->
-        <div class="profile-sidebar">
-          <div class="profile-img-container">${imgHtml}</div>
-          <div class="profile-status-box">
-            <div class="profile-status-label">// TIPO //</div>
-            <div class="status-badge status-pendente" style="font-size:0.75rem;padding:0.4rem 1rem">${f.editRequest?'EDIÇÃO':'NOVA FICHA'}</div>
-          </div>
-          <div class="profile-info-box">
-            <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${f.name||'—'}</span></div>
-            ${f.cucuruchoNome?`<div class="profile-info-item"><span class="label">NOME IN-GAME</span><span class="value">${f.cucuruchoNome}</span></div>`:''}
-            <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${f.player||'—'}</span></div>
-            <div class="profile-info-item"><span class="label">NASC. PLAYER</span><span class="value">${f.nascimento_player||'—'}</span></div>
-            <div class="profile-info-item"><span class="label">IDADE PLAYER</span><span class="value">${f.idade_player||'—'}</span></div>
-            <div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${f.nascimento||'—'}</span></div>
-            <div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${f.idade?f.idade+' anos':'—'}</span></div>
-            ${f.lang==='cucurucho' ? `<div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>` : `<div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${(f.lang||'—').toUpperCase()}</span></div>`}
-          </div>
-        </div>
-
-        <!-- Main -->
-        <div class="profile-main">
-          ${f.fisico||f.personalidade?`
-          <div class="profile-section">
-            <h3>CARACTERÍSTICAS</h3>
-            ${f.fisico?`<p style="margin-bottom:1rem"><strong style="color:var(--silver)">Físico:</strong><br>${f.fisico}</p>`:''}
-            ${f.personalidade?`<p><strong style="color:var(--silver)">Personalidade:</strong><br>${f.personalidade}</p>`:''}
-          </div>`:''}
-          ${f.backstory?`<div class="profile-section"><h3>HISTÓRIA</h3><p>${f.backstory}</p></div>`:''}
-          <div class="profile-section">
-            <h3>SISTEMA</h3>
-            <div style="margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">ATRIBUTOS</div>
-            ${attrsHtml}
-            <div style="margin:1rem 0;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">PERÍCIAS</div>
-            ${skillsHtml}
-          </div>
-        </div>
+      <div class="profile-main">
+        ${f.fisico||f.personalidade?`<div class="profile-section"><h3>CARACTERÍSTICAS</h3>${f.fisico?`<p style="margin-bottom:1rem"><strong style="color:var(--silver)">Físico:</strong><br>${f.fisico}</p>`:''}${f.personalidade?`<p><strong style="color:var(--silver)">Personalidade:</strong><br>${f.personalidade}</p>`:''}</div>`:''}
+        ${f.backstory?`<div class="profile-section"><h3>HISTÓRIA</h3><p>${f.backstory}</p></div>`:''}
+        <div class="profile-section"><h3>SISTEMA</h3>${attrsHtml}<div style="margin-top:1rem">${skillsHtml}</div></div>
       </div>
-
-
-    </div>`;
+    </div>
+  </div>`;
   document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
+  modal.addEventListener('click',e=>{if(e.target===modal) modal.remove();});
 }
 
-async function adminAprovar(id, btn) {
-  btn.disabled = true;
-  btn.textContent = '⏳ APROVANDO...';
-  const ok = await approveFicha(id);
-  if(ok) {
-    btn.textContent = '✓ APROVADO!';
-    btn.style.background = '#1a4a1a';
-    setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 600);
-  } else {
-    btn.disabled = false;
-    btn.textContent = '✓ APROVAR';
-    alert('Erro ao aprovar. Verifique o console.');
-  }
-}
+async function adminAprovar(id,btn){btn.disabled=true;btn.textContent='⏳';await approveFicha(id);setTimeout(()=>document.getElementById('fichaPreviewModal')?.remove(),400);}
+async function adminRejeitar(id,btn){btn.disabled=true;btn.textContent='⏳';await rejectFicha(id);setTimeout(()=>document.getElementById('fichaPreviewModal')?.remove(),400);}
 
-async function adminRejeitar(id, btn) {
-  btn.disabled = true;
-  btn.textContent = '⏳ REJEITANDO...';
-  const ok = await rejectFicha(id);
-  if(ok) {
-    btn.textContent = '✗ REJEITADO';
-    setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 600);
-  } else {
-    btn.disabled = false;
-    btn.textContent = '✗ REJEITAR';
-    alert('Erro ao rejeitar. Verifique o console.');
-  }
-}
-
-function gerarSenhaEdicao(charId, playerName) {
-  window._generateEditKey(charId).then(key => {
-    // Modal estilizado em vez de alert()
-    const existingModal = document.getElementById('senhaModal');
-    if(existingModal) existingModal.remove();
-    const modal = document.createElement('div');
-    modal.id = 'senhaModal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:2rem';
-    modal.innerHTML = `
-      <div style="background:var(--bg2);border:1px solid var(--red);padding:2.5rem;max-width:460px;width:100%;text-align:center">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem">// SENHA GERADA //</div>
-        <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:#fff;margin-bottom:0.5rem">${playerName.toUpperCase()}</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:2rem;color:var(--red-bright);letter-spacing:6px;padding:1.5rem;background:var(--bg3);border:1px solid var(--red);margin:1.5rem 0;cursor:pointer;user-select:all" title="Clique para copiar" onclick="navigator.clipboard.writeText('${key}').then(()=>{this.style.color='#4caf50';setTimeout(()=>this.style.color='var(--red-bright)',1200)})">${key}</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem">Clique na senha para copiar. Envie ao player via Discord.</div>
-        <button onclick="document.getElementById('senhaModal').remove()" style="padding:0.7rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">FECHAR</button>
-      </div>`;
-    document.body.appendChild(modal);
-    modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
-  });
-}
-
-
-function renderApprovedAdmin() {
-  const list = document.getElementById('approvedList');
-  if(!list) return;
-  if(!approvedChars.length) { list.innerHTML = '<div class="empty-state">NENHUM PERSONAGEM APROVADO</div>'; return; }
-  list.innerHTML = approvedChars.map(f => `
-    <div class="pending-card" id="apc_${f.id}">
-      <div class="pending-info">
-        <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' — '+f.cucuruchoNome:''}</h4>
-        <p>// Player: ${f.player||'?'} // Personagem: ${f.name} // Status: ${(f.gameStatus||'vivo').toUpperCase()}</p>
-      </div>
+function renderApprovedAdmin(){
+  const list=document.getElementById('approvedList');if(!list) return;
+  if(!approvedChars.length){list.innerHTML='<div class="empty-state">NENHUM PERSONAGEM APROVADO</div>';return;}
+  list.innerHTML=approvedChars.map(f=>`
+    <div class="pending-card">
+      <div class="pending-info"><h4>${(f.name||'?').toUpperCase()}</h4><p>// Player: ${f.player||'?'} // Status: ${(f.gameStatus||'vivo').toUpperCase()}</p></div>
       <div class="pending-actions">
         <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${(f.player||f.name).replace(/'/g,"\\'")}')">🔑 GERAR SENHA</button>
         <button class="btn-reject" onclick="deleteApprovedChar('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}')">🗑 EXCLUIR</button>
@@ -2214,54 +1191,42 @@ function renderApprovedAdmin() {
     </div>`).join('');
 }
 
-async function deleteApprovedChar(id, name) {
-  if(!confirm('Excluir o personagem "' + name + '"? Esta ação não pode ser desfeita.')) return;
-  try {
-    const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    await deleteDoc(doc(window._db, 'approvedChars', id));
-  } catch(e) {
-    alert('Erro ao excluir. Verifique o console.');
-    console.error(e);
-  }
+function gerarSenhaEdicao(charId,playerName){
+  window._generateEditKey(charId).then(key=>{
+    const m=document.createElement('div');
+    m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:2rem';
+    m.innerHTML=`<div style="background:var(--bg2);border:1px solid var(--red);padding:2.5rem;max-width:460px;width:100%;text-align:center">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem">// SENHA GERADA — ${playerName.toUpperCase()} //</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:2rem;color:var(--red-bright);letter-spacing:6px;padding:1.5rem;background:var(--bg3);border:1px solid var(--red);margin:1.5rem 0;cursor:pointer;user-select:all" title="Clique para copiar" onclick="navigator.clipboard.writeText('${key}').then(()=>{this.style.color='#4caf50';setTimeout(()=>this.style.color='var(--red-bright)',1200)})">${key}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);margin-bottom:1.5rem">Clique para copiar. Envie ao player via Discord.</div>
+      <button onclick="this.closest('div[style]').remove()" style="padding:0.7rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">FECHAR</button>
+    </div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click',e=>{if(e.target===m) m.remove();});
+  });
 }
 
-// ===== RESET FICHA =====
-function resetFichaForm() {
-  // Reseta campos de texto
-  ['f_nome','f_player','f_nascimento_player','f_idade_player','f_nascimento','f_idade','f_imagem','f_fisico','f_personalidade','f_backstory','f_cucurucho_nome'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.value = '';
-  });
-  // Reseta atributos
-  attrValues = {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
-  buildAttrsForm();
-  // Reseta perícias
-  selectedSkills = new Set();
-  buildSkillsForm();
-  // Reseta seleção de personagem
-  selectedCharId = null;
-  // Reseta modo edição
-  window._editingFichaId = null;
-  window._editingSenha = null;
-  // Reseta UI
-  document.getElementById('submitBtn').textContent = '▶ ENVIAR FICHA PARA APROVAÇÃO';
-  document.getElementById('fichaEditNotice').style.display = 'none';
-  document.getElementById('f_cucurucho_nome_group').style.display = 'none';
-  document.getElementById('f_nome_label').textContent = 'Personagem *';
-  document.getElementById('f_imagem_err').style.display = 'none';
-  document.getElementById('f_imagem_err2').style.display = 'none';
-  // Volta para a tela do formulário
-  document.getElementById('fichaForm').style.display = 'block';
-  document.getElementById('fichaSuccess').style.display = 'none';
+async function deleteApprovedChar(id,name){
+  if(!confirm('Excluir "'+name+'"?')) return;
+  try{const {doc,deleteDoc}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");await deleteDoc(doc(window._db,'approvedChars',id));}catch(e){alert('Erro ao excluir.');console.error(e);}
+}
+
+function resetFichaForm(){
+  ['f_nome','f_player','f_nascimento_player','f_idade_player','f_nascimento','f_idade','f_imagem','f_fisico','f_personalidade','f_backstory','f_cucurucho_nome'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  attrValues={AGI:1,FOR:1,INT:1,PRE:1,VIG:1};buildAttrsForm();
+  selectedSkills=new Set();buildSkillsForm();
+  selectedCharId=null;window._editingFichaId=null;
+  document.getElementById('submitBtn').textContent='▶ ENVIAR FICHA PARA APROVAÇÃO';
+  document.getElementById('fichaEditNotice').style.display='none';
+  document.getElementById('f_cucurucho_nome_group').style.display='none';
+  document.getElementById('f_nome_label').textContent='Personagem *';
+  document.getElementById('fichaForm').style.display='block';
+  document.getElementById('fichaSuccess').style.display='none';
   showPage('home');
 }
 
-// ===== INIT =====
-initImages();
-buildAttrsForm();
-buildSkillsForm();
-renderChars('all');
-initDateMasks();
+// INIT
+buildAttrsForm();buildSkillsForm();renderChars('all');initDateMasks();
 </script>
 </body>
 </html>
