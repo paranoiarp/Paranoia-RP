@@ -1336,6 +1336,7 @@ function showPage(id) {
   window.scrollTo(0,0);
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') renderPending();
+  if(id==='ficha') { buildAttrsForm(); initDateMasks(); }
 }
 
 function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
@@ -1494,6 +1495,24 @@ function toggleSkill(s) {
 
 function updateSkillsDisplay() {
   document.getElementById('skillsLeft').textContent = MAX_SKILLS - selectedSkills.size;
+}
+
+// ===== MÁSCARA DE DATA =====
+function maskDate(input) {
+  input.addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 8);
+    if(v.length >= 5) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
+    else if(v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+    this.value = v;
+  });
+  input.addEventListener('keydown', function(e) {
+    if(e.key === 'Backspace' && this.value.endsWith('/')) { this.value = this.value.slice(0,-1); e.preventDefault(); }
+  });
+  input.setAttribute('placeholder', 'DD/MM/AAAA');
+  input.setAttribute('maxlength', '10');
+}
+function initDateMasks() {
+  ['f_nascimento_player','f_nascimento'].forEach(id => { const el = document.getElementById(id); if(el) maskDate(el); });
 }
 
 // ===== SUBMIT =====
@@ -1768,8 +1787,8 @@ function openEditForm(playerName, senha) {
   document.getElementById('submitBtn').textContent = '▶ ENVIAR EDIÇÃO PARA APROVAÇÃO';
   document.getElementById('fichaEditNotice').style.display = 'block';
   showPage('ficha');
+  initDateMasks();
 }
-
 
 function viewPendingFicha(id) {
   const f = (window.pendingFichas||[]).find(x => x.id === id);
@@ -1894,6 +1913,7 @@ initImages();
 buildAttrsForm();
 buildSkillsForm();
 renderChars('all');
+initDateMasks();
 </script>
 </body>
 </html>
