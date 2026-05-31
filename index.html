@@ -643,7 +643,9 @@
     // Pendentes
     onSnapshot(collection(db, 'pendingFichas'), snap => {
       window.pendingFichas = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      pendingFichas = window.pendingFichas;
       if(typeof renderPending === 'function') renderPending();
+      if(typeof renderPopupChars === 'function') renderPopupChars();
       // Atualiza notificação só se admin estiver logado
       if(window._adminLogado) updateAdminNotify();
     });
@@ -651,8 +653,10 @@
     // Aprovados
     onSnapshot(collection(db, 'approvedChars'), snap => {
       window.approvedChars = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      approvedChars = window.approvedChars;
       if(typeof renderChars === 'function') renderChars('all');
       if(typeof renderApprovedAdmin === 'function') renderApprovedAdmin();
+      if(typeof renderPopupChars === 'function') renderPopupChars();
     });
   }
 
@@ -1128,6 +1132,7 @@
           <h3>INFORMAÇÕES BÁSICAS</h3>
           <div class="form-grid">
             <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em escolher..." readonly style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div></div>
+            <div class="form-group full" id="f_cucurucho_nome_group" style="display:none"><label>Nome do Cucurucho (como será chamado in-game) *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho, Cucurucho 03..."></div>
             <div class="form-group"><label>Nome do Player *</label><input type="text" id="f_player" placeholder="Seu nome/usuário"></div>
             <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
             <div class="form-group"><label>Idade do Player</label><input type="number" id="f_idade_player" placeholder="Ex: 25"></div>
@@ -1505,9 +1510,15 @@ function submitFicha() {
   }
   errEl.style.display = 'none';
   const charData = CHARS_DATA.find(c => c.id === selectedCharId);
+  const cucuruchoNome = document.getElementById('f_cucurucho_nome').value.trim();
+  if(charData?.lang === 'cucurucho' && !cucuruchoNome) {
+    alert('Preencha o nome do Cucurucho.');
+    return;
+  }
   const ficha = {
     id: Date.now().toString(),
     charId: selectedCharId || '',
+    cucuruchoNome: cucuruchoNome || '',
     name: nome, player,
     nascimento_player: document.getElementById('f_nascimento_player').value,
     idade_player: document.getElementById('f_idade_player').value,
@@ -1687,11 +1698,14 @@ function selectChar(id, name, lang) {
   if(st !== 'disponivel') return;
   selectedCharId = id;
   document.getElementById('f_nome').value = name;
-  // Se cucurucho, muda label
+  // Se cucurucho, muda label e mostra campo de nome real
   if(lang === 'cucurucho') {
-    document.getElementById('f_nome_label').textContent = 'Nome do Cucurucho *';
+    document.getElementById('f_nome_label').textContent = 'Cucurucho Escolhido *';
+    document.getElementById('f_cucurucho_nome_group').style.display = 'flex';
   } else {
     document.getElementById('f_nome_label').textContent = 'Personagem *';
+    document.getElementById('f_cucurucho_nome_group').style.display = 'none';
+    document.getElementById('f_cucurucho_nome').value = '';
   }
   closeCharPopup();
 }
