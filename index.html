@@ -2185,7 +2185,7 @@ function initImages() {
 // ===== NAV =====
 function showLorePage(slug) { showPage('lore-' + slug); }
 
-function showPage(id, pushState = true) {
+function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById(id);
   if(p) p.classList.add('active');
@@ -2194,10 +2194,6 @@ function showPage(id, pushState = true) {
   if(nav) nav.classList.add('active');
   document.getElementById('navLinks').classList.remove('open');
   setTimeout(() => window.scrollTo({top:0, behavior:'instant'}), 0);
-  if(pushState && location.hash !== '#' + id) {
-    window._skipHashChange = true;
-    try { location.hash = id; } catch(e) {}
-  }
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
   if(id==='player-panel') { if(!window._playerLogado) { showPage('minha-area'); return; } loadPlayerPanel(); }
@@ -2235,13 +2231,6 @@ function showPage(id, pushState = true) {
 
 function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
 
-// Navegação por hash — funciona no GitHub Pages e suporta botão voltar
-window.addEventListener('hashchange', () => {
-  if(window._skipHashChange) { window._skipHashChange = false; return; }
-  const id = location.hash.replace('#', '') || 'home';
-  const validPages = ['home','historia','regras','sistema','personagens','federacao','ficha','admin-gate','admin-panel','minha-area','player-panel','char-profile','lore-chegada','fed-secret'];
-  if(validPages.includes(id)) showPage(id, false);
-});
 
 // Touch support para dropdowns da nav no mobile
 document.addEventListener('click', (e) => {
