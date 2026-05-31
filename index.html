@@ -679,6 +679,36 @@
     await deleteDoc(doc(db, 'pendingFichas', fichaId));
   };
 
+  // ===== ADMIN AUTH VIA FIRESTORE =====
+  window._hashPassword = async function(pass) {
+    const enc = new TextEncoder().encode(pass);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  };
+
+  window._checkAdminFirebase = async function(user, pass) {
+    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._db;
+    const hash = await window._hashPassword(pass);
+    const snap = await getDoc(doc(db, 'adminAuth', user.toLowerCase()));
+    if(!snap.exists()) return false;
+    return snap.data().hash === hash;
+  };
+
+  window._setAdminPasswordFirebase = async function(user, newPass) {
+    const { doc, setDoc } = window._fbModules;
+    const db = window._db;
+    const hash = await window._hashPassword(newPass);
+    await setDoc(doc(db, 'adminAuth', user.toLowerCase()), { hash, user });
+  };
+
+  window._adminExistsFirebase = async function(user) {
+    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._db;
+    const snap = await getDoc(doc(db, 'adminAuth', user.toLowerCase()));
+    return snap.exists();
+  };
+
   window._saveFedPasswordFirebase = async function(pass) {
     const { doc, setDoc } = window._fbModules;
     const db = window._db;
@@ -1213,6 +1243,7 @@
       <button class="admin-tab" onclick="showAdminTab('personagens-admin',this)">PERSONAGENS</button>
       <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
       <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
+      <button class="admin-tab" onclick="showAdminTab('senha-admin',this)">🔐 MINHA SENHA</button>
     </div>
     <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
     <div id="personagens-admin" class="admin-content"><div id="approvedList"><div class="empty-state">CARREGANDO...</div></div></div>
@@ -1225,6 +1256,30 @@
           <div class="form-group" style="justify-content:flex-end"><button class="submit-btn" style="margin-top:1.5rem" onclick="saveFedPassword()">SALVAR</button></div>
         </div>
         <div id="cfg_msg" style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
+      </div>
+    </div>
+
+    <div id="senha-admin" class="admin-content">
+      <div class="form-section" style="max-width:500px">
+        <h3>ALTERAR MINHA SENHA</h3>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">A senha é armazenada como hash no Firebase — ninguém, nem a staff, consegue ver sua senha.</p>
+        <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.2rem">
+          <div class="form-group">
+            <label>SENHA ATUAL</label>
+            <input type="password" id="cfg_passAtual" placeholder="Digite sua senha atual" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div class="form-group">
+            <label>NOVA SENHA</label>
+            <input type="password" id="cfg_passNova" placeholder="Mínimo 6 caracteres" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div class="form-group">
+            <label>CONFIRMAR NOVA SENHA</label>
+            <input type="password" id="cfg_passConfirm" placeholder="Repita a nova senha" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+          </div>
+        </div>
+        <div id="cfg_pass_err" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:0.8rem;display:none"></div>
+        <div id="cfg_pass_ok" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#4caf50;margin-bottom:0.8rem;display:none">✓ SENHA ALTERADA COM SUCESSO</div>
+        <button class="submit-btn" onclick="changeAdminPassword()" id="cfg_passBtnSave">SALVAR NOVA SENHA</button>
       </div>
     </div>
   </div>
@@ -1297,7 +1352,9 @@ const CHARS_DATA = [
 
 const SKILLS = ['Acrobacia','Adestramento','Artes','Atletismo','Atualidades','Ciências','Crime','Diplomacia','Enganação','Fortitude','Furtividade','Iniciativa','Intimidação','Intuição','Investigação','Luta','Medicina','Ocultismo','Percepção','Pilotagem','Pontaria','Profissão','Reflexos','Religião','Sobrevivência','Tática','Tecnologia','Vontade'];
 const ATTRS = ['AGI','FOR','INT','PRE','VIG'];
-const ADMINS = [{user:'Twik',pass:'MestreRP'},{user:'Ryu',pass:'StaffA'},{user:'Andy',pass:'cegodosolhos'},{user:'Ali',pass:'euamocavalos'}];
+// Lista de usuários admin válidos (apenas nomes — senhas ficam no Firestore)
+const ADMIN_USERS = ['twik','ryu','andy','ali'];
+function isValidAdminUser(u) { return ADMIN_USERS.includes(u.toLowerCase()); }
 const MAX_ATTR_POINTS = 5;
 const MAX_SKILLS = 8;
 
@@ -1312,17 +1369,18 @@ const FED_LOGO_URL = ''; // URL da logo da Federação
 const BG_PATTERN_URL = ''; // URL do background pattern
 
 function initImages() {
+  const safe = (id, fn) => { const el = document.getElementById(id); if(el) fn(el); };
   if(LOGO_URL) {
-    document.getElementById('navLogoImg').src = LOGO_URL;
-    document.getElementById('heroLogo').src = LOGO_URL;
-    document.getElementById('navLogoFallback').style.display = 'none';
+    safe('navLogoImg', el => el.src = LOGO_URL);
+    safe('heroLogo', el => el.src = LOGO_URL);
+    safe('navLogoFallback', el => el.style.display = 'none');
   }
   if(FED_LOGO_URL) {
-    document.getElementById('navFedLogo').src = FED_LOGO_URL;
-    document.getElementById('fedHeaderLogo').src = FED_LOGO_URL;
+    safe('navFedLogo', el => el.src = FED_LOGO_URL);
+    safe('fedHeaderLogo', el => el.src = FED_LOGO_URL);
   }
   if(BG_PATTERN_URL) {
-    document.getElementById('heroBg').style.backgroundImage = `url('${BG_PATTERN_URL}')`;
+    safe('heroBg', el => el.style.backgroundImage = `url('${BG_PATTERN_URL}')`);
   }
 }
 
@@ -1337,7 +1395,7 @@ function showPage(id) {
   document.getElementById('navLinks').classList.remove('open');
   window.scrollTo(0,0);
   if(id==='personagens') renderChars('all');
-  if(id==='admin-panel') renderPending();
+  if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
   if(id==='ficha') {
     // Se a tela de sucesso estava aberta, reseta o form
     if(document.getElementById('fichaSuccess').style.display === 'block' && !window._editingFichaId) {
@@ -1353,10 +1411,16 @@ function toggleNav() { document.getElementById('navLinks').classList.toggle('ope
 // ===== CHARS =====
 function renderChars(filter) {
   const grid = document.getElementById('charsGrid');
-  let list = [...CHARS_DATA, ...approvedChars];
+  // Constrói lista: personagens aprovados têm prioridade sobre os estáticos
+  const approvedCharIds = new Set(approvedChars.map(c => c.charId).filter(Boolean));
+  // Remove da lista estática os que já têm ficha aprovada
+  const staticList = CHARS_DATA.filter(c => !approvedCharIds.has(c.id));
+  let list = [...staticList, ...approvedChars];
   if(filter !== 'all') list = list.filter(c => c.status===filter || c.lang===filter);
   if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
   grid.innerHTML = list.map(c => {
+    // Para approved chars, o id de clique é o charId original (se existir) ou o doc id
+    const clickId = c.charId || c.id;
     const img = c.imageUrl
       ? `<img src="${c.imageUrl}" alt="${c.name}">`
       : c.minecraft
@@ -1364,7 +1428,7 @@ function renderChars(filter) {
       : `<span>👤</span>`;
     const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
     const sl = c.gameStatus || 'PENDENTE';
-    return `<div class="char-card" onclick="showCharProfile('${c.id}')">
+    return `<div class="char-card" onclick="showCharProfile('${clickId}')">
       <div class="char-available ${c.status==='ocupado'?'occupied':'available'}"></div>
       <div class="char-avatar">${img}</div>
       <div class="char-name">${c.name.toUpperCase()}</div>
@@ -1381,8 +1445,10 @@ function filterChars(f, btn) {
 }
 
 function showCharProfile(id) {
-  const all = [...CHARS_DATA, ...approvedChars];
-  const c = all.find(x => x.id===id);
+  // Busca primeiro em approvedChars pelo charId original, depois por doc id
+  let c = approvedChars.find(x => x.charId === id || x.id === id);
+  // Fallback: busca no estático
+  if(!c) c = CHARS_DATA.find(x => x.id === id);
   if(!c) return;
   const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
   const sl = c.gameStatus || 'DESCONHECIDO';
@@ -1480,11 +1546,14 @@ function updatePointsDisplay() {
 // ===== PERÍCIAS =====
 function buildSkillsForm() {
   const g = document.getElementById('skillsGrid');
-  g.innerHTML = SKILLS.map(s => `
-    <label class="skill-check" id="sc_${s}" onclick="toggleSkill('${s}')">
-      <div class="skill-check-box" id="sb_${s}"></div>
+  g.innerHTML = SKILLS.map(s => {
+    const isSelected = selectedSkills.has(s);
+    return `
+    <label class="skill-check${isSelected?' selected':''}" id="sc_${s}" onclick="toggleSkill('${s}')">
+      <div class="skill-check-box" id="sb_${s}">${isSelected?'✓':''}</div>
       <span class="skill-check-name">${s}</span>
-    </label>`).join('');
+    </label>`;
+  }).join('');
   updateSkillsDisplay();
 }
 
@@ -1519,6 +1588,8 @@ function calcAge(dateStr) {
 
 // ===== MÁSCARA DE DATA =====
 function maskDate(input) {
+  if(input._maskInitialized) return; // evita duplicar listeners
+  input._maskInitialized = true;
   input.addEventListener('input', function() {
     let v = this.value.replace(/\D/g, '').slice(0, 8);
     if(v.length >= 5) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
@@ -1540,10 +1611,13 @@ function initDateMasks() {
     const el = document.getElementById(dateId);
     if(!el) return;
     maskDate(el);
-    el.addEventListener('input', function() {
-      const ageEl = document.getElementById(ageId);
-      if(ageEl) ageEl.value = calcAge(this.value);
-    });
+    if(!el._ageListenerInitialized) {
+      el._ageListenerInitialized = true;
+      el.addEventListener('input', function() {
+        const ageEl = document.getElementById(ageId);
+        if(ageEl) ageEl.value = calcAge(this.value);
+      });
+    }
   });
 }
 
@@ -1644,15 +1718,86 @@ function updateAdminNotify() {
   }
 }
 
-function checkAdmin() {
+async function checkAdmin() {
   const u = document.getElementById('adminUser').value.trim();
   const p = document.getElementById('adminPass').value;
-  if(ADMINS.find(a => a.user.toLowerCase()===u.toLowerCase() && a.pass===p)) {
+  const errEl = document.getElementById('adminError');
+  const btn = document.querySelector('#admin-gate .secret-btn');
+  if(!u || !p) { errEl.style.display = 'block'; return; }
+  if(!isValidAdminUser(u)) { errEl.style.display = 'block'; return; }
+  // Desabilita botão durante verificação
+  if(btn) { btn.disabled = true; btn.textContent = '...'; }
+  try {
+    // Verifica se admin já tem senha cadastrada no Firestore
+    const exists = await window._adminExistsFirebase(u);
+    if(!exists) {
+      // Primeiro acesso: pede criação de senha
+      errEl.style.display = 'none';
+      showFirstAccessSetup(u, p);
+      if(btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
+      return;
+    }
+    const ok = await window._checkAdminFirebase(u, p);
+    if(ok) {
+      window._adminLogado = true;
+      window._adminUser = u.toLowerCase();
+      updateAdminNotify();
+      showPage('admin-panel'); renderPending(); renderApprovedAdmin();
+    } else {
+      errEl.textContent = '⚠ CREDENCIAIS INVÁLIDAS';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    console.error(e);
+    errEl.textContent = '⚠ ERRO DE CONEXÃO — TENTE NOVAMENTE';
+    errEl.style.display = 'block';
+  }
+  if(btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
+}
+
+function showFirstAccessSetup(user, initialPass) {
+  // Modal para cadastrar senha pela primeira vez
+  const existing = document.getElementById('firstAccessModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'firstAccessModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2.5rem;max-width:420px;width:100%">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.5rem">// PRIMEIRO ACESSO //</div>
+      <h3 style="font-family:'Orbitron',monospace;font-size:1rem;color:#fff;letter-spacing:3px;margin-bottom:0.5rem">${user.toUpperCase()}</h3>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);line-height:1.8;margin-bottom:1.5rem">Nenhuma senha cadastrada para este usuário. Defina sua senha agora para continuar.</p>
+      <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.5rem">
+        <input type="password" id="firstPass1" placeholder="NOVA SENHA" style="background:var(--bg3);border:1px solid var(--red);color:var(--red-bright);padding:0.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;letter-spacing:2px;outline:none;width:100%;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        <input type="password" id="firstPass2" placeholder="CONFIRMAR SENHA" style="background:var(--bg3);border:1px solid var(--red);color:var(--red-bright);padding:0.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;letter-spacing:2px;outline:none;width:100%;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')confirmFirstAccess('${user}')">
+      </div>
+      <div id="firstAccessErr" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:1rem;display:none"></div>
+      <button onclick="confirmFirstAccess('${user}')" style="width:100%;padding:0.9rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer" id="firstAccessBtn">CADASTRAR SENHA</button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function confirmFirstAccess(user) {
+  const p1 = document.getElementById('firstPass1').value;
+  const p2 = document.getElementById('firstPass2').value;
+  const errEl = document.getElementById('firstAccessErr');
+  const btn = document.getElementById('firstAccessBtn');
+  if(p1.length < 6) { errEl.textContent = '⚠ Senha precisa ter pelo menos 6 caracteres.'; errEl.style.display='block'; return; }
+  if(p1 !== p2) { errEl.textContent = '⚠ Senhas não coincidem.'; errEl.style.display='block'; return; }
+  btn.disabled = true; btn.textContent = 'SALVANDO...';
+  try {
+    await window._setAdminPasswordFirebase(user, p1);
+    document.getElementById('firstAccessModal').remove();
+    // Loga automaticamente
     window._adminLogado = true;
+    window._adminUser = user.toLowerCase();
     updateAdminNotify();
-    showPage('admin-panel'); renderPending();
-  } else {
-    document.getElementById('adminError').style.display = 'block';
+    showPage('admin-panel'); renderPending(); renderApprovedAdmin();
+  } catch(e) {
+    console.error(e);
+    errEl.textContent = '⚠ Erro ao salvar. Tente novamente.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'CADASTRAR SENHA';
   }
 }
 
@@ -1721,6 +1866,50 @@ function saveFedPassword() {
     document.getElementById('cfg_msg').style.display = 'block';
     setTimeout(() => document.getElementById('cfg_msg').style.display='none', 2000);
   });
+}
+
+async function changeAdminPassword() {
+  const atual = document.getElementById('cfg_passAtual').value;
+  const nova = document.getElementById('cfg_passNova').value;
+  const confirm = document.getElementById('cfg_passConfirm').value;
+  const errEl = document.getElementById('cfg_pass_err');
+  const okEl = document.getElementById('cfg_pass_ok');
+  const btn = document.getElementById('cfg_passBtnSave');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+  if(!atual || !nova || !confirm) {
+    errEl.textContent = '⚠ Preencha todos os campos.'; errEl.style.display='block'; return;
+  }
+  if(nova.length < 6) {
+    errEl.textContent = '⚠ Nova senha precisa ter pelo menos 6 caracteres.'; errEl.style.display='block'; return;
+  }
+  if(nova !== confirm) {
+    errEl.textContent = '⚠ Nova senha e confirmação não coincidem.'; errEl.style.display='block'; return;
+  }
+  if(!window._adminUser) {
+    errEl.textContent = '⚠ Sessão expirada. Faça login novamente.'; errEl.style.display='block'; return;
+  }
+  btn.disabled = true; btn.textContent = 'VERIFICANDO...';
+  try {
+    // Verifica senha atual
+    const ok = await window._checkAdminFirebase(window._adminUser, atual);
+    if(!ok) {
+      errEl.textContent = '⚠ Senha atual incorreta.'; errEl.style.display='block';
+      btn.disabled = false; btn.textContent = 'SALVAR NOVA SENHA'; return;
+    }
+    btn.textContent = 'SALVANDO...';
+    await window._setAdminPasswordFirebase(window._adminUser, nova);
+    // Limpa os campos
+    document.getElementById('cfg_passAtual').value = '';
+    document.getElementById('cfg_passNova').value = '';
+    document.getElementById('cfg_passConfirm').value = '';
+    okEl.style.display = 'block';
+    setTimeout(() => okEl.style.display='none', 4000);
+  } catch(e) {
+    console.error(e);
+    errEl.textContent = '⚠ Erro ao salvar. Tente novamente.'; errEl.style.display='block';
+  }
+  btn.disabled = false; btn.textContent = 'SALVAR NOVA SENHA';
 }
 
 // ===== FEDERAÇÃO SECRETA =====
@@ -1810,14 +1999,15 @@ function selectChar(id, name, lang) {
 }
 
 // ===== EDIÇÃO DE FICHA =====
-function showEditFicha() {
+async function showEditFicha() {
   const senha = prompt('Digite sua senha de edição (solicitada via ticket no Discord):');
   if(!senha) return;
-  // Verifica se é admin
-  const isAdmin = ADMINS.find(a => a.pass === senha);
-  if(isAdmin) {
-    openEditForm(isAdmin.user, senha);
-    return;
+  // Verifica se é admin: testa todos os usuários admin válidos
+  for(const u of ADMIN_USERS) {
+    try {
+      const ok = await window._checkAdminFirebase(u, senha);
+      if(ok) { openEditForm(u, senha); return; }
+    } catch(e) { /* continua */ }
   }
   // Verifica senha de player no Firestore
   window._getPlayerEditKey(senha).then(player => {
@@ -1836,6 +2026,9 @@ function openEditForm(playerName, senha) {
     alert('Nenhuma ficha aprovada encontrada para ' + playerName);
     return;
   }
+  // Garante que fichaSuccess não está visível
+  document.getElementById('fichaForm').style.display = 'block';
+  document.getElementById('fichaSuccess').style.display = 'none';
   // Preenche o formulário com os dados existentes
   document.getElementById('f_nome').value = ficha.name || '';
   document.getElementById('f_player').value = ficha.player || '';
@@ -1849,8 +2042,9 @@ function openEditForm(playerName, senha) {
   document.getElementById('f_backstory').value = ficha.backstory || '';
   if(ficha.attrs) { Object.assign(attrValues, ficha.attrs); buildAttrsForm(); }
   if(ficha.skills) { selectedSkills = new Set(ficha.skills); buildSkillsForm(); }
-  selectedCharId = ficha.id;
-  // Marca como edição
+  // selectedCharId = charId original (para validação do popup)
+  selectedCharId = ficha.charId || ficha.id;
+  // _editingFichaId = doc ID do Firestore (para updateDoc na aprovação)
   window._editingFichaId = ficha.id;
   window._editingSenha = senha;
   // Muda botão
