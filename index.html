@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/png" href="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PARANOIA — Ilha Quesadilla</title>
 <style>
@@ -218,6 +219,9 @@
 
   /* PAGES */
   .page { display: none; padding-top: 60px; min-height: 100vh; }
+  .page.active { display: block; opacity: 0; animation: pageFadeIn 0.2s ease forwards; }
+  #home.active { display: flex; }
+  @keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
   .page.active { display: block; }
   #home { display: none; flex-direction: column; }
   #home.active { display: flex; }
@@ -824,10 +828,6 @@
     to   { opacity: 0; transform: translateX(20px); }
   }
 
-  /* PAGE FADE */
-  .page { opacity: 0; transition: opacity 0.2s ease; }
-  .page.active { opacity: 1; }
-
   /* CHAR CARD SCANLINE HOVER */
   .char-card::after {
     content: '';
@@ -1046,7 +1046,7 @@
 <!-- NAV -->
 <nav>
   <div class="nav-logo-wrap" onclick="showPage('home')" id="navLogoWrap2">
-    <img src="https://i.imgur.com/OSV9nga.png" id="navLogoImg" alt="PARANOIA" style="width:38px;height:38px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 6px rgba(139,0,0,0.6))">
+    <img src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" id="navLogoImg" alt="PARANOIA" style="width:38px;height:38px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 6px rgba(139,0,0,0.6))">
     <div class="admin-notify-badge" id="adminNotifyBadge"></div>
     <span style="font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:#fff;letter-spacing:12px;text-shadow:0 0 40px rgba(139,0,0,0.8);text-transform:uppercase;-webkit-font-smoothing:antialiased">PARANOIA</span>
   </div>
@@ -1055,8 +1055,8 @@
     <li class="nav-dropdown">
       <a href="#" onclick="showPage('historia')" id="nav-historia">História</a>
       <div class="nav-dropdown-menu">
-        <a href="#" onclick="showPage('historia')"><img src="https://i.imgur.com/OSV9nga.png" class="nav-logo-img" alt=""> Sinopse</a>
-        <a href="#" onclick="showLorePage('chegada')"><img src="https://i.imgur.com/OSV9nga.png" class="nav-logo-img" alt=""> A Chegada de Trem</a>
+        <a href="#" onclick="showPage('historia')"><img src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Sinopse</a>
+        <a href="#" onclick="showLorePage('chegada')"><img src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> A Chegada de Trem</a>
       </div>
     </li>
     <li><a href="#" onclick="showPage('regras')" id="nav-regras">Regras</a></li>
@@ -1064,7 +1064,7 @@
     <li class="nav-dropdown" id="nav-personagens-li">
       <a href="#" onclick="showPage('personagens')" id="nav-personagens">Personagens</a>
       <div class="nav-dropdown-menu" id="navPersonagensMenu">
-        <a href="#" onclick="showPage('personagens')"><img src="https://i.imgur.com/OSV9nga.png" class="nav-logo-img" alt=""> Ver Todos</a>
+        <a href="#" onclick="showPage('personagens')"><img src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Ver Todos</a>
         <div class="nav-submenu-item">
           <a href="#" onclick="showPage('personagens');filterChars('ingles',document.querySelector('.filter-btn:nth-child(4)'))"><img src="https://flagcdn.com/16x12/us.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Inglês</a>
           <div class="nav-submenu" id="navSubIngles"><!-- preenchido por JS --></div>
@@ -1110,7 +1110,7 @@
     <div class="hero-grid"></div>
     <div class="hero-content">
       <div id="heroLogoWrap" style="margin-bottom:2rem;width:160px;height:160px;position:relative;display:flex;align-items:center;justify-content:center">
-        <img id="heroLogo" src="https://i.imgur.com/OSV9nga.png" alt="PARANOIA" style="width:160px;height:160px;border-radius:50%;object-fit:cover;position:absolute;z-index:2;filter:drop-shadow(0 0 40px rgba(139,0,0,0.9));animation:pulse 4s ease-in-out infinite">
+        <img id="heroLogo" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" alt="PARANOIA" style="width:160px;height:160px;border-radius:50%;object-fit:cover;position:absolute;z-index:2;filter:drop-shadow(0 0 40px rgba(139,0,0,0.9));animation:pulse 4s ease-in-out infinite">
       </div>
       <h1>PARANOIA</h1>
       <div class="hero-divider"></div>
@@ -1829,11 +1829,7 @@ function showLorePage(slug) { showPage('lore-' + slug); }
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById(id);
-  if(p) {
-    // force reflow para a transição funcionar
-    void p.offsetWidth;
-    p.classList.add('active');
-  }
+  if(p) p.classList.add('active');
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   const nav = document.getElementById('nav-'+id) || (id.startsWith('lore-') ? document.getElementById('nav-historia') : null);
   if(nav) nav.classList.add('active');
