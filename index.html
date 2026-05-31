@@ -1622,27 +1622,33 @@ function renderPending() {
       </div>
       <div class="pending-actions">
         <button class="btn-approve" onclick="viewPendingFicha('${f.id}')">👁 VER</button>
-        <button class="btn-approve" onclick="this.disabled=true;this.textContent='⏳';approveFicha('${f.id}')">✓ APROVAR</button>
-        <button class="btn-reject" onclick="this.disabled=true;this.textContent='⏳';rejectFicha('${f.id}')">✗ REJEITAR</button>
+        <button class="btn-approve" onclick="(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await approveFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✓ APROVAR';}})(this)">✓ APROVAR</button>
+        <button class="btn-reject" onclick="(async(b)=>{b.disabled=true;b.textContent='⏳';const ok=await rejectFicha('${f.id}');if(!ok){b.disabled=false;b.textContent='✗ REJEITAR';}})(this)">✗ REJEITAR</button>
       </div>
     </div>`).join('');
 }
 
-function approveFicha(id) {
+async function approveFicha(id) {
   const ficha = (window.pendingFichas||[]).find(f => f.id===id);
-  if(!ficha) return;
-  const { id: fichaId, ...fichaData } = ficha;
-  window._approveFichaFirebase({...fichaData, pending:false}, id).catch(err => {
-    alert('Erro ao aprovar ficha.');
-    console.error(err);
-  });
+  if(!ficha) return false;
+  const { id: _localId, ...fichaData } = ficha;
+  try {
+    await window._approveFichaFirebase({...fichaData, pending:false}, id);
+    return true;
+  } catch(err) {
+    console.error('Erro ao aprovar:', err);
+    return false;
+  }
 }
 
-function rejectFicha(id) {
-  window._rejectFichaFirebase(id).catch(err => {
-    alert('Erro ao rejeitar ficha.');
-    console.error(err);
-  });
+async function rejectFicha(id) {
+  try {
+    await window._rejectFichaFirebase(id);
+    return true;
+  } catch(err) {
+    console.error('Erro ao rejeitar:', err);
+    return false;
+  }
 }
 
 function saveFedPassword() {
@@ -1869,18 +1875,33 @@ function viewPendingFicha(id) {
   modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
 }
 
-function adminAprovar(id, btn) {
+async function adminAprovar(id, btn) {
   btn.disabled = true;
   btn.textContent = '⏳ APROVANDO...';
-  approveFicha(id);
-  setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 800);
+  const ok = await approveFicha(id);
+  if(ok) {
+    btn.textContent = '✓ APROVADO!';
+    btn.style.background = '#1a4a1a';
+    setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 600);
+  } else {
+    btn.disabled = false;
+    btn.textContent = '✓ APROVAR';
+    alert('Erro ao aprovar. Verifique o console.');
+  }
 }
 
-function adminRejeitar(id, btn) {
+async function adminRejeitar(id, btn) {
   btn.disabled = true;
   btn.textContent = '⏳ REJEITANDO...';
-  rejectFicha(id);
-  setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 800);
+  const ok = await rejectFicha(id);
+  if(ok) {
+    btn.textContent = '✗ REJEITADO';
+    setTimeout(() => { document.getElementById('fichaPreviewModal')?.remove(); }, 600);
+  } else {
+    btn.disabled = false;
+    btn.textContent = '✗ REJEITAR';
+    alert('Erro ao rejeitar. Verifique o console.');
+  }
 }
 
 function gerarSenhaEdicao(charId, playerName) {
