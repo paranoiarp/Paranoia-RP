@@ -22,6 +22,7 @@
     --nav-bg: rgba(10,10,10,0.97);
     --card-overlay: rgba(10,10,10,0.88);
     --hero-gradient: rgba(10,10,10,0.92);
+    --hero-overlay: radial-gradient(ellipse at center, rgba(10,10,10,0.1) 0%, rgba(10,10,10,0.6) 70%, rgba(10,10,10,0.92) 100%);
   }
 
   /* ─── TEMA CLARO ─── */
@@ -40,6 +41,7 @@
     --nav-bg: rgba(240,235,232,0.97);
     --card-overlay: rgba(240,235,232,0.88);
     --hero-gradient: rgba(240,235,232,0.85);
+    --hero-overlay: radial-gradient(ellipse at center, rgba(240,235,232,0.05) 0%, rgba(240,235,232,0.4) 70%, rgba(240,235,232,0.88) 100%);
   }
 
   /* ─── BOTÃO DE TEMA ─── */
@@ -214,6 +216,15 @@
   html.light [style*="text-shadow:0 0 40px rgba(139,0,0"] {
     text-shadow: 0 0 20px rgba(139,0,0,0.25) !important;
   }
+
+  /* Hero no tema claro */
+  html.light .hero-grid {
+    background-image:
+      linear-gradient(rgba(139,0,0,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,0,0,0.08) 1px, transparent 1px);
+  }
+  html.light .hero { background: var(--bg); }
+  html.light #bgCanvas { opacity: 0.06; filter: invert(1); }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -447,7 +458,7 @@
   .hero-overlay {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at center, rgba(10,10,10,0.1) 0%, rgba(10,10,10,0.6) 70%, rgba(10,10,10,0.92) 100%);
+    background: var(--hero-overlay);
     z-index: 1;
   }
 
@@ -6391,11 +6402,10 @@ function updateThemeIcon(isLight) {
 // Aplicar tema salvo ao carregar
 (function() {
   const saved = localStorage.getItem('paranoia-theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isLight = saved === 'light' || (!saved && !prefersDark);
+  // padrão: escuro (tema original)
+  const isLight = saved === 'light';
   if (isLight) {
     document.documentElement.classList.add('light');
-    // O icon será atualizado quando o DOM carregar
     document.addEventListener('DOMContentLoaded', function() {
       updateThemeIcon(true);
     });
