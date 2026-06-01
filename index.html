@@ -5339,11 +5339,22 @@ async function renderPlayersAdmin() {
       return `<div class="pending-card" style="flex-direction:column;align-items:flex-start;gap:0.3rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;gap:1rem;flex-wrap:wrap">
           <div class="pending-info" style="flex:1">
-            <h4>${(p.username||p.id).toUpperCase()}</h4>
+            <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem">
+              <h4 style="margin:0">${(p.username||p.id).toUpperCase()}</h4>
+              ${(()=>{
+                const role = p.role || 'player';
+                const isAdm = ['twik','ryu','andy','ali'].includes((p.username||p.id).toLowerCase());
+                const r = isAdm ? 'admin' : role;
+                const colors = { admin:'#cc0000', adminplayer:'#ff6b00', player:'#4caf50' };
+                const labels = { admin:'ADMIN', adminplayer:'ADMIN PLAYER', player:'PLAYER' };
+                return `<span style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;padding:0.2rem 0.6rem;border:1px solid ${colors[r]||colors.player};color:${colors[r]||colors.player};background:${colors[r]||colors.player}22">${labels[r]||'PLAYER'}</span>`;
+              })()}
+            </div>
             <p>// ${myChars.length} personagem(s) vinculado(s) // Criado em: ${p.createdAt ? new Date(p.createdAt).toLocaleDateString('pt-BR') : '—'}</p>
           </div>
           <div class="pending-actions" style="flex-shrink:0;gap:0.4rem">
             <button class="btn-approve" onclick="adminEditarPlayer('${p.username||p.id}')">✎ EDITAR</button>
+            <button class="btn-approve" onclick="adminChangeRole('${p.username||p.id}','${p.role||'player'}')">🏷 TIPO</button>
             <button class="btn-reject" onclick="adminDeletePlayer('${p.username||p.id}')">🗑 EXCLUIR</button>
           </div>
         </div>
@@ -5352,6 +5363,36 @@ async function renderPlayersAdmin() {
     }).join('');
   } catch(e) {
     el.innerHTML = '<div class="empty-state">ERRO AO CARREGAR.</div>';
+    console.error(e);
+  }
+}
+
+async function adminChangeRole(username, currentRole) {
+  const roles = ['player','adminplayer'];
+  const labels = { player:'👤 PLAYER', adminplayer:'🛡 ADMIN PLAYER' };
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:360px;width:100%;text-align:center">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem">// TIPO DE USUÁRIO //</div>
+      <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:#fff;margin-bottom:1.5rem">${username.toUpperCase()}</div>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.5rem">
+        ${roles.map(r => `<button onclick="setPlayerRole('${username}','${r}',this.closest('[style*=fixed]'))" style="padding:0.8rem;background:${r===currentRole?'rgba(139,0,0,0.3)':'none'};border:1px solid ${r===currentRole?'var(--red-bright)':'var(--border)'};color:${r===currentRole?'#fff':'var(--text-dim)'};font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">${labels[r]}</button>`).join('')}
+      </div>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="padding:0.5rem 1.5rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function setPlayerRole(username, role, modal) {
+  try {
+    const { doc, updateDoc } = window._fbModules;
+    await updateDoc(doc(window._db, 'playerAuth', username.toLowerCase()), { role });
+    modal.remove();
+    renderPlayersAdmin();
+  } catch(e) {
+    alert('Erro ao atualizar. Tente novamente.');
     console.error(e);
   }
 }
