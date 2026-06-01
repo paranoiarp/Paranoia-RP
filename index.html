@@ -2842,6 +2842,7 @@
       <button class="admin-tab" onclick="showAdminTab(&#39;personagens-admin&#39;,this);renderApprovedAdmin()">PERSONAGENS</button>
       <button class="admin-tab" onclick="showAdminTab(&#39;players-admin&#39;,this);renderPlayersAdmin()">👥 PLAYERS</button>
       <button class="admin-tab" onclick="showAdminTab(&#39;fotos-admin&#39;,this);renderFotosAdmin()">🖼 FOTOS</button>
+      <button class="admin-tab" onclick="showAdminTab(&#39;admin-meu-perfil&#39;,this);loadAdminPerfil()">🪪 MEU PERFIL</button>
       <button class="admin-tab" onclick="showAdminTab(&#39;admin-meus-chars&#39;,this);renderAdminOwnChars()">👤 MEUS PERSONAGENS</button>
       <button class="admin-tab" onclick="showAdminTab(&#39;fed-admin&#39;,this)">THE FEDERATION</button>
       <button class="admin-tab" onclick="showAdminTab(&#39;config&#39;,this)">CONFIGURAÇÕES</button>
@@ -2865,6 +2866,9 @@
       </div>
     </div></div></div>
     <div id="players-admin" class="admin-content"><div id="playersAdminList"><div class="empty-state">CARREGANDO...</div></div></div>
+    <div id="admin-meu-perfil" class="admin-content">
+      <div id="adminPerfilContent"><div class="empty-state">CARREGANDO...</div></div>
+    </div>
     <div id="admin-meus-chars" class="admin-content">
       <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
         <button class="submit-btn" style="max-width:280px" onclick="abrirFichaAdmin()">+ ENVIAR NOVA FICHA (AUTO-APROVAR)</button>
@@ -4445,6 +4449,98 @@ function playerLogout() {
   showPage('minha-area');
   document.getElementById('playerLoginUser').value = '';
   document.getElementById('playerLoginPass').value = '';
+}
+
+async function loadAdminPerfil() {
+  const el = document.getElementById('adminPerfilContent');
+  if(!el || !window._adminUser) return;
+  el.innerHTML = '<div class="empty-state">CARREGANDO...</div>';
+  try {
+    const { doc, getDoc, updateDoc } = window._fbModules;
+    // Tenta pegar dados do playerAuth se existir conta vinculada
+    const snap = await getDoc(doc(window._db, 'playerAuth', window._adminUser));
+    const data = snap.exists() ? snap.data() : { username: window._adminUser };
+    const myChars = approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === window._adminUser);
+    const myPending = (window.pendingFichas||[]).filter(f => f.playerAccount && f.playerAccount.toLowerCase() === window._adminUser);
+    const avatar = data.avatarUrl || '';
+
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:2rem;padding:1rem 0">
+        <!-- Sidebar -->
+        <div>
+          <div style="background:var(--bg2);border:1px solid var(--border);padding:1.5rem;text-align:center;margin-bottom:1rem">
+            ${avatar
+              ? `<img src="${avatar}" alt="${window._adminUser}" style="width:160px;height:160px;object-fit:cover;border:2px solid var(--red);display:block;margin:0 auto 1rem">`
+              : `<div style="width:160px;height:160px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--border);font-size:4rem;margin:0 auto 1rem">👤</div>`
+            }
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:2px;padding:0.2rem 0.8rem;border:1px solid var(--red-bright);color:var(--red-bright);display:inline-block;margin-bottom:1rem">ADMIN</div>
+            <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:#fff;letter-spacing:3px;margin-bottom:1.2rem">${window._adminUser.toUpperCase()}</div>
+            <!-- Input foto -->
+            <div style="text-align:left">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:0.4rem">FOTO DE PERFIL (Imgur)</div>
+              <input type="text" id="adm_avatar_url" placeholder="https://i.imgur.com/..." value="${avatar}" style="width:100%;padding:0.5rem;background:var(--bg3);border:1px solid var(--border);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;margin-bottom:0.5rem;box-sizing:border-box">
+              <div id="adm_avatar_err" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);margin-bottom:0.4rem">⚠ Apenas imagens do Imgur são aceitas.</div>
+              <button onclick="saveAdminAvatar()" style="width:100%;padding:0.6rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">SALVAR FOTO</button>
+            </div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);padding:1rem">
+            <div class="profile-info-item"><span class="label">FUNÇÃO</span><span class="value" style="color:var(--red-bright)">ADMINISTRADOR</span></div>
+            <div class="profile-info-item"><span class="label">PERSONAGENS ATIVOS</span><span class="value" style="color:#4caf50">${myChars.length}</span></div>
+            <div class="profile-info-item"><span class="label">FICHAS PENDENTES</span><span class="value" style="color:#ff9800">${myPending.length}</span></div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div>
+          <div class="profile-section">
+            <h3>MEUS PERSONAGENS</h3>
+            ${myChars.length ? `<div style="display:flex;flex-wrap:wrap;gap:0.8rem;margin-top:1rem">
+              ${myChars.map(c => {
+                const gs = c.gameStatus || 'vivo';
+                const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':'#ff9800';
+                const charStatic = CHARS_DATA.find(x => x.id === (c.charId||c.id));
+                const imgUrl = (window._charPhotos && window._charPhotos[c.charId||c.id]) || c.imageUrl || (charStatic?.minecraft ? 'https://mc-heads.net/avatar/'+charStatic.minecraft+'/60' : '');
+                return `<button onclick="showCharProfile('${c.charId||c.id}')" style="display:flex;align-items:center;gap:0.8rem;padding:0.7rem 1rem 0.7rem 0.7rem;background:var(--bg2);border:1px solid var(--border);color:var(--silver);cursor:pointer;transition:all 0.2s;min-width:180px" onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'">
+                  <div style="position:relative;flex-shrink:0">
+                    ${imgUrl ? `<img src="${imgUrl}" style="width:50px;height:50px;object-fit:cover;border:1px solid var(--border)">` : `<div style="width:50px;height:50px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem">👤</div>`}
+                    <span style="position:absolute;bottom:-2px;right:-2px;width:9px;height:9px;border-radius:50%;background:${gsColor};border:2px solid var(--bg2)"></span>
+                  </div>
+                  <div>
+                    <div style="font-family:'Orbitron',monospace;font-size:0.65rem;color:#fff;letter-spacing:1px">${(c.name||'?').toUpperCase()}</div>
+                    ${c.cucuruchoNome?`<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim)">${c.cucuruchoNome}</div>`:''}
+                    <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:${gsColor};letter-spacing:1px">${gs.toUpperCase()}</div>
+                  </div>
+                </button>`;
+              }).join('')}
+            </div>` : `<p style="color:var(--text-dim);font-size:0.85rem">Nenhum personagem aprovado ainda.</p>`}
+          </div>
+        </div>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state">ERRO AO CARREGAR PERFIL.</div>';
+    console.error(e);
+  }
+}
+
+async function saveAdminAvatar() {
+  const url = document.getElementById('adm_avatar_url')?.value.trim() || '';
+  const errEl = document.getElementById('adm_avatar_err');
+  errEl.style.display = 'none';
+  if(url && !url.match(/^https?:\/\/(i\.)?imgur\.com\//i)) {
+    errEl.style.display = 'block'; return;
+  }
+  try {
+    const { doc, getDoc, setDoc, updateDoc } = window._fbModules;
+    const ref = doc(window._db, 'playerAuth', window._adminUser);
+    const snap = await getDoc(ref);
+    if(snap.exists()) {
+      await updateDoc(ref, { avatarUrl: url });
+    } else {
+      await setDoc(ref, { username: window._adminUser, avatarUrl: url, createdAt: new Date().toISOString() });
+    }
+    loadAdminPerfil();
+  } catch(e) {
+    alert('Erro ao salvar foto.'); console.error(e);
+  }
 }
 
 async function loadPlayerPerfil() {
