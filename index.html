@@ -903,6 +903,7 @@
     .pending-actions button { font-size: 0.58rem; padding: 0.35rem 0.5rem; }
     .profile-img-container { max-height: 220px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 0.5rem; }
     .profile-img { max-height: 200px; width: auto; max-width: 100%; }
+    #playerPerfilContent > div { grid-template-columns: 1fr !important; }
     .lore-page-title { font-size: 1.2rem; letter-spacing: 2px; }
   }
 
@@ -2781,11 +2782,15 @@
   </div>
   <div style="max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
     <div class="admin-tabs">
-      <button class="admin-tab active" onclick="showPlayerTab(&#39;player-meus-chars&#39;,this)">MEUS PERSONAGENS</button>
+      <button class="admin-tab active" onclick="showPlayerTab(&#39;player-perfil&#39;,this);loadPlayerPerfil()">👤 MEU PERFIL</button>
+      <button class="admin-tab" onclick="showPlayerTab(&#39;player-meus-chars&#39;,this)">MEUS PERSONAGENS</button>
       <button class="admin-tab" onclick="showPlayerTab(&#39;player-senha&#39;,this)">🔐 MINHA SENHA</button>
       <button class="admin-tab" onclick="playerLogout()" style="margin-left:auto;color:var(--text-dim)">↩ SAIR</button>
     </div>
-    <div id="player-meus-chars" class="admin-content active">
+    <div id="player-perfil" class="admin-content active">
+      <div id="playerPerfilContent"><div class="empty-state">CARREGANDO...</div></div>
+    </div>
+    <div id="player-meus-chars" class="admin-content">
       <div id="playerCharsList"><div class="empty-state">CARREGANDO...</div></div>
     </div>
     <div id="player-senha" class="admin-content">
@@ -3588,7 +3593,7 @@ async function submitFicha() {
       resetFichaForm();
       showToast('✓ Edição enviada para aprovação!', 'success');
       showPage('player-panel');
-      loadPlayerPanel();
+      loadPlayerPerfil();
     } else {
       document.getElementById('fichaForm').style.display = 'none';
       document.getElementById('fichaSuccess').style.display = 'block';
@@ -4386,7 +4391,7 @@ async function doPlayerLogin() {
       document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
       document.getElementById('nav-ficha-li').style.display = 'block';
       showPage('player-panel');
-      loadPlayerPanel();
+      loadPlayerPerfil();
     } else {
       errEl.textContent = '⚠ USUÁRIO OU SENHA INVÁLIDOS';
       errEl.style.display = 'block';
@@ -4440,6 +4445,97 @@ function playerLogout() {
   showPage('minha-area');
   document.getElementById('playerLoginUser').value = '';
   document.getElementById('playerLoginPass').value = '';
+}
+
+async function loadPlayerPerfil() {
+  const el = document.getElementById('playerPerfilContent');
+  if(!el) return;
+  el.innerHTML = '<div class="empty-state">CARREGANDO...</div>';
+  try {
+    const { doc, getDoc, updateDoc } = window._fbModules;
+    const snap = await getDoc(doc(window._db, 'playerAuth', window._playerUser));
+    const data = snap.exists() ? snap.data() : {};
+    const myChars = approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === window._playerUser);
+    const myPending = (window.pendingFichas||[]).filter(f => f.playerAccount && f.playerAccount.toLowerCase() === window._playerUser);
+    const avatar = data.avatarUrl || '';
+    const role = data.role || 'player';
+    const roleLabels = { player:'PLAYER', adminplayer:'ADMIN PLAYER' };
+    const roleColors = { player:'#4caf50', adminplayer:'#ff6b00' };
+
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:2rem;padding:1rem 0">
+        <!-- Sidebar -->
+        <div>
+          <!-- Avatar -->
+          <div style="background:var(--bg2);border:1px solid var(--border);padding:1.5rem;text-align:center;margin-bottom:1rem">
+            ${avatar
+              ? `<img src="${avatar}" alt="${data.username}" style="width:160px;height:160px;object-fit:cover;border:2px solid var(--border);display:block;margin:0 auto 1rem">`
+              : `<div style="width:160px;height:160px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--border);font-size:4rem;margin:0 auto 1rem">👤</div>`
+            }
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:2px;padding:0.2rem 0.8rem;border:1px solid ${roleColors[role]||'#4caf50'};color:${roleColors[role]||'#4caf50'};display:inline-block;margin-bottom:1rem">${roleLabels[role]||'PLAYER'}</div>
+            <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:#fff;letter-spacing:3px;margin-bottom:1.2rem">${(data.username||window._playerUser).toUpperCase()}</div>
+            <!-- Input foto -->
+            <div style="text-align:left">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:0.4rem">FOTO DE PERFIL (Imgur)</div>
+              <input type="text" id="pl_avatar_url" placeholder="https://i.imgur.com/..." value="${avatar}" style="width:100%;padding:0.5rem;background:var(--bg3);border:1px solid var(--border);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;margin-bottom:0.5rem;box-sizing:border-box">
+              <div id="pl_avatar_err" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);margin-bottom:0.4rem">⚠ Apenas imagens do Imgur são aceitas.</div>
+              <button onclick="savePlayerAvatar()" style="width:100%;padding:0.6rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">SALVAR FOTO</button>
+            </div>
+          </div>
+          <!-- Stats -->
+          <div style="background:var(--bg2);border:1px solid var(--border);padding:1rem">
+            <div class="profile-info-item"><span class="label">MEMBRO DESDE</span><span class="value">${data.createdAt ? new Date(data.createdAt).toLocaleDateString('pt-BR') : '—'}</span></div>
+            <div class="profile-info-item"><span class="label">PERSONAGENS ATIVOS</span><span class="value" style="color:#4caf50">${myChars.length}</span></div>
+            <div class="profile-info-item"><span class="label">FICHAS PENDENTES</span><span class="value" style="color:#ff9800">${myPending.length}</span></div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div>
+          <div class="profile-section">
+            <h3>MEUS PERSONAGENS</h3>
+            ${myChars.length ? `<div style="display:flex;flex-wrap:wrap;gap:0.8rem;margin-top:1rem">
+              ${myChars.map(c => {
+                const gs = c.gameStatus || 'vivo';
+                const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':'#ff9800';
+                const charStatic = CHARS_DATA.find(x => x.id === (c.charId||c.id));
+                const imgUrl = (window._charPhotos && window._charPhotos[c.charId||c.id]) || c.imageUrl || (charStatic?.minecraft ? 'https://mc-heads.net/avatar/'+charStatic.minecraft+'/60' : '');
+                return `<button onclick="showCharProfile('${c.charId||c.id}')" style="display:flex;align-items:center;gap:0.8rem;padding:0.7rem 1rem 0.7rem 0.7rem;background:var(--bg2);border:1px solid var(--border);color:var(--silver);cursor:pointer;transition:all 0.2s;min-width:180px" onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'">
+                  <div style="position:relative;flex-shrink:0">
+                    ${imgUrl ? `<img src="${imgUrl}" style="width:50px;height:50px;object-fit:cover;border:1px solid var(--border)">` : `<div style="width:50px;height:50px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem">👤</div>`}
+                    <span style="position:absolute;bottom:-2px;right:-2px;width:9px;height:9px;border-radius:50%;background:${gsColor};border:2px solid var(--bg2)"></span>
+                  </div>
+                  <div>
+                    <div style="font-family:'Orbitron',monospace;font-size:0.65rem;color:#fff;letter-spacing:1px">${(c.name||'?').toUpperCase()}</div>
+                    ${c.cucuruchoNome?`<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim)">${c.cucuruchoNome}</div>`:''}
+                    <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:${gsColor};letter-spacing:1px">${gs.toUpperCase()}</div>
+                  </div>
+                </button>`;
+              }).join('')}
+            </div>` : `<p style="color:var(--text-dim);font-size:0.85rem">Nenhum personagem aprovado ainda.</p>`}
+            ${myPending.length ? `<div style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#ff9800">⏳ ${myPending.length} ficha(s) aguardando aprovação</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state">ERRO AO CARREGAR PERFIL.</div>';
+    console.error(e);
+  }
+}
+
+async function savePlayerAvatar() {
+  const url = document.getElementById('pl_avatar_url')?.value.trim();
+  const errEl = document.getElementById('pl_avatar_err');
+  errEl.style.display = 'none';
+  if(url && !url.match(/^https?:\/\/(i\.)?imgur\.com\//i)) {
+    errEl.style.display = 'block'; return;
+  }
+  try {
+    const { doc, updateDoc } = window._fbModules;
+    await updateDoc(doc(window._db, 'playerAuth', window._playerUser), { avatarUrl: url });
+    loadPlayerPerfil();
+  } catch(e) {
+    alert('Erro ao salvar foto.'); console.error(e);
+  }
 }
 
 async function loadPlayerPanel() {
@@ -4554,6 +4650,7 @@ function showPlayerTab(id, btn) {
   document.getElementById(id).classList.add('active');
   if(btn) btn.classList.add('active');
   if(id === 'player-meus-chars') loadPlayerPanel();
+  if(id === 'player-perfil') loadPlayerPerfil();
 }
 
 // ===== ADMIN: FICHA RÁPIDA (AUTO-APROVAÇÃO) =====
