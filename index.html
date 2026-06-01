@@ -5140,6 +5140,149 @@ async function dismissPlayerNotif(notifId) {
 }
 
 // ===== ADMIN: EXCLUIR PLAYER =====
+// ===== ADMIN: EDITAR PERFIL DE PLAYER =====
+async function adminEditarPlayer(username) {
+  const existing = document.getElementById('editPlayerModal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'editPlayerModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:460px;width:100%">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// EDITAR PLAYER //</div>
+      <h3 style="font-family:'Orbitron',monospace;color:#fff;margin-bottom:1.4rem;font-size:0.95rem;letter-spacing:3px">${username.toUpperCase()}</h3>
+
+      <!-- SEÇÃO: RENOMEAR -->
+      <div style="margin-bottom:1.4rem;padding-bottom:1.4rem;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--silver);letter-spacing:2px;margin-bottom:0.7rem">RENOMEAR CONTA</div>
+        <div style="display:flex;gap:0.5rem">
+          <input type="text" id="ep_novoUser" value="${username}" placeholder="novo username..." style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.8rem;outline:none;text-transform:lowercase" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+          <button id="ep_renameBtn" onclick="adminRenomearPlayer('${username}')" style="padding:0.7rem 1rem;background:rgba(139,0,0,0.2);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">RENOMEAR</button>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.63rem;color:var(--text-dim);letter-spacing:1px;margin-top:0.4rem">Apenas letras minúsculas, números e _. Atualiza também o vínculo nos personagens.</div>
+        <div id="ep_renameMsg" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.72rem;margin-top:0.5rem"></div>
+      </div>
+
+      <!-- SEÇÃO: RESETAR SENHA -->
+      <div style="margin-bottom:1.4rem">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--silver);letter-spacing:2px;margin-bottom:0.7rem">RESETAR SENHA</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem">
+          <input type="password" id="ep_novaSenha" placeholder="nova senha (mín. 6 caracteres)..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.8rem;outline:none;text-transform:lowercase" oninput="this.value=this.value.toLowerCase()">
+          <input type="password" id="ep_confirmSenha" placeholder="confirmar nova senha..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.8rem;outline:none;text-transform:lowercase" oninput="this.value=this.value.toLowerCase()">
+          <button id="ep_senhaBtn" onclick="adminResetarSenhaPlayer('${username}')" style="padding:0.7rem 1rem;background:rgba(139,0,0,0.2);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:2px;cursor:pointer">🔑 DEFINIR NOVA SENHA</button>
+        </div>
+        <div id="ep_senhaMsg" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.72rem;margin-top:0.5rem"></div>
+      </div>
+
+      <button onclick="document.getElementById('editPlayerModal').remove()" style="width:100%;padding:0.7rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:2px;cursor:pointer">FECHAR</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function adminRenomearPlayer(oldUsername) {
+  const novoUser = (document.getElementById('ep_novoUser')?.value || '').trim().toLowerCase();
+  const msgEl = document.getElementById('ep_renameMsg');
+  const btn = document.getElementById('ep_renameBtn');
+  msgEl.style.display = 'none';
+
+  if(!novoUser || novoUser.length < 3) {
+    msgEl.textContent = '⚠ Username deve ter pelo menos 3 caracteres.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block'; return;
+  }
+  if(novoUser === oldUsername.toLowerCase()) {
+    msgEl.textContent = '⚠ O novo username é igual ao atual.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true; btn.textContent = '⏳...';
+  try {
+    const { doc, getDoc, setDoc, deleteDoc, collection, getDocs, query, where, updateDoc } = window._fbModules;
+    const db = window._db;
+
+    // Verifica se novo username já existe
+    const existing = await getDoc(doc(db, 'playerAuth', novoUser));
+    if(existing.exists()) {
+      msgEl.textContent = '⚠ Este username já está em uso.';
+      msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'RENOMEAR'; return;
+    }
+
+    // Copia doc antigo com novo id
+    const oldSnap = await getDoc(doc(db, 'playerAuth', oldUsername.toLowerCase()));
+    if(!oldSnap.exists()) throw new Error('Player não encontrado');
+    const oldData = oldSnap.data();
+    await setDoc(doc(db, 'playerAuth', novoUser), { ...oldData, username: novoUser });
+    await deleteDoc(doc(db, 'playerAuth', oldUsername.toLowerCase()));
+
+    // Atualiza playerAccount em todos os personagens vinculados
+    const charsSnap = await getDocs(query(collection(db, 'approvedChars'), where('playerAccount', '==', oldUsername.toLowerCase())));
+    for(const cd of charsSnap.docs) {
+      await updateDoc(doc(db, 'approvedChars', cd.id), { playerAccount: novoUser });
+    }
+    // Atualiza pendingFichas também
+    const pendSnap = await getDocs(query(collection(db, 'pendingFichas'), where('playerAccount', '==', oldUsername.toLowerCase())));
+    for(const pd of pendSnap.docs) {
+      await updateDoc(doc(db, 'pendingFichas', pd.id), { playerAccount: novoUser });
+    }
+
+    if(window._logAcaoAdmin) await window._logAcaoAdmin('PLAYER RENOMEADO', '—', novoUser, window._adminUser||'?', `Username anterior: ${oldUsername} → Novo: ${novoUser}`);
+
+    msgEl.textContent = `✓ Renomeado para "${novoUser}" com sucesso!`;
+    msgEl.style.color = '#4caf50'; msgEl.style.display = 'block';
+    showToast(`✓ Player renomeado: ${oldUsername} → ${novoUser}`, 'success');
+
+    // Atualiza o botão para refletir novo username
+    const renameBtn = document.getElementById('ep_renameBtn');
+    if(renameBtn) renameBtn.setAttribute('onclick', `adminRenomearPlayer('${novoUser}')`);
+    const senhaBtn = document.getElementById('ep_senhaBtn');
+    if(senhaBtn) senhaBtn.setAttribute('onclick', `adminResetarSenhaPlayer('${novoUser}')`);
+
+    renderPlayersAdmin();
+  } catch(e) {
+    msgEl.textContent = '✗ Erro ao renomear. Verifique o console.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block';
+    console.error(e);
+  } finally {
+    btn.disabled = false; btn.textContent = 'RENOMEAR';
+  }
+}
+
+async function adminResetarSenhaPlayer(username) {
+  const nova = (document.getElementById('ep_novaSenha')?.value || '');
+  const confirm = (document.getElementById('ep_confirmSenha')?.value || '');
+  const msgEl = document.getElementById('ep_senhaMsg');
+  const btn = document.getElementById('ep_senhaBtn');
+  msgEl.style.display = 'none';
+
+  if(nova.length < 6) {
+    msgEl.textContent = '⚠ A senha deve ter pelo menos 6 caracteres.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block'; return;
+  }
+  if(nova !== confirm) {
+    msgEl.textContent = '⚠ As senhas não coincidem.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true; btn.textContent = '⏳ SALVANDO...';
+  try {
+    await window._setPlayerPasswordFirebase(username, nova);
+    if(window._logAcaoAdmin) await window._logAcaoAdmin('SENHA PLAYER RESETADA', '—', username, window._adminUser||'?', 'Senha redefinida pelo admin.');
+    msgEl.textContent = '✓ Senha redefinida com sucesso!';
+    msgEl.style.color = '#4caf50'; msgEl.style.display = 'block';
+    document.getElementById('ep_novaSenha').value = '';
+    document.getElementById('ep_confirmSenha').value = '';
+    showToast(`✓ Senha de ${username} redefinida.`, 'success');
+  } catch(e) {
+    msgEl.textContent = '✗ Erro ao salvar. Verifique o console.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block';
+    console.error(e);
+  } finally {
+    btn.disabled = false; btn.textContent = '🔑 DEFINIR NOVA SENHA';
+  }
+}
+
 async function adminDeletePlayer(username) {
   confirmarAcao(`Excluir a conta do player "${username}"? Esta ação não pode ser desfeita. Os personagens vinculados não serão removidos.`, async () => {
     try {
@@ -5199,7 +5342,8 @@ async function renderPlayersAdmin() {
             <h4>${(p.username||p.id).toUpperCase()}</h4>
             <p>// ${myChars.length} personagem(s) vinculado(s) // Criado em: ${p.createdAt ? new Date(p.createdAt).toLocaleDateString('pt-BR') : '—'}</p>
           </div>
-          <div class="pending-actions" style="flex-shrink:0">
+          <div class="pending-actions" style="flex-shrink:0;gap:0.4rem">
+            <button class="btn-approve" onclick="adminEditarPlayer('${p.username||p.id}')">✎ EDITAR</button>
             <button class="btn-reject" onclick="adminDeletePlayer('${p.username||p.id}')">🗑 EXCLUIR</button>
           </div>
         </div>
