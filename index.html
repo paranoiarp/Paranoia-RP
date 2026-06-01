@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<link rel="icon" type="image/png" href="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png">
+<!-- saved from url=(0046)file:///C:/Users/gleid/Downloads/Update_2.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link rel="icon" type="image/png" href="./index 2222222_files/Paranoia Logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PARANOIA — Ilha Quesadilla</title>
 <style>
@@ -1148,9 +1148,15 @@
 
   // ===== EDIÇÃO DIRETA ADMIN =====
   window._adminEditChar = async function(charDocId, fichaData, obs, adminUser) {
-    const { doc, updateDoc } = window._fbModules;
+    const { doc, updateDoc, setDoc, deleteDoc } = window._fbModules;
     const db = window._db;
     await updateDoc(doc(db, 'approvedChars', charDocId), {...fichaData});
+    // Sincroniza foto com charPhotos
+    const charId = fichaData.charId || charDocId;
+    if(fichaData.imageUrl) {
+      await setDoc(doc(db, 'charPhotos', charId), { charId, imageUrl: fichaData.imageUrl, updatedBy: adminUser, updatedAt: new Date().toISOString() });
+      if(window._charPhotos) window._charPhotos[charId] = fichaData.imageUrl;
+    }
     if(window._logAcaoAdmin) await window._logAcaoAdmin('EDIÇÃO ADMIN', fichaData.name||'?', fichaData.player||'?', adminUser, obs);
   };
 
@@ -1228,7 +1234,11 @@
   // Sincroniza fotos pré-cadastradas em tempo real
   onSnapshot(collection(db, 'charPhotos'), snap => {
     window._charPhotos = {};
-    snap.docs.forEach(d => { window._charPhotos[d.id] = d.data().imageUrl || ''; });
+    window._charPhotosData = {};
+    snap.docs.forEach(d => {
+      window._charPhotos[d.id] = d.data().imageUrl || '';
+      window._charPhotosData[d.id] = d.data();
+    });
     if(typeof renderChars === 'function') renderChars('all');
     if(typeof renderFotosAdmin === 'function') {
       const tab = document.getElementById('fotos-admin');
@@ -1248,67 +1258,191 @@
 </script>
 </head>
 <body>
-<canvas id="bgCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+<canvas id="bgCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;" width="950" height="947"></canvas>
 
 <div id="toastContainer"></div>
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo-wrap" onclick="showPage('home')" id="navLogoWrap2">
-    <img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" id="navLogoImg" alt="PARANOIA" style="width:38px;height:38px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 6px rgba(139,0,0,0.6))">
+  <div class="nav-logo-wrap" onclick="showPage(&#39;home&#39;)" id="navLogoWrap2">
+    <img loading="lazy" src="./index 2222222_files/Paranoia Logo.png" id="navLogoImg" alt="PARANOIA" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; filter: drop-shadow(rgba(139, 0, 0, 0.6) 0px 0px 6px); animation: 4s ease-in-out 0s infinite normal none running pulse;" title="">
     <div class="admin-notify-badge" id="adminNotifyBadge"></div>
-    <span style="font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:#fff;letter-spacing:12px;text-shadow:0 0 40px rgba(139,0,0,0.8);text-transform:uppercase;-webkit-font-smoothing:antialiased">PARANOIA</span>
+    <span style="font-family:&#39;Orbitron&#39;,monospace;font-weight:900;font-size:1.1rem;color:#fff;letter-spacing:12px;text-shadow:0 0 40px rgba(139,0,0,0.8);text-transform:uppercase;-webkit-font-smoothing:antialiased">PARANOIA</span>
   </div>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#" onclick="showPage('home')" id="nav-home" class="active">Início</a></li>
+    <li><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;home&#39;)" id="nav-home" class="active">Início</a></li>
     <li class="nav-dropdown">
-      <a href="#" onclick="showPage('historia')" id="nav-historia">História</a>
+      <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;historia&#39;)" id="nav-historia">História</a>
       <div class="nav-dropdown-menu">
-        <a href="#" onclick="showPage('historia')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Sinopse</a>
-        <a href="#" onclick="showLorePage('chegada')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> A Chegada de Trem</a>
+        <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;historia&#39;)"><img loading="lazy" src="./index 2222222_files/Paranoia Logo.png" class="nav-logo-img" alt=""> Sinopse</a>
+        <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showLorePage(&#39;chegada&#39;)"><img loading="lazy" src="./index 2222222_files/Paranoia Logo.png" class="nav-logo-img" alt=""> A Chegada de Trem</a>
       </div>
     </li>
-    <li><a href="#" onclick="showPage('regras')" id="nav-regras">Regras</a></li>
-    <li><a href="#" onclick="showPage('sistema')" id="nav-sistema">Sistema</a></li>
+    <li><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;regras&#39;)" id="nav-regras">Regras</a></li>
+    <li><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;sistema&#39;)" id="nav-sistema">Sistema</a></li>
     <li class="nav-dropdown" id="nav-personagens-li">
-      <a href="#" onclick="showPage('personagens')" id="nav-personagens">Personagens</a>
+      <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;)" id="nav-personagens">Personagens</a>
       <div class="nav-dropdown-menu" id="navPersonagensMenu">
-        <a href="#" onclick="showPage('personagens')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Ver Todos</a>
+        <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;)"><img loading="lazy" src="./index 2222222_files/Paranoia Logo.png" class="nav-logo-img" alt=""> Ver Todos</a>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('ingles',document.querySelector('.filter-btn:nth-child(4)'))"><img loading="lazy" src="https://flagcdn.com/16x12/us.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Inglês</a>
-          <div class="nav-submenu" id="navSubIngles"><!-- preenchido por JS --></div>
+          <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);filterChars(&#39;ingles&#39;,document.querySelector(&#39;.filter-btn:nth-child(4)&#39;))"><img loading="lazy" src="./index 2222222_files/us.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Inglês</a>
+          <div class="nav-submenu" id="navSubIngles"><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;badboyhalo&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>BadBoyHalo
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;dantdm&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>DanTDM
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;fitmc&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>FitMC
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;foolish&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Foolish
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;ironmouse&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Ironmouse
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;jaiden&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Jaiden
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;lenay&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Lenay
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;nihachu&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Nihachu
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;philza&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Philza
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;slimecicle&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#cc0000"></span>Slimecicle
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;tinakitten&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>TinaKitten
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;tubbo&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Tubbo
+      </a></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('espanhol',document.querySelector('.filter-btn:nth-child(5)'))"><img loading="lazy" src="https://flagcdn.com/16x12/es.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Espanhol</a>
-          <div class="nav-submenu" id="navSubEspanhol"><!-- preenchido por JS --></div>
+          <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);filterChars(&#39;espanhol&#39;,document.querySelector(&#39;.filter-btn:nth-child(5)&#39;))"><img loading="lazy" src="./index 2222222_files/es.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Espanhol</a>
+          <div class="nav-submenu" id="navSubEspanhol"><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;carre&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Carre
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;elmariana&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>ElMariana
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;german&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>German
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;luzu&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Luzu
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;maximus&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Maximus
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;missasinfonia&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Missasinfonia
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;polispol&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Polispol
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;quackity&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Quackity
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;rivers&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Rivers
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;roier&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Roier
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;rubius&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Rubius
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;spreen&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Spreen
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;vegetta&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Vegetta
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;willyrex&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Willyrex
+      </a></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('portugues',document.querySelector('.filter-btn:nth-child(6)'))"><img loading="lazy" src="https://flagcdn.com/16x12/br.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Português</a>
-          <div class="nav-submenu" id="navSubPortugues"><!-- preenchido por JS --></div>
+          <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);filterChars(&#39;portugues&#39;,document.querySelector(&#39;.filter-btn:nth-child(6)&#39;))"><img loading="lazy" src="./index 2222222_files/br.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Português</a>
+          <div class="nav-submenu" id="navSubPortugues"><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;bagi&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Bagi
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;cellbit&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Cellbit
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;felps&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Felps
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;forever&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Forever
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;jinki&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Jinki
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;mike&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Mike
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;pac&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Pac
+      </a></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('frances',document.querySelector('.filter-btn:nth-child(7)'))"><img loading="lazy" src="https://flagcdn.com/16x12/fr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Francês</a>
-          <div class="nav-submenu" id="navSubFrances"><!-- preenchido por JS --></div>
+          <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);filterChars(&#39;frances&#39;,document.querySelector(&#39;.filter-btn:nth-child(7)&#39;))"><img loading="lazy" src="./index 2222222_files/fr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Francês</a>
+          <div class="nav-submenu" id="navSubFrances"><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;antoine&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Antoine
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;aypierre&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Aypierre
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;baghera&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Baghera
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;etoiles&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Etoiles
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;kameto&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Kameto
+      </a></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('coreano',document.querySelector('.filter-btn:nth-child(8)'))"><img loading="lazy" src="https://flagcdn.com/16x12/kr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Coreano</a>
-          <div class="nav-submenu" id="navSubCoreano"><!-- preenchido por JS --></div>
+          <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);filterChars(&#39;coreano&#39;,document.querySelector(&#39;.filter-btn:nth-child(8)&#39;))"><img loading="lazy" src="./index 2222222_files/kr.png" width="16" height="12" style="margin-right:0.4rem;vertical-align:middle" alt=""> Coreano</a>
+          <div class="nav-submenu" id="navSubCoreano"><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;bjacau&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Acau
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;jungryeok&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Jungryeok
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;kongkong&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Kongkong
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;yangdding&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Yangdding
+      </a></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('huevito',document.querySelector('.filter-btn:nth-child(9)'))">🥚 Huevitos</a>
-          <div class="nav-submenu" id="navSubHuevito"><!-- preenchido por JS --></div>
+          <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);filterChars(&#39;huevito&#39;,document.querySelector(&#39;.filter-btn:nth-child(9)&#39;))">🥚 Huevitos</a>
+          <div class="nav-submenu" id="navSubHuevito"><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;bobby&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Bobby
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;chayanne&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Chayanne
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;chunsik&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Chunsik
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;dapper&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Dapper
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;empanada&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Empanada
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;gegg&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Gegg
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;juanaflippa&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Juanaflippa
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;leonarda&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Leonarda
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;pepito&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Pepito
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;pomme&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Pomme
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;ramon&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Ramón
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;richarlyson&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Richarlyson
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;sunnysideup&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Sunnysideup
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;tallulah&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Tallulah
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;tilin&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Tilin
+      </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);showCharProfile(&#39;trump&#39;);event.stopPropagation()">
+        <span class="nav-submenu-status" style="background:#4caf50"></span>Trump
+      </a></div>
         </div>
         <div class="nav-submenu-item">
-          <a href="#" onclick="showPage('personagens');filterChars('cucurucho',document.querySelector('.filter-btn:nth-child(10)'))">🏛 The Federation</a>
-          <div class="nav-submenu" id="navSubCucurucho"><!-- preenchido por JS --></div>
+          <a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;personagens&#39;);filterChars(&#39;cucurucho&#39;,document.querySelector(&#39;.filter-btn:nth-child(10)&#39;))">🏛 The Federation</a>
+          <div class="nav-submenu" id="navSubCucurucho"><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showClassifiedModal();event.stopPropagation()">
+          <span class="nav-submenu-status" style="background:#4caf50"></span><span style="color:var(--red-bright);letter-spacing:1px">██ CLASSIFIED ██</span>
+        </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showClassifiedModal();event.stopPropagation()">
+          <span class="nav-submenu-status" style="background:#4caf50"></span><span style="color:var(--red-bright);letter-spacing:1px">██ CLASSIFIED ██</span>
+        </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showClassifiedModal();event.stopPropagation()">
+          <span class="nav-submenu-status" style="background:#4caf50"></span><span style="color:var(--red-bright);letter-spacing:1px">██ CLASSIFIED ██</span>
+        </a><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showClassifiedModal();event.stopPropagation()">
+          <span class="nav-submenu-status" style="background:#4caf50"></span><span style="color:var(--red-bright);letter-spacing:1px">██ CLASSIFIED ██</span>
+        </a></div>
         </div>
       </div>
     </li>
-    <li><a href="#" onclick="showPage('federacao')" id="nav-federacao">The Federation</a></li>
-    <li><a href="#" onclick="showPage('registro')" id="nav-registro">Registro</a></li>
-    <li id="nav-ficha-li" style="display:none"><a href="#" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
-    <li><a href="#" onclick="showPage('minha-area')" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
-    <li><a href="#" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
+    <li><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;federacao&#39;)" id="nav-federacao">The Federation</a></li>
+    <li><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;registro&#39;)" id="nav-registro">Registro</a></li>
+    <li id="nav-ficha-li" style="display:none"><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;ficha&#39;)" id="nav-ficha">Enviar Ficha</a></li>
+    <li><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;minha-area&#39;)" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
+    <li><a href="file:///C:/Users/gleid/Downloads/Update_2.html#" onclick="showPage(&#39;admin-gate&#39;)" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
   <button class="nav-mobile-btn" onclick="toggleNav()">☰</button>
 </nav>
@@ -1321,7 +1455,7 @@
     <div class="hero-grid"></div>
     <div class="hero-content">
       <div id="heroLogoWrap" style="margin-bottom:2rem">
-        <img id="heroLogo" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" alt="PARANOIA" style="width:clamp(180px,25vw,320px);height:clamp(180px,25vw,320px);border-radius:50%;object-fit:cover;display:block;z-index:2;filter:drop-shadow(0 0 60px rgba(139,0,0,0.9));animation:pulse 4s ease-in-out infinite">
+        <img id="heroLogo" src="./index 2222222_files/Paranoia Logo.png" alt="PARANOIA" style="width:clamp(180px,25vw,320px);height:clamp(180px,25vw,320px);border-radius:50%;object-fit:cover;display:block;z-index:2;filter:drop-shadow(0 0 60px rgba(139,0,0,0.9));animation:pulse 4s ease-in-out infinite">
       </div>
       <h1>PARANOIA</h1>
       <div class="hero-divider"></div>
@@ -1331,22 +1465,22 @@
   </div>
 
   <div class="highlights">
-    <div class="highlight-card" onclick="showPage('historia')">
+    <div class="highlight-card" onclick="showPage(&#39;historia&#39;)">
       <div class="icon">📖</div>
       <h3>HISTÓRIA</h3>
       <p>Conheça o universo, os eventos que moldaram a ilha e os rastros deixados por quem passou por aqui.</p>
     </div>
-    <div class="highlight-card" onclick="showPage('personagens')">
+    <div class="highlight-card" onclick="showPage(&#39;personagens&#39;)">
       <div class="icon">👤</div>
       <h3>PERSONAGENS</h3>
       <p>Todos os habitantes registrados da Ilha Quesadilla. Seus rostos, suas histórias, seus status.</p>
     </div>
-    <div class="highlight-card" onclick="showPage('federacao')">
+    <div class="highlight-card" onclick="showPage(&#39;federacao&#39;)">
       <div class="icon">🏛️</div>
       <h3>THE FEDERATION</h3>
       <p>A organização que administra a ilha. O que se sabe, o que se suspeita, e o que permanece em silêncio.</p>
     </div>
-    <div class="highlight-card" onclick="showPage('registro')">
+    <div class="highlight-card" onclick="showPage(&#39;registro&#39;)">
       <div class="icon">📋</div>
       <h3>REGISTRO</h3>
       <p>Quer fazer parte da história? Veja como criar sua conta, enviar sua ficha e começar a jogar.</p>
@@ -1389,7 +1523,7 @@
       <div class="rule-item"><span class="rule-label">REVISÃO</span><span>Toda edição passa por aprovação da staff antes de ser publicada.</span></div>
     </div>
     <div style="text-align:center;margin-top:2rem">
-      <button class="submit-btn" style="max-width:300px;margin:0 auto" onclick="showPage('minha-area')">▶ IR PARA MINHA ÁREA</button>
+      <button class="submit-btn" style="max-width:300px;margin:0 auto" onclick="showPage(&#39;minha-area&#39;)">▶ IR PARA MINHA ÁREA</button>
     </div>
   </div>
 </div>
@@ -1415,7 +1549,7 @@
     <div class="lore-section">
       <h2>RESUMO DE LORE</h2>
       <div class="timeline">
-        <div class="timeline-item" onclick="showLorePage('chegada')">
+        <div class="timeline-item" onclick="showLorePage(&#39;chegada&#39;)">
           <div class="timeline-tag">// EVENTO I //</div>
           <div class="timeline-title">A Chegada de Trem</div>
         </div>
@@ -1427,8 +1561,8 @@
 <!-- LORE: A CHEGADA DE TREM -->
 <div id="lore-chegada" class="page">
   <div style="max-width:1100px;margin:0 auto;padding:0 0 4rem">
-    <button class="lore-back-btn" onclick="showPage('historia')">← VOLTAR</button>
-    <img loading="lazy" src="https://i.imgur.com/xzMJ2Ij.png" alt="A Chegada de Trem" class="lore-page-banner">
+    <button class="lore-back-btn" onclick="showPage(&#39;historia&#39;)">← VOLTAR</button>
+    <img loading="lazy" src="./index 2222222_files/xzMJ2Ij.png" alt="A Chegada de Trem" class="lore-page-banner">
     <div style="padding:0 2rem">
       <h1 class="lore-page-title">A Chegada de Trem</h1>
       <div class="lore-text event-text">
@@ -1440,19 +1574,19 @@
           <p>Dois trens. Dois grupos. Uma parede entre eles.</p>
           <p>De um lado estavam BadBoyHalo, Foolish, Jaiden, Philza e Slimecicle. Do outro, ElMariana, Missa Sinfonia, Roier e Spreen. A única forma de contato entre os dois grupos era uma pequena janela instalada no muro. No entanto, por mais que tentassem se comunicar, nenhuma voz parecia atravessar o vidro.</p>
           <p>Enquanto exploravam a estação em busca de respostas, um detalhe chamou atenção. Em uma das extremidades do muro havia um terminal antigo acompanhado por uma sequência numérica gravada em uma placa metálica:</p>
-          <p><strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">4 12 15 22 23 12 6 22 2 12 21 17 22 6 1 15 12 16 26 19 8 21 11</strong></p>
+          <p><strong style="color:var(--silver-bright);font-family:&#39;Share Tech Mono&#39;,monospace">4 12 15 22 23 12 6 22 2 12 21 17 22 6 1 15 12 16 26 19 8 21 11</strong></p>
           <p>Do outro lado existia um terminal idêntico, mas com a tela completamente vazia.</p>
           <p>O que se seguiu foi uma tentativa coletiva de decifrar o enigma. Slimecicle foi o primeiro a interagir com o terminal e, impulsivamente, pressionou Enter sem qualquer resposta válida. O choque elétrico que recebeu foi suficiente para derrubar qualquer entusiasmo inicial.</p>
           <p>Enquanto isso, Spreen analisava a sequência numérica. Após algumas tentativas, percebeu que se tratava de uma cifra simples. A mensagem oculta era clara:</p>
-          <p><strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">WEHOPEYOUENJOYTHEISLAND</strong></p>
+          <p><strong style="color:var(--silver-bright);font-family:&#39;Share Tech Mono&#39;,monospace">WEHOPEYOUENJOYTHEISLAND</strong></p>
           <p>A frase precisava ser enviada ao outro grupo. A comunicação, porém, era limitada.</p>
           <p>Depois de algumas trocas improvisadas através da janela, a solução finalmente chegou ao lado oposto. Mas havia um detalhe que ninguém havia considerado: os espaços.</p>
           <p>Impaciente, Slimecicle digitou a frase inteira sem separações.</p>
           <p>O resultado foi imediato.</p>
           <p>Uma descarga violenta percorreu o terminal e fez seu braço explodir em fragmentos de gosma, espalhando queimaduras em quem estava próximo. Do outro lado, Spreen cometeu o mesmo erro e foi lançado para trás pela força da descarga.</p>
           <p>Foi Philza quem percebeu o problema. Com uma simples observação sobre a ausência de espaços entre as palavras, levou Jaiden à resposta correta. Sem hesitar, ela digitou:</p>
-          <p><strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">We Hope You Enjoy The Island</strong></p>
-          <p>Por alguns segundos, nada aconteceu. Então um pequeno rosto sorridente surgiu na tela: <strong style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace">:]</strong></p>
+          <p><strong style="color:var(--silver-bright);font-family:&#39;Share Tech Mono&#39;,monospace">We Hope You Enjoy The Island</strong></p>
+          <p>Por alguns segundos, nada aconteceu. Então um pequeno rosto sorridente surgiu na tela: <strong style="color:var(--silver-bright);font-family:&#39;Share Tech Mono&#39;,monospace">:]</strong></p>
           <p>As luzes da estação começaram a se acender. Os mecanismos voltaram a funcionar. As catracas destravaram. E o enorme muro que os separava começou lentamente a descer.</p>
           <p>Pela primeira vez desde que chegaram, os dois grupos puderam se ver, se ouvir e se encontrar.</p>
           <p>Acima dos terminais, uma última mensagem apareceu:</p>
@@ -1526,54 +1660,54 @@
 
       <!-- ESPADAS -->
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">⚔ ESPADAS <span style="color:#aaa;font-size:0.85rem">— Arma equilibrada e versátil</span></div>
+        <div style="font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">⚔ ESPADAS <span style="color:#aaa;font-size:0.85rem">— Arma equilibrada e versátil</span></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.6rem">
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Madeira → 1d2</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Pedra → 1d4</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Ferro → 1d6</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Diamante → 1d7</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Netherite → 1d8</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Madeira → 1d2</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Pedra → 1d4</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Ferro → 1d6</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Diamante → 1d7</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Netherite → 1d8</div>
         </div>
       </div>
 
       <!-- MACHADOS -->
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🪓 MACHADOS <span style="color:#aaa;font-size:0.85rem">— Golpes pesados e alto dano</span></div>
+        <div style="font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🪓 MACHADOS <span style="color:#aaa;font-size:0.85rem">— Golpes pesados e alto dano</span></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.6rem">
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Madeira → 1d4</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Pedra → 1d5</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Ferro → 1d7</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Diamante → 1d8</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Netherite → 1d9</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Madeira → 1d4</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Pedra → 1d5</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Ferro → 1d7</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Diamante → 1d8</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Netherite → 1d9</div>
         </div>
       </div>
 
       <!-- FOICES -->
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🌙 FOICES <span style="color:#aaa;font-size:0.85rem">— A mais poderosa, grande potencial ofensivo</span></div>
+        <div style="font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🌙 FOICES <span style="color:#aaa;font-size:0.85rem">— A mais poderosa, grande potencial ofensivo</span></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.6rem">
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Madeira → 1d5</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Pedra → 1d6</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Ferro → 1d8</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Diamante → 1d9</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Netherite → 1d10</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Madeira → 1d5</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Pedra → 1d6</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Ferro → 1d8</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Diamante → 1d9</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Netherite → 1d10</div>
         </div>
       </div>
 
       <!-- ADAGA -->
       <div style="padding:0.8rem 0;border-bottom:1px solid var(--border)">
-        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🗡 ADAGA <span style="color:#aaa;font-size:0.85rem">— Discreta, ideal para furtividade e emboscadas</span></div>
+        <div style="font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🗡 ADAGA <span style="color:#aaa;font-size:0.85rem">— Discreta, ideal para furtividade e emboscadas</span></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.6rem">
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Diamante → 1d6</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Diamante → 1d6</div>
         </div>
       </div>
 
       <!-- DISTÂNCIA -->
       <div style="padding:0.8rem 0">
-        <div style="font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🏹 DISTÂNCIA</div>
+        <div style="font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright);letter-spacing:2px;margin-bottom:0.8rem;padding:0.4rem 0;border-left:3px solid var(--red);padding-left:0.8rem">🏹 DISTÂNCIA</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.6rem">
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Arco → 1d6</div>
-          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:'Share Tech Mono',monospace;color:var(--silver-bright)">Besta → 1d7</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Arco → 1d6</div>
+          <div style="padding:0.8rem 1.1rem;background:var(--bg3);border:1px solid var(--border);font-size:0.95rem;font-family:&#39;Share Tech Mono&#39;,monospace;color:var(--silver-bright)">Besta → 1d7</div>
         </div>
       </div>
     </div>
@@ -1585,11 +1719,11 @@
         <span class="rule-label">ESCUDO</span>
         <span><strong style="color:var(--silver-bright)">1d3</strong> — Defesa ativa. Requer declaração de ação no turno.<br>
         <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.6rem;align-items:center">
-          <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #4caf50;color:#4caf50;background:rgba(76,175,80,0.08)">3 — Bloqueio Total</span>
+          <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid #4caf50;color:#4caf50;background:rgba(76,175,80,0.08)">3 — Bloqueio Total</span>
           <span style="color:var(--text-dim);font-size:1rem">→</span>
-          <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #ff9800;color:#ff9800;background:rgba(255,152,0,0.08)">2 — Bloqueio Parcial</span>
+          <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid #ff9800;color:#ff9800;background:rgba(255,152,0,0.08)">2 — Bloqueio Parcial</span>
           <span style="color:var(--text-dim);font-size:1rem">→</span>
-          <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid var(--red);color:var(--red-bright);background:rgba(139,0,0,0.08)">1 — Falha</span>
+          <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid var(--red);color:var(--red-bright);background:rgba(139,0,0,0.08)">1 — Falha</span>
         </div>
         </span>
       </div>
@@ -1597,9 +1731,9 @@
         <span class="rule-label">ARMADURA</span>
         <span>Defesa passiva. Requer anúncio prévio de que está equipada.<br>
         <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.6rem;align-items:center">
-          <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid var(--border);color:var(--silver-bright);background:var(--bg3)">Ferro → reduz 1d4</span>
-          <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #4fc3f7;color:#4fc3f7;background:rgba(79,195,247,0.06)">Diamante → reduz 1d6</span>
-          <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #d4a017;color:#d4a017;background:rgba(212,160,23,0.06)">Netherite → reduz 1d7</span>
+          <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid var(--border);color:var(--silver-bright);background:var(--bg3)">Ferro → reduz 1d4</span>
+          <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid #4fc3f7;color:#4fc3f7;background:rgba(79,195,247,0.06)">Diamante → reduz 1d6</span>
+          <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid #d4a017;color:#d4a017;background:rgba(212,160,23,0.06)">Netherite → reduz 1d7</span>
         </div>
         </span>
       </div>
@@ -1612,7 +1746,7 @@
       <div class="rule-item">
         <span class="rule-label">RESOLUÇÃO</span>
         <span>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.95rem;line-height:2.4;color:var(--silver);display:flex;flex-wrap:wrap;gap:0.3rem;align-items:center">
+          <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.95rem;line-height:2.4;color:var(--silver);display:flex;flex-wrap:wrap;gap:0.3rem;align-items:center">
             <span style="color:var(--red-bright);font-weight:bold">1.</span><span>Ataque acerta</span>
             <span style="color:var(--red-bright)">→</span>
             <span style="color:var(--red-bright);font-weight:bold">2.</span><span>Escudo (1d3) tenta defender</span>
@@ -1632,24 +1766,24 @@
       <h2>❤️ VIDA E ESTADOS <span>HP BASE: 20</span></h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem;margin-bottom:1rem">
         <div style="padding:1rem;background:var(--bg3);border:1px solid #4caf50;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#4caf50;letter-spacing:1px;margin-bottom:0.3rem">NORMAL</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">20 – 15</div>
+          <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.65rem;color:#4caf50;letter-spacing:1px;margin-bottom:0.3rem">NORMAL</div>
+          <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:1.1rem;color:var(--silver-bright)">20 – 15</div>
         </div>
         <div style="padding:1rem;background:var(--bg3);border:1px solid #ff9800;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#ff9800;letter-spacing:1px;margin-bottom:0.3rem">FERIDO</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">14 – 10</div>
+          <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.65rem;color:#ff9800;letter-spacing:1px;margin-bottom:0.3rem">FERIDO</div>
+          <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:1.1rem;color:var(--silver-bright)">14 – 10</div>
         </div>
         <div style="padding:1rem;background:var(--bg3);border:1px solid #f44336;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#f44336;letter-spacing:1px;margin-bottom:0.3rem">GRAVE</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">9 – 5</div>
+          <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.65rem;color:#f44336;letter-spacing:1px;margin-bottom:0.3rem">GRAVE</div>
+          <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:1.1rem;color:var(--silver-bright)">9 – 5</div>
         </div>
         <div style="padding:1rem;background:rgba(139,0,0,0.3);border:1px solid var(--red-bright);text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.3rem">CRÍTICO</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--silver-bright)">4 – 1</div>
+          <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:0.3rem">CRÍTICO</div>
+          <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:1.1rem;color:var(--silver-bright)">4 – 1</div>
         </div>
         <div style="padding:1rem;background:rgba(0,0,0,0.5);border:1px solid #444;text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#666;letter-spacing:1px;margin-bottom:0.3rem">INCONSCIENTE</div>
-          <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:#555">0</div>
+          <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.65rem;color:#666;letter-spacing:1px;margin-bottom:0.3rem">INCONSCIENTE</div>
+          <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:1.1rem;color:#555">0</div>
         </div>
       </div>
       <div class="rule-item">
@@ -1675,13 +1809,13 @@
         <span class="rule-label">ESTADOS</span>
         <span>
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:0.6rem;align-items:center">
-            <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #4caf50;color:#4caf50;background:rgba(76,175,80,0.08)">Inteiro</span>
+            <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid #4caf50;color:#4caf50;background:rgba(76,175,80,0.08)">Inteiro</span>
             <span style="color:var(--text-dim);font-size:1rem;align-self:center">→</span>
-            <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #ff9800;color:#ff9800;background:rgba(255,152,0,0.08)">Danificado</span>
+            <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid #ff9800;color:#ff9800;background:rgba(255,152,0,0.08)">Danificado</span>
             <span style="color:var(--text-dim);font-size:1rem;align-self:center">→</span>
-            <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #f44336;color:#f44336;background:rgba(244,67,54,0.08)">Muito Danificado</span>
+            <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid #f44336;color:#f44336;background:rgba(244,67,54,0.08)">Muito Danificado</span>
             <span style="color:var(--text-dim);font-size:1rem;align-self:center">→</span>
-            <span style="padding:0.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;border:1px solid #666;color:#999;background:rgba(100,100,100,0.08)">Quebrado</span>
+            <span style="padding:0.5rem 1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.85rem;border:1px solid #666;color:#999;background:rgba(100,100,100,0.08)">Quebrado</span>
           </div>
         </span>
       </div>
@@ -1706,25 +1840,382 @@
   </div>
   <div class="section-content">
     <div class="chars-filter">
-      <button class="filter-btn active" onclick="filterChars('all',this)">TODOS</button>
-      <button class="filter-btn" onclick="filterChars('ocupado',this)">🔴 OCUPADOS</button>
-      <button class="filter-btn" onclick="filterChars('reservado',this)">🟡 RESERVADOS</button>
-      <button class="filter-btn" onclick="filterChars('disponivel',this)">🟢 DISPONÍVEIS</button>
-      <button class="filter-btn" onclick="filterChars('ingles',this)"><img loading="lazy" src="https://flagcdn.com/20x15/us.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS</button>
-      <button class="filter-btn" onclick="filterChars('espanhol',this)"><img loading="lazy" src="https://flagcdn.com/20x15/es.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> ESPANHOL</button>
-      <button class="filter-btn" onclick="filterChars('portugues',this)"><img loading="lazy" src="https://flagcdn.com/20x15/br.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> PORTUGUÊS</button>
-      <button class="filter-btn" onclick="filterChars('frances',this)"><img loading="lazy" src="https://flagcdn.com/20x15/fr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS</button>
-      <button class="filter-btn" onclick="filterChars('coreano',this)"><img loading="lazy" src="https://flagcdn.com/20x15/kr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO</button>
-      <button class="filter-btn" onclick="filterChars('huevito',this)">🥚 HUEVITOS</button>
-      <button class="filter-btn" id="filterBtnCucurucho" onclick="filterChars('cucurucho',this)">🏛 THE FEDERATION</button>
+      <button class="filter-btn active" onclick="filterChars(&#39;all&#39;,this)">TODOS</button>
+      <button class="filter-btn" onclick="filterChars(&#39;ocupado&#39;,this)">🔴 OCUPADOS</button>
+      <button class="filter-btn" onclick="filterChars(&#39;reservado&#39;,this)">🟡 RESERVADOS</button>
+      <button class="filter-btn" onclick="filterChars(&#39;disponivel&#39;,this)">🟢 DISPONÍVEIS</button>
+      <button class="filter-btn" onclick="filterChars(&#39;ingles&#39;,this)"><img loading="lazy" src="./index 2222222_files/us(1).png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS</button>
+      <button class="filter-btn" onclick="filterChars(&#39;espanhol&#39;,this)"><img loading="lazy" src="./index 2222222_files/es(1).png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> ESPANHOL</button>
+      <button class="filter-btn" onclick="filterChars(&#39;portugues&#39;,this)"><img loading="lazy" src="./index 2222222_files/br(1).png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> PORTUGUÊS</button>
+      <button class="filter-btn" onclick="filterChars(&#39;frances&#39;,this)"><img loading="lazy" src="./index 2222222_files/fr(1).png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS</button>
+      <button class="filter-btn" onclick="filterChars(&#39;coreano&#39;,this)"><img loading="lazy" src="./index 2222222_files/kr(1).png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO</button>
+      <button class="filter-btn" onclick="filterChars(&#39;huevito&#39;,this)">🥚 HUEVITOS</button>
+      <button class="filter-btn" id="filterBtnCucurucho" onclick="filterChars(&#39;cucurucho&#39;,this)">🏛 THE FEDERATION</button>
     </div>
-    <div class="chars-grid" id="charsGrid"></div>
+    <div class="chars-grid" id="charsGrid"><div style="grid-column:1/-1;display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:0.5rem;padding:0.7rem 1rem;background:var(--bg3);border:1px solid var(--border);font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.68rem;letter-spacing:1px;color:var(--text-dim)">
+    <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#4caf50;box-shadow:0 0 5px #4caf50;margin-right:6px;vertical-align:middle"></span>DISPONÍVEL</span>
+    <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#f5a623;box-shadow:0 0 5px #f5a623;margin-right:6px;vertical-align:middle"></span>RESERVADO — ficha enviada, aguardando aprovação</span>
+    <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#cc0000;box-shadow:0 0 5px #cc0000;margin-right:6px;vertical-align:middle"></span>OCUPADO — personagem em jogo</span>
+  </div><div class="char-card" onclick="showCharProfile(&#39;bjacau&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/Qhwb9UV.png" alt="Acau"></div>
+      <div class="char-name">ACAU</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;antoine&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/esEJWhB.png" alt="Antoine"></div>
+      <div class="char-name">ANTOINE</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;aypierre&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/S3jNrjP.png" alt="Aypierre"></div>
+      <div class="char-name">AYPIERRE</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;badboyhalo&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/RjKamYj.png" alt="BadBoyHalo"></div>
+      <div class="char-name">BADBOYHALO</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;baghera&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/uckIsgz.png" alt="Baghera"></div>
+      <div class="char-name">BAGHERA</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;bagi&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/AAG8neo.png" alt="Bagi"></div>
+      <div class="char-name">BAGI</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;bobby&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/ENpUJ7H.png" alt="Bobby"></div>
+      <div class="char-name">BOBBY</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;carre&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/UfVF2pw.jpeg" alt="Carre"></div>
+      <div class="char-name">CARRE</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;cellbit&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/TRUfxv3.png" alt="Cellbit"></div>
+      <div class="char-name">CELLBIT</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;chayanne&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/F4wuEGs.png" alt="Chayanne"></div>
+      <div class="char-name">CHAYANNE</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;chunsik&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/A1Krc5u.png" alt="Chunsik"></div>
+      <div class="char-name">CHUNSIK</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;dantdm&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/OWbxC6o.jpeg" alt="DanTDM"></div>
+      <div class="char-name">DANTDM</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;dapper&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/Rfqm4hx.png" alt="Dapper"></div>
+      <div class="char-name">DAPPER</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;elmariana&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/1dMwMFl.png" alt="ElMariana"></div>
+      <div class="char-name">ELMARIANA</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;empanada&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/cG9oAQg.png" alt="Empanada"></div>
+      <div class="char-name">EMPANADA</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;etoiles&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/dv1fTmP.png" alt="Etoiles"></div>
+      <div class="char-name">ETOILES</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;felps&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/pKCauTv.png" alt="Felps"></div>
+      <div class="char-name">FELPS</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;fitmc&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/tlI9iAV.png" alt="FitMC"></div>
+      <div class="char-name">FITMC</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;foolish&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/Kan03zX.png" alt="Foolish"></div>
+      <div class="char-name">FOOLISH</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;forever&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/papdtXB.png" alt="Forever"></div>
+      <div class="char-name">FOREVER</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;gegg&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/4LbCeTA.png" alt="Gegg"></div>
+      <div class="char-name">GEGG</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;german&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/yuvTl2U.png" alt="German"></div>
+      <div class="char-name">GERMAN</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;ironmouse&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/0GNrvY2.png" alt="Ironmouse"></div>
+      <div class="char-name">IRONMOUSE</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;jaiden&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/NmaSNyL.png" alt="Jaiden"></div>
+      <div class="char-name">JAIDEN</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;jinki&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/Z1W0Mw1.png" alt="Jinki"></div>
+      <div class="char-name">JINKI</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;juanaflippa&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/66fkmUG.png" alt="Juanaflippa"></div>
+      <div class="char-name">JUANAFLIPPA</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;jungryeok&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/5XDRfJb.png" alt="Jungryeok"></div>
+      <div class="char-name">JUNGRYEOK</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;kameto&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/LzhDp64.png" alt="Kameto"></div>
+      <div class="char-name">KAMETO</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;kongkong&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/QJuVhAV.png" alt="Kongkong"></div>
+      <div class="char-name">KONGKONG</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;lenay&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/BYv6MZ6.png" alt="Lenay"></div>
+      <div class="char-name">LENAY</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;leonarda&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/NSsYrey.png" alt="Leonarda"></div>
+      <div class="char-name">LEONARDA</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;luzu&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/jvK54Dn.png" alt="Luzu"></div>
+      <div class="char-name">LUZU</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;maximus&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/8BBdGwU.png" alt="Maximus"></div>
+      <div class="char-name">MAXIMUS</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;mike&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/j0X84Dl.png" alt="Mike"></div>
+      <div class="char-name">MIKE</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;missasinfonia&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/7CPSM81.png" alt="Missasinfonia"></div>
+      <div class="char-name">MISSASINFONIA</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;nihachu&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/nB61Ial.png" alt="Nihachu"></div>
+      <div class="char-name">NIHACHU</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;pac&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/R4H5ns5.png" alt="Pac"></div>
+      <div class="char-name">PAC</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;pepito&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/7YFIjUn.png" alt="Pepito"></div>
+      <div class="char-name">PEPITO</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;philza&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/cPUpCMi.png" alt="Philza"></div>
+      <div class="char-name">PHILZA</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;polispol&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/UbM43c9.png" alt="Polispol"></div>
+      <div class="char-name">POLISPOL</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;pomme&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/BEutxVk.png" alt="Pomme"></div>
+      <div class="char-name">POMME</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;quackity&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/ipo0pjy.png" alt="Quackity"></div>
+      <div class="char-name">QUACKITY</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;ramon&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/OthqqXs.png" alt="Ramón"></div>
+      <div class="char-name">RAMÓN</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;richarlyson&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/94cOKoc.png" alt="Richarlyson"></div>
+      <div class="char-name">RICHARLYSON</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;rivers&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/mhzkvdz.png" alt="Rivers"></div>
+      <div class="char-name">RIVERS</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;roier&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/u03rUlM.png" alt="Roier"></div>
+      <div class="char-name">ROIER</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;rubius&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/4UnZE6M.jpeg" alt="Rubius"></div>
+      <div class="char-name">RUBIUS</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;spreen&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/V5p53Vg.png" alt="Spreen"></div>
+      <div class="char-name">SPREEN</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;sunnysideup&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/vJmZGT9.png" alt="Sunnysideup"></div>
+      <div class="char-name">SUNNYSIDEUP</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;tallulah&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/kUYA2ar.png" alt="Tallulah"></div>
+      <div class="char-name">TALLULAH</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;tilin&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/OIqJhNY.png" alt="Tilin"></div>
+      <div class="char-name">TILIN</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;tinakitten&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/p8swQJP.png" alt="TinaKitten"></div>
+      <div class="char-name">TINAKITTEN</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;trump&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/49OPRww.png" alt="Trump"></div>
+      <div class="char-name">TRUMP</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;tubbo&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/JqurBFB.png" alt="Tubbo"></div>
+      <div class="char-name">TUBBO</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;vegetta&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/mmaHQWx.png" alt="Vegetta"></div>
+      <div class="char-name">VEGETTA</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;willyrex&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/JCrBP2m.png" alt="Willyrex"></div>
+      <div class="char-name">WILLYREX</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;yangdding&#39;)">
+      <div class="char-available available"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/W94zkIf.png" alt="Yangdding"></div>
+      <div class="char-name">YANGDDING</div>
+      
+      <div class="status-badge status-vivo">VIVO</div>
+    </div><div class="char-card" onclick="showCharProfile(&#39;slimecicle&#39;)">
+      <div class="char-available occupied"></div>
+      <div class="char-avatar"><img src="./index 2222222_files/3rQGF9S.jpeg" alt="Slimecicle"></div>
+      <div class="char-name">SLIMECICLE</div>
+      <div class="char-player">torielxuxu</div>
+      <div class="status-badge status-vivo">VIVO</div>
+    </div>
+    <div onclick="showClassifiedModal()" style="grid-column:1/-1;cursor:pointer;padding:3rem 2rem;background:rgba(139,0,0,0.06);border:1px solid rgba(139,0,0,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;transition:border-color 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;rgba(139,0,0,0.25)&#39;">
+      <div style="font-size:4rem;filter:drop-shadow(0 0 15px rgba(139,0,0,0.6))">🔒</div>
+      <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:clamp(1.2rem,3vw,2rem);color:var(--red-bright);letter-spacing:6px;font-weight:900;text-shadow:0 0 20px rgba(139,0,0,0.7)">██ CLASSIFIED ██</div>
+      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:3px">4 ARQUIVOS RESTRITOS — THE FEDERATION</div>
+    </div></div>
   </div>
 </div>
 
 <!-- CHAR PROFILE -->
 <div id="char-profile" class="page">
-  <div class="profile-back"><button class="back-btn" onclick="showPage('personagens')">← VOLTAR</button></div>
+  <div class="profile-back"><button class="back-btn" onclick="showPage(&#39;personagens&#39;)">← VOLTAR</button></div>
   <div class="profile-layout" id="profileContent"></div>
 </div>
 
@@ -1736,7 +2227,7 @@
   </div>
   <div class="section-content">
     <div class="fed-header">
-      <img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png" id="fedHeaderLogo" style="width:560px;height:560px;max-width:90vw;object-fit:contain;filter:invert(1) brightness(2);mix-blend-mode:screen;margin:0 auto 1.5rem;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
+      <img loading="lazy" src="./index 2222222_files/FederationBookletLogo.png" id="fedHeaderLogo" style="width:560px;height:560px;max-width:90vw;object-fit:contain;filter:invert(1) brightness(2);mix-blend-mode:screen;margin:0 auto 1.5rem;display:block;position:relative;z-index:1" onerror="this.style.display=&#39;none&#39;">
       <div class="fed-motto">
         <span>"Esperamos que aproveite a ilha."</span><br>
         <span>"We hope you enjoy the island."</span><br>
@@ -1766,7 +2257,7 @@
       <p>The Federation has been presente na ilha desde o primeiro dia. Foi ela quem construiu a estação. Foi ela quem ergueu o muro que dividia os recém-chegados. E foi ela quem, ao final, deixou sua mensagem nas placas.</p>
       <p>Ela observa. Ela registra. Ela administra.</p>
       <p>Por enquanto, é tudo que se sabe com certeza.</p>
-      <div style="margin-top:1.5rem;padding:1rem;background:var(--bg3);border-left:2px solid var(--red);font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px">
+      <div style="margin-top:1.5rem;padding:1rem;background:var(--bg3);border-left:2px solid var(--red);font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px">
         Informações adicionais serão atualizadas conforme novos dados se tornarem disponíveis.<br>
         <span style="color:var(--red-bright)">— Arquivo público. Classificação: ABERTO.</span>
       </div>
@@ -1785,13 +2276,13 @@
     <div class="access-sub">NÍVEL DE AUTORIZAÇÃO INSUFICIENTE</div>
     <div class="access-sub" style="margin-bottom:2rem;font-size:0.65rem">INSIRA CREDENCIAIS PARA CONTINUAR</div>
     <div class="secret-input-group">
-      <input type="password" class="secret-input" id="fedPassword" placeholder="SENHA DE ACESSO" onkeydown="if(event.key==='Enter')checkFedAccess()">
+      <input type="password" class="secret-input" id="fedPassword" placeholder="SENHA DE ACESSO" onkeydown="if(event.key===&#39;Enter&#39;)checkFedAccess()">
       <button class="secret-btn" onclick="checkFedAccess()">ACESSAR</button>
     </div>
     <div class="access-error" id="fedError">⚠ AUTORIZAÇÃO NEGADA — CREDENCIAIS INVÁLIDAS</div>
   </div>
   <div id="fedContent" style="display:none;max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
-    <div class="empty-state" style="font-family:'Share Tech Mono',monospace;letter-spacing:2px;line-height:2">
+    <div class="empty-state" style="font-family:&#39;Share Tech Mono&#39;,monospace;letter-spacing:2px;line-height:2">
       <div style="color:var(--red-bright);font-size:1.5rem;margin-bottom:1rem">⚠</div>
       ARQUIVOS CLASSIFICADOS<br>
       <span style="color:#aaa;font-size:0.85rem">AGUARDANDO LIBERAÇÃO PELA ADMINISTRAÇÃO</span>
@@ -1804,10 +2295,214 @@
 <div id="charSelectPopup" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);overflow-y:auto;padding:2rem">
   <div style="max-width:900px;margin:0 auto;background:var(--bg2);border:1px solid var(--red);padding:2rem">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-      <h2 style="font-family:'Orbitron',monospace;font-size:1rem;letter-spacing:3px;color:#fff">ESCOLHER PERSONAGEM</h2>
-      <button onclick="closeCharPopup()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕ FECHAR</button>
+      <h2 style="font-family:&#39;Orbitron&#39;,monospace;font-size:1rem;letter-spacing:3px;color:#fff">ESCOLHER PERSONAGEM</h2>
+      <button onclick="closeCharPopup()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;cursor:pointer;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem">✕ FECHAR</button>
     </div>
-    <div id="popupCharList"></div>
+    <div id="popupCharList"><div style="margin-bottom:1.5rem">
+      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)"><img loading="lazy" src="./index 2222222_files/us(1).png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
+        <div onclick="selectChar(&#39;badboyhalo&#39;,&#39;BadBoyHalo&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">BadBoyHalo</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;dantdm&#39;,&#39;DanTDM&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">DanTDM</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;fitmc&#39;,&#39;FitMC&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">FitMC</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;foolish&#39;,&#39;Foolish&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Foolish</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;ironmouse&#39;,&#39;Ironmouse&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Ironmouse</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;jaiden&#39;,&#39;Jaiden&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Jaiden</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;lenay&#39;,&#39;Lenay&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Lenay</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;nihachu&#39;,&#39;Nihachu&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Nihachu</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;philza&#39;,&#39;Philza&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Philza</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;slimecicle&#39;,&#39;Slimecicle&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--red);cursor:not-allowed;opacity:0.5;transition:all 0.2s">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:var(--text-dim)">Slimecicle</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:var(--red-bright)">🔴 OCUPADO</div>
+          </div><div onclick="selectChar(&#39;tinakitten&#39;,&#39;TinaKitten&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">TinaKitten</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;tubbo&#39;,&#39;Tubbo&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Tubbo</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div>
+      </div>
+    </div><div style="margin-bottom:1.5rem">
+      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)">🇪🇸 ESPANHOL</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
+        <div onclick="selectChar(&#39;carre&#39;,&#39;Carre&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Carre</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;elmariana&#39;,&#39;ElMariana&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">ElMariana</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;german&#39;,&#39;German&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">German</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;luzu&#39;,&#39;Luzu&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Luzu</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;maximus&#39;,&#39;Maximus&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Maximus</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;missasinfonia&#39;,&#39;Missasinfonia&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Missasinfonia</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;polispol&#39;,&#39;Polispol&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Polispol</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;quackity&#39;,&#39;Quackity&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Quackity</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;rivers&#39;,&#39;Rivers&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Rivers</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;roier&#39;,&#39;Roier&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Roier</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;rubius&#39;,&#39;Rubius&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Rubius</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;spreen&#39;,&#39;Spreen&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Spreen</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;vegetta&#39;,&#39;Vegetta&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Vegetta</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;willyrex&#39;,&#39;Willyrex&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Willyrex</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div>
+      </div>
+    </div><div style="margin-bottom:1.5rem">
+      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)"><img loading="lazy" src="./index 2222222_files/br(1).png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> PORTUGUÊS</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
+        <div onclick="selectChar(&#39;bagi&#39;,&#39;Bagi&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Bagi</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;cellbit&#39;,&#39;Cellbit&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Cellbit</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;felps&#39;,&#39;Felps&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Felps</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;mike&#39;,&#39;Mike&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Mike</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;pac&#39;,&#39;Pac&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Pac</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;forever&#39;,&#39;Forever&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Forever</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;jinki&#39;,&#39;Jinki&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Jinki</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div>
+      </div>
+    </div><div style="margin-bottom:1.5rem">
+      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)"><img loading="lazy" src="./index 2222222_files/fr(1).png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
+        <div onclick="selectChar(&#39;antoine&#39;,&#39;Antoine&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Antoine</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;aypierre&#39;,&#39;Aypierre&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Aypierre</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;baghera&#39;,&#39;Baghera&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Baghera</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;etoiles&#39;,&#39;Etoiles&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Etoiles</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;kameto&#39;,&#39;Kameto&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Kameto</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div>
+      </div>
+    </div><div style="margin-bottom:1.5rem">
+      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)"><img loading="lazy" src="./index 2222222_files/kr(1).png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
+        <div onclick="selectChar(&#39;bjacau&#39;,&#39;Acau&#39;,&#39;coreano&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Acau</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;jungryeok&#39;,&#39;Jungryeok&#39;,&#39;coreano&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Jungryeok</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;yangdding&#39;,&#39;Yangdding&#39;,&#39;coreano&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Yangdding</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;kongkong&#39;,&#39;Kongkong&#39;,&#39;coreano&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Kongkong</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div>
+      </div>
+    </div><div style="margin-bottom:1.5rem">
+      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)">🥚 HUEVITOS</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
+        <div onclick="selectChar(&#39;bobby&#39;,&#39;Bobby&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Bobby</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;chayanne&#39;,&#39;Chayanne&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Chayanne</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;chunsik&#39;,&#39;Chunsik&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Chunsik</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;dapper&#39;,&#39;Dapper&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Dapper</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;empanada&#39;,&#39;Empanada&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Empanada</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;gegg&#39;,&#39;Gegg&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Gegg</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;juanaflippa&#39;,&#39;Juanaflippa&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Juanaflippa</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;leonarda&#39;,&#39;Leonarda&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Leonarda</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;pepito&#39;,&#39;Pepito&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Pepito</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;pomme&#39;,&#39;Pomme&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Pomme</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;ramon&#39;,&#39;Ramón&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Ramón</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;richarlyson&#39;,&#39;Richarlyson&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Richarlyson</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;sunnysideup&#39;,&#39;Sunnysideup&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Sunnysideup</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;tallulah&#39;,&#39;Tallulah&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Tallulah</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;tilin&#39;,&#39;Tilin&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Tilin</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div><div onclick="selectChar(&#39;trump&#39;,&#39;Trump&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
+            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Trump</div>
+            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
+          </div>
+      </div>
+    </div></div>
   </div>
 </div>
 <!-- ENVIAR FICHA -->
@@ -1817,7 +2512,7 @@
     <h1 class="section-title">ENVIAR FICHA</h1>
   </div>
   <div class="section-content">
-    <div id="fichaPlayerNotice" style="display:none;padding:0.7rem 1rem;background:rgba(0,80,0,0.12);border:1px solid #4caf50;margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;letter-spacing:1px">✓ LOGADO COMO: <span id="fichaPlayerNome"></span> — FICHA SERÁ VINCULADA AUTOMATICAMENTE À SUA CONTA</div>
+    <div id="fichaPlayerNotice" style="display:none;padding:0.7rem 1rem;background:rgba(0,80,0,0.12);border:1px solid #4caf50;margin-bottom:1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.75rem;color:#4caf50;letter-spacing:1px">✓ LOGADO COMO: <span id="fichaPlayerNome"></span> — FICHA SERÁ VINCULADA AUTOMATICAMENTE À SUA CONTA</div>
     <div class="form-container">
       <div class="ficha-progress-wrap" id="fichaProgressWrap">
         <div class="ficha-progress-header">
@@ -1830,7 +2525,7 @@
         <div class="form-section">
           <h3>INFORMAÇÕES BÁSICAS</h3>
           <div class="form-grid">
-            <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em escolher..." readonly style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div>
+            <div class="form-group full"><label id="f_nome_label">Personagem *</label><div style="display:flex;gap:0.5rem"><input type="text" id="f_nome" placeholder="Clique em escolher..." readonly="" style="cursor:pointer;flex:1" onclick="openCharPopup()"><button type="button" onclick="openCharPopup()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button></div>
               <div class="ficha-char-preview" id="fichaCharPreview">
                 <div id="fichaCharPreviewThumb"></div>
                 <div class="ficha-char-preview-info" id="fichaCharPreviewInfo"></div>
@@ -1838,14 +2533,14 @@
             </div>
             <div class="form-group full" id="f_cucurucho_nome_group" style="display:none;grid-column:1/-1"><label>Nome do Cucurucho (como será chamado in-game) *</label><input type="text" id="f_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho, Cucurucho 03..."></div>
             <div class="form-group"><label>Nome do Player *
-              <span style="font-family:'Share Tech Mono',monospace;font-weight:400;font-size:0.6rem;color:var(--text-dim);letter-spacing:1px;display:block;margin-top:0.2rem">⚠ Use o mesmo nome do seu usuário cadastrado, para que a adm saiba de quem é a ficha.</span>
+              <span style="font-family:&#39;Share Tech Mono&#39;,monospace;font-weight:400;font-size:0.6rem;color:var(--text-dim);letter-spacing:1px;display:block;margin-top:0.2rem">⚠ Use o mesmo nome do seu usuário cadastrado, para que a adm saiba de quem é a ficha.</span>
             </label><input type="text" id="f_player" placeholder="Seu usuário cadastrado"></div>
-            <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA"></div>
-            <div class="form-group"><label>Idade do Player</label><input type="text" id="f_idade_player" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
-            <div class="form-group"><label>Data de Nascimento do Personagem</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA"></div>
-            <div class="form-group"><label>Idade do Personagem</label><input type="text" id="f_idade" placeholder="Calculada automaticamente" readonly style="opacity:0.5;cursor:not-allowed"></div>
-            <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div>
-<div id="f_imagem_err2" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ A imagem precisa ser quadrada (largura = altura). Edite antes de enviar.</div></div>
+            <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="f_nascimento_player" placeholder="DD/MM/AAAA" maxlength="10"></div>
+            <div class="form-group"><label>Idade do Player</label><input type="text" id="f_idade_player" placeholder="Calculada automaticamente" readonly="" style="opacity:0.5;cursor:not-allowed"></div>
+            <div class="form-group"><label>Data de Nascimento do Personagem</label><input type="text" id="f_nascimento" placeholder="DD/MM/AAAA" maxlength="10"></div>
+            <div class="form-group"><label>Idade do Personagem</label><input type="text" id="f_idade" placeholder="Calculada automaticamente" readonly="" style="opacity:0.5;cursor:not-allowed"></div>
+            <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="f_imagem" placeholder="https://i.imgur.com/..."><div id="f_imagem_err" style="display:none;margin-top:0.4rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ Apenas imagens do Imgur são aceitas (https://i.imgur.com/...)</div>
+<div id="f_imagem_err2" style="display:none;margin-top:0.4rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px">⚠ A imagem precisa ser quadrada (largura = altura). Edite antes de enviar.</div></div>
           </div>
         </div>
 
@@ -1863,7 +2558,47 @@
           <div class="attrs-points-info">
             Você possui <span class="attrs-points-remaining" id="pointsLeft">5</span> pontos para distribuir. Cada atributo começa com 1 ponto. Reduzir um atributo abaixo de 1 devolve esse ponto para distribuição.
           </div>
-          <div class="attrs-form-grid" id="attrsGrid"></div>
+          <div class="attrs-form-grid" id="attrsGrid">
+    <div class="attr-ctrl">
+      <span class="attr-ctrl-name">AGI</span>
+      <div class="attr-ctrl-row">
+        <button class="attr-btn" onclick="changeAttr(&#39;AGI&#39;,-1)">−</button>
+        <span class="attr-display" id="av_AGI">1</span>
+        <button class="attr-btn" onclick="changeAttr(&#39;AGI&#39;,+1)">+</button>
+      </div>
+    </div>
+    <div class="attr-ctrl">
+      <span class="attr-ctrl-name">FOR</span>
+      <div class="attr-ctrl-row">
+        <button class="attr-btn" onclick="changeAttr(&#39;FOR&#39;,-1)">−</button>
+        <span class="attr-display" id="av_FOR">1</span>
+        <button class="attr-btn" onclick="changeAttr(&#39;FOR&#39;,+1)">+</button>
+      </div>
+    </div>
+    <div class="attr-ctrl">
+      <span class="attr-ctrl-name">INT</span>
+      <div class="attr-ctrl-row">
+        <button class="attr-btn" onclick="changeAttr(&#39;INT&#39;,-1)">−</button>
+        <span class="attr-display" id="av_INT">1</span>
+        <button class="attr-btn" onclick="changeAttr(&#39;INT&#39;,+1)">+</button>
+      </div>
+    </div>
+    <div class="attr-ctrl">
+      <span class="attr-ctrl-name">PRE</span>
+      <div class="attr-ctrl-row">
+        <button class="attr-btn" onclick="changeAttr(&#39;PRE&#39;,-1)">−</button>
+        <span class="attr-display" id="av_PRE">1</span>
+        <button class="attr-btn" onclick="changeAttr(&#39;PRE&#39;,+1)">+</button>
+      </div>
+    </div>
+    <div class="attr-ctrl">
+      <span class="attr-ctrl-name">VIG</span>
+      <div class="attr-ctrl-row">
+        <button class="attr-btn" onclick="changeAttr(&#39;VIG&#39;,-1)">−</button>
+        <span class="attr-display" id="av_VIG">1</span>
+        <button class="attr-btn" onclick="changeAttr(&#39;VIG&#39;,+1)">+</button>
+      </div>
+    </div></div>
         </div>
 
         <div class="form-section">
@@ -1871,17 +2606,129 @@
           <div class="skills-info">
             Escolha até <span class="skills-remaining" id="skillsLeft">8</span> perícias para o seu personagem.
           </div>
-          <div class="skills-check-grid" id="skillsGrid"></div>
+          <div class="skills-check-grid" id="skillsGrid">
+    <label class="skill-check" id="sc_Acrobacia" onclick="toggleSkill(&#39;Acrobacia&#39;)">
+      <div class="skill-check-box" id="sb_Acrobacia"></div>
+      <span class="skill-check-name">Acrobacia</span>
+    </label>
+    <label class="skill-check" id="sc_Adestramento" onclick="toggleSkill(&#39;Adestramento&#39;)">
+      <div class="skill-check-box" id="sb_Adestramento"></div>
+      <span class="skill-check-name">Adestramento</span>
+    </label>
+    <label class="skill-check" id="sc_Artes" onclick="toggleSkill(&#39;Artes&#39;)">
+      <div class="skill-check-box" id="sb_Artes"></div>
+      <span class="skill-check-name">Artes</span>
+    </label>
+    <label class="skill-check" id="sc_Atletismo" onclick="toggleSkill(&#39;Atletismo&#39;)">
+      <div class="skill-check-box" id="sb_Atletismo"></div>
+      <span class="skill-check-name">Atletismo</span>
+    </label>
+    <label class="skill-check" id="sc_Atualidades" onclick="toggleSkill(&#39;Atualidades&#39;)">
+      <div class="skill-check-box" id="sb_Atualidades"></div>
+      <span class="skill-check-name">Atualidades</span>
+    </label>
+    <label class="skill-check" id="sc_Ciências" onclick="toggleSkill(&#39;Ciências&#39;)">
+      <div class="skill-check-box" id="sb_Ciências"></div>
+      <span class="skill-check-name">Ciências</span>
+    </label>
+    <label class="skill-check" id="sc_Crime" onclick="toggleSkill(&#39;Crime&#39;)">
+      <div class="skill-check-box" id="sb_Crime"></div>
+      <span class="skill-check-name">Crime</span>
+    </label>
+    <label class="skill-check" id="sc_Diplomacia" onclick="toggleSkill(&#39;Diplomacia&#39;)">
+      <div class="skill-check-box" id="sb_Diplomacia"></div>
+      <span class="skill-check-name">Diplomacia</span>
+    </label>
+    <label class="skill-check" id="sc_Enganação" onclick="toggleSkill(&#39;Enganação&#39;)">
+      <div class="skill-check-box" id="sb_Enganação"></div>
+      <span class="skill-check-name">Enganação</span>
+    </label>
+    <label class="skill-check" id="sc_Fortitude" onclick="toggleSkill(&#39;Fortitude&#39;)">
+      <div class="skill-check-box" id="sb_Fortitude"></div>
+      <span class="skill-check-name">Fortitude</span>
+    </label>
+    <label class="skill-check" id="sc_Furtividade" onclick="toggleSkill(&#39;Furtividade&#39;)">
+      <div class="skill-check-box" id="sb_Furtividade"></div>
+      <span class="skill-check-name">Furtividade</span>
+    </label>
+    <label class="skill-check" id="sc_Iniciativa" onclick="toggleSkill(&#39;Iniciativa&#39;)">
+      <div class="skill-check-box" id="sb_Iniciativa"></div>
+      <span class="skill-check-name">Iniciativa</span>
+    </label>
+    <label class="skill-check" id="sc_Intimidação" onclick="toggleSkill(&#39;Intimidação&#39;)">
+      <div class="skill-check-box" id="sb_Intimidação"></div>
+      <span class="skill-check-name">Intimidação</span>
+    </label>
+    <label class="skill-check" id="sc_Intuição" onclick="toggleSkill(&#39;Intuição&#39;)">
+      <div class="skill-check-box" id="sb_Intuição"></div>
+      <span class="skill-check-name">Intuição</span>
+    </label>
+    <label class="skill-check" id="sc_Investigação" onclick="toggleSkill(&#39;Investigação&#39;)">
+      <div class="skill-check-box" id="sb_Investigação"></div>
+      <span class="skill-check-name">Investigação</span>
+    </label>
+    <label class="skill-check" id="sc_Luta" onclick="toggleSkill(&#39;Luta&#39;)">
+      <div class="skill-check-box" id="sb_Luta"></div>
+      <span class="skill-check-name">Luta</span>
+    </label>
+    <label class="skill-check" id="sc_Medicina" onclick="toggleSkill(&#39;Medicina&#39;)">
+      <div class="skill-check-box" id="sb_Medicina"></div>
+      <span class="skill-check-name">Medicina</span>
+    </label>
+    <label class="skill-check" id="sc_Ocultismo" onclick="toggleSkill(&#39;Ocultismo&#39;)">
+      <div class="skill-check-box" id="sb_Ocultismo"></div>
+      <span class="skill-check-name">Ocultismo</span>
+    </label>
+    <label class="skill-check" id="sc_Percepção" onclick="toggleSkill(&#39;Percepção&#39;)">
+      <div class="skill-check-box" id="sb_Percepção"></div>
+      <span class="skill-check-name">Percepção</span>
+    </label>
+    <label class="skill-check" id="sc_Pilotagem" onclick="toggleSkill(&#39;Pilotagem&#39;)">
+      <div class="skill-check-box" id="sb_Pilotagem"></div>
+      <span class="skill-check-name">Pilotagem</span>
+    </label>
+    <label class="skill-check" id="sc_Pontaria" onclick="toggleSkill(&#39;Pontaria&#39;)">
+      <div class="skill-check-box" id="sb_Pontaria"></div>
+      <span class="skill-check-name">Pontaria</span>
+    </label>
+    <label class="skill-check" id="sc_Profissão" onclick="toggleSkill(&#39;Profissão&#39;)">
+      <div class="skill-check-box" id="sb_Profissão"></div>
+      <span class="skill-check-name">Profissão</span>
+    </label>
+    <label class="skill-check" id="sc_Reflexos" onclick="toggleSkill(&#39;Reflexos&#39;)">
+      <div class="skill-check-box" id="sb_Reflexos"></div>
+      <span class="skill-check-name">Reflexos</span>
+    </label>
+    <label class="skill-check" id="sc_Religião" onclick="toggleSkill(&#39;Religião&#39;)">
+      <div class="skill-check-box" id="sb_Religião"></div>
+      <span class="skill-check-name">Religião</span>
+    </label>
+    <label class="skill-check" id="sc_Sobrevivência" onclick="toggleSkill(&#39;Sobrevivência&#39;)">
+      <div class="skill-check-box" id="sb_Sobrevivência"></div>
+      <span class="skill-check-name">Sobrevivência</span>
+    </label>
+    <label class="skill-check" id="sc_Tática" onclick="toggleSkill(&#39;Tática&#39;)">
+      <div class="skill-check-box" id="sb_Tática"></div>
+      <span class="skill-check-name">Tática</span>
+    </label>
+    <label class="skill-check" id="sc_Tecnologia" onclick="toggleSkill(&#39;Tecnologia&#39;)">
+      <div class="skill-check-box" id="sb_Tecnologia"></div>
+      <span class="skill-check-name">Tecnologia</span>
+    </label>
+    <label class="skill-check" id="sc_Vontade" onclick="toggleSkill(&#39;Vontade&#39;)">
+      <div class="skill-check-box" id="sb_Vontade"></div>
+      <span class="skill-check-name">Vontade</span>
+    </label></div>
         </div>
 
-        <div id="fichaEditNotice" style="display:none;padding:0.8rem 1rem;background:rgba(139,0,0,0.15);border:1px solid var(--red);margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--red-bright);letter-spacing:1px">⚠ MODO EDIÇÃO — Sua edição será enviada para aprovação da administração.</div>
+        <div id="fichaEditNotice" style="display:none;padding:0.8rem 1rem;background:rgba(139,0,0,0.15);border:1px solid var(--red);margin-bottom:1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.75rem;color:var(--red-bright);letter-spacing:1px">⚠ MODO EDIÇÃO — Sua edição será enviada para aprovação da administração.</div>
         <button class="submit-btn" id="submitBtn" onclick="submitFicha()">▶ ENVIAR FICHA PARA APROVAÇÃO</button>
         <button class="submit-btn" onclick="showEditFicha()" style="margin-top:0.5rem;background:none;border:1px solid var(--border);color:var(--text-dim)">✎ EDITAR FICHA EXISTENTE</button>
       </div>
       <div class="form-success" id="fichaSuccess">
         <h3>FICHA RECEBIDA</h3>
         <p>Sua ficha foi enviada e está aguardando aprovação da administração.<br><br>Você será notificado assim que for analisada.</p>
-        <button onclick="resetFichaForm()" style="margin-top:2rem;padding:0.8rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Orbitron',monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='var(--red-bright)'" onmouseout="this.style.background='var(--red)'">← VOLTAR AO INÍCIO</button>
+        <button onclick="resetFichaForm()" style="margin-top:2rem;padding:0.8rem 2rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;letter-spacing:3px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background=&#39;var(--red-bright)&#39;" onmouseout="this.style.background=&#39;var(--red)&#39;">← VOLTAR AO INÍCIO</button>
       </div>
     </div>
   </div>
@@ -1897,28 +2744,28 @@
     <div class="access-denied" style="font-size:1.5rem">ACESSO DO PLAYER</div>
     <div class="access-sub" style="margin-bottom:2rem">ENTRE OU CRIE SUA CONTA</div>
     <div style="display:flex;gap:0;margin-bottom:1.5rem">
-      <button id="playerTabLogin" onclick="switchPlayerTab('login')" style="padding:0.6rem 1.5rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">ENTRAR</button>
-      <button id="playerTabCadastro" onclick="switchPlayerTab('cadastro')" style="padding:0.6rem 1.5rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">CRIAR CONTA</button>
+      <button id="playerTabLogin" onclick="switchPlayerTab(&#39;login&#39;)" style="padding:0.6rem 1.5rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">ENTRAR</button>
+      <button id="playerTabCadastro" onclick="switchPlayerTab(&#39;cadastro&#39;)" style="padding:0.6rem 1.5rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">CRIAR CONTA</button>
     </div>
     <!-- Login -->
     <div id="playerLoginForm" style="display:flex;flex-direction:column;gap:0.8rem;width:100%;max-width:400px">
       <input type="text" class="secret-input" id="playerLoginUser" placeholder="USUÁRIO" style="border-right:1px solid var(--red);text-transform:lowercase" oninput="this.value=this.value.toLowerCase()">
       <div class="secret-input-group">
-        <input type="password" class="secret-input" id="playerLoginPass" placeholder="SENHA" onkeydown="if(event.key==='Enter')doPlayerLogin()">
+        <input type="password" class="secret-input" id="playerLoginPass" placeholder="SENHA" onkeydown="if(event.key===&#39;Enter&#39;)doPlayerLogin()">
         <button class="secret-btn" onclick="doPlayerLogin()">ENTRAR</button>
       </div>
       <div class="access-error" id="playerLoginError" style="display:none">⚠ USUÁRIO OU SENHA INVÁLIDOS</div>
     </div>
     <!-- Cadastro -->
     <div id="playerCadastroForm" style="display:none;flex-direction:column;gap:0.8rem;width:100%;max-width:400px">
-      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;line-height:1.8;margin-bottom:0.5rem">
+      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;line-height:1.8;margin-bottom:0.5rem">
         Usuário: letras, números, sem espaços.<br>
         Senha: tudo minúsculo, mínimo 6 caracteres. Números e caracteres especiais permitidos.
       </div>
-      <input type="text" class="secret-input" id="playerCadUser" placeholder="ESCOLHA UM USUÁRIO" style="border-right:1px solid var(--red);text-transform:lowercase" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+      <input type="text" class="secret-input" id="playerCadUser" placeholder="ESCOLHA UM USUÁRIO" style="border-right:1px solid var(--red);text-transform:lowercase" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,&#39;&#39;)">
       <input type="password" class="secret-input" id="playerCadPass" placeholder="SENHA (mín. 6 caracteres)" style="border-right:1px solid var(--red);text-transform:lowercase" oninput="this.value=this.value.toLowerCase()">
       <div class="secret-input-group">
-        <input type="password" class="secret-input" id="playerCadPass2" placeholder="CONFIRMAR SENHA" style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()" onkeydown="if(event.key==='Enter')doPlayerCadastro()">
+        <input type="password" class="secret-input" id="playerCadPass2" placeholder="CONFIRMAR SENHA" style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()" onkeydown="if(event.key===&#39;Enter&#39;)doPlayerCadastro()">
         <button class="secret-btn" onclick="doPlayerCadastro()">CADASTRAR</button>
       </div>
       <div class="access-error" id="playerCadError" style="display:none">⚠ ERRO</div>
@@ -1934,8 +2781,8 @@
   </div>
   <div style="max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
     <div class="admin-tabs">
-      <button class="admin-tab active" onclick="showPlayerTab('player-meus-chars',this)">MEUS PERSONAGENS</button>
-      <button class="admin-tab" onclick="showPlayerTab('player-senha',this)">🔐 MINHA SENHA</button>
+      <button class="admin-tab active" onclick="showPlayerTab(&#39;player-meus-chars&#39;,this)">MEUS PERSONAGENS</button>
+      <button class="admin-tab" onclick="showPlayerTab(&#39;player-senha&#39;,this)">🔐 MINHA SENHA</button>
       <button class="admin-tab" onclick="playerLogout()" style="margin-left:auto;color:var(--text-dim)">↩ SAIR</button>
     </div>
     <div id="player-meus-chars" class="admin-content active">
@@ -1944,14 +2791,14 @@
     <div id="player-senha" class="admin-content">
       <div class="form-section" style="max-width:500px">
         <h3>ALTERAR MINHA SENHA</h3>
-        <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">Senha deve ser tudo minúsculo, mínimo 6 caracteres.</p>
+        <p style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">Senha deve ser tudo minúsculo, mínimo 6 caracteres.</p>
         <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.2rem">
           <div class="form-group"><label>SENHA ATUAL</label><input type="password" id="pl_passAtual" style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()"></div>
           <div class="form-group"><label>NOVA SENHA</label><input type="password" id="pl_passNova" style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()"></div>
           <div class="form-group"><label>CONFIRMAR NOVA SENHA</label><input type="password" id="pl_passConfirm" style="text-transform:lowercase" oninput="this.value=this.value.toLowerCase()"></div>
         </div>
-        <div id="pl_pass_err" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:0.8rem;display:none"></div>
-        <div id="pl_pass_ok" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#4caf50;margin-bottom:0.8rem;display:none">✓ SENHA ALTERADA COM SUCESSO</div>
+        <div id="pl_pass_err" style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:0.8rem;display:none"></div>
+        <div id="pl_pass_ok" style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:#4caf50;margin-bottom:0.8rem;display:none">✓ SENHA ALTERADA COM SUCESSO</div>
         <button class="submit-btn" onclick="changePlayerPassword()">SALVAR NOVA SENHA</button>
       </div>
     </div>
@@ -1970,7 +2817,7 @@
     <div style="display:flex;flex-direction:column;gap:0.8rem;width:100%;max-width:400px">
       <input type="text" class="secret-input" id="adminUser" placeholder="USUÁRIO" style="border-right:1px solid var(--red)">
       <div class="secret-input-group">
-        <input type="password" class="secret-input" id="adminPass" placeholder="SENHA" onkeydown="if(event.key==='Enter')checkAdmin()">
+        <input type="password" class="secret-input" id="adminPass" placeholder="SENHA" onkeydown="if(event.key===&#39;Enter&#39;)checkAdmin()">
         <button class="secret-btn" onclick="checkAdmin()">ENTRAR</button>
       </div>
     </div>
@@ -1986,18 +2833,32 @@
   </div>
   <div style="max-width:1200px;margin:0 auto;padding:0 2rem 4rem">
     <div class="admin-tabs">
-      <button class="admin-tab active" onclick="showAdminTab('pendentes',this)">FICHAS PENDENTES <span class="admin-tab-badge" id="pendentesTabBadge" style="display:none"></span></button>
-      <button class="admin-tab" onclick="showAdminTab('personagens-admin',this);renderApprovedAdmin()">PERSONAGENS</button>
-      <button class="admin-tab" onclick="showAdminTab('players-admin',this);renderPlayersAdmin()">👥 PLAYERS</button>
-      <button class="admin-tab" onclick="showAdminTab('fotos-admin',this);renderFotosAdmin()">🖼 FOTOS</button>
-      <button class="admin-tab" onclick="showAdminTab('admin-meus-chars',this);renderAdminOwnChars()">👤 MEUS PERSONAGENS</button>
-      <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">THE FEDERATION</button>
-      <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
-      <button class="admin-tab" onclick="showAdminTab('senha-admin',this)">🔐 MINHA SENHA</button>
-      <button class="admin-tab" onclick="showAdminTab('log-admin',this);renderLogAdmin()">📋 LOG</button>
+      <button class="admin-tab active" onclick="showAdminTab(&#39;pendentes&#39;,this)">FICHAS PENDENTES <span class="admin-tab-badge" id="pendentesTabBadge" style="display:none">0</span></button>
+      <button class="admin-tab" onclick="showAdminTab(&#39;personagens-admin&#39;,this);renderApprovedAdmin()">PERSONAGENS</button>
+      <button class="admin-tab" onclick="showAdminTab(&#39;players-admin&#39;,this);renderPlayersAdmin()">👥 PLAYERS</button>
+      <button class="admin-tab" onclick="showAdminTab(&#39;fotos-admin&#39;,this);renderFotosAdmin()">🖼 FOTOS</button>
+      <button class="admin-tab" onclick="showAdminTab(&#39;admin-meus-chars&#39;,this);renderAdminOwnChars()">👤 MEUS PERSONAGENS</button>
+      <button class="admin-tab" onclick="showAdminTab(&#39;fed-admin&#39;,this)">THE FEDERATION</button>
+      <button class="admin-tab" onclick="showAdminTab(&#39;config&#39;,this)">CONFIGURAÇÕES</button>
+      <button class="admin-tab" onclick="showAdminTab(&#39;senha-admin&#39;,this)">🔐 MINHA SENHA</button>
+      <button class="admin-tab" onclick="showAdminTab(&#39;log-admin&#39;,this);renderLogAdmin()">📋 LOG</button>
     </div>
     <div id="pendentes" class="admin-content active"><div id="pendingList"><div class="empty-state">NENHUMA FICHA PENDENTE</div></div></div>
-    <div id="personagens-admin" class="admin-content"><div id="approvedList"><div class="empty-state">CARREGANDO...</div></div></div>
+    <div id="personagens-admin" class="admin-content"><div id="approvedList">
+    <div class="pending-card" id="apc_BwjZBmqwbkXDaFrAe2VD">
+      <div class="pending-info">
+        <h4>SLIMECICLE</h4>
+        <p>// Player: torielxuxu // Status: <span style="color:#4caf50">VIVO</span> // Conta: torielxuxu</p>
+      </div>
+      <div class="pending-actions" style="flex-wrap:wrap;gap:0.4rem">
+        <button class="btn-approve" onclick="adminEditarFicha(&#39;BwjZBmqwbkXDaFrAe2VD&#39;)">✎ EDITAR</button>
+        <button class="btn-approve" onclick="adminChangeStatus(&#39;BwjZBmqwbkXDaFrAe2VD&#39;,&#39;Slimecicle&#39;,&#39;torielxuxu&#39;)">⚡ STATUS</button>
+        <button class="btn-approve" onclick="adminGerenciarTraumas(&#39;BwjZBmqwbkXDaFrAe2VD&#39;)">😰 TRAUMAS</button>
+        <button class="btn-approve" onclick="adminGerenciarHistorico(&#39;BwjZBmqwbkXDaFrAe2VD&#39;)">📖 HISTÓRICO</button>
+        <button class="btn-approve" onclick="gerarSenhaEdicao(&#39;BwjZBmqwbkXDaFrAe2VD&#39;,&#39;torielxuxu&#39;)">🔑 SENHA</button>
+        <button class="btn-reject" onclick="deleteApprovedChar(&#39;BwjZBmqwbkXDaFrAe2VD&#39;,&#39;Slimecicle&#39;)">🗑 EXCLUIR</button>
+      </div>
+    </div></div></div>
     <div id="players-admin" class="admin-content"><div id="playersAdminList"><div class="empty-state">CARREGANDO...</div></div></div>
     <div id="admin-meus-chars" class="admin-content"><div id="adminOwnCharsList"><div class="empty-state">CARREGANDO...</div></div></div>
 
@@ -2005,7 +2866,7 @@
     <div id="fotos-admin" class="admin-content">
       <div class="form-section">
         <h3>GERENCIAR FOTOS DOS PERSONAGENS</h3>
-        <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;line-height:1.8;margin-bottom:1.5rem">
+        <p style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;line-height:1.8;margin-bottom:1.5rem">
           Cadastre ou atualize a foto de qualquer personagem independente de ficha.<br>
           A imagem será exibida na página de personagens e no formulário de inscrição.<br>
           Use URLs do Imgur (https://i.imgur.com/...).
@@ -2013,11 +2874,11 @@
         <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">
           <div class="form-group" style="flex:1;min-width:200px">
             <label>FILTRAR PERSONAGEM</label>
-            <input type="text" id="fotosSearchInput" placeholder="Digite o nome..." oninput="filtrarFotosAdmin(this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Inter',sans-serif;font-size:0.95rem;outline:none;width:100%">
+            <input type="text" id="fotosSearchInput" placeholder="Digite o nome..." oninput="filtrarFotosAdmin(this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:&#39;Inter&#39;,sans-serif;font-size:0.95rem;outline:none;width:100%">
           </div>
           <div class="form-group" style="flex:1;min-width:160px">
             <label>FILTRAR POR IDIOMA</label>
-            <select id="fotosLangFilter" onchange="filtrarFotosAdmin(document.getElementById('fotosSearchInput').value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Inter',sans-serif;font-size:0.95rem;outline:none;width:100%">
+            <select id="fotosLangFilter" onchange="filtrarFotosAdmin(document.getElementById(&#39;fotosSearchInput&#39;).value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:&#39;Inter&#39;,sans-serif;font-size:0.95rem;outline:none;width:100%">
               <option value="">TODOS</option>
               <option value="ingles">🇺🇸 Inglês</option>
               <option value="espanhol">🇪🇸 Espanhol</option>
@@ -2036,7 +2897,7 @@
     <div id="log-admin" class="admin-content">
       <div class="form-section">
         <h3>LOG DE AÇÕES</h3>
-        <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem">Registro de todas as aprovações e rejeições de fichas.</p>
+        <p style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem">Registro de todas as aprovações e rejeições de fichas.</p>
         <div id="logAdminList"></div>
       </div>
     </div>
@@ -2049,15 +2910,15 @@
           <div class="form-group"><label>Senha da Área Secreta of The Federation</label><input type="text" id="cfg_fedPass" placeholder="Defina a senha..."></div>
           <div class="form-group" style="justify-content:flex-end"><button class="submit-btn" style="margin-top:1.5rem" onclick="saveFedPassword()">SALVAR</button></div>
         </div>
-        <div id="cfg_msg" style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
+        <div id="cfg_msg" style="margin-top:1rem;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
       </div>
       <div class="form-section" style="margin-top:2rem" id="secaoGerenciarAdmins">
         <h3>GERENCIAR SENHAS DE ADMINS</h3>
-        <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">Redefina a senha de qualquer admin. Use para recuperar acesso ou cadastrar novos admins.</p>
+        <p style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">Redefina a senha de qualquer admin. Use para recuperar acesso ou cadastrar novos admins.</p>
         <div style="display:flex;flex-direction:column;gap:0.8rem;max-width:500px">
           <div class="form-group">
             <label>USUÁRIO ADMIN</label>
-            <select id="cfg_adminTarget" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Inter',sans-serif;font-size:0.95rem;outline:none;width:100%">
+            <select id="cfg_adminTarget" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:&#39;Inter&#39;,sans-serif;font-size:0.95rem;outline:none;width:100%">
               <option value="twik">Twik</option>
               <option value="ryu">Ryu</option>
               <option value="andy">Andy</option>
@@ -2072,7 +2933,7 @@
             <label>CONFIRMAR SENHA</label>
             <input type="password" id="cfg_adminConfirmPass" placeholder="Repita a senha">
           </div>
-          <div id="cfg_admin_msg" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;display:none"></div>
+          <div id="cfg_admin_msg" style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;display:none"></div>
           <button class="submit-btn" onclick="redefinirSenhaAdmin()">REDEFINIR SENHA</button>
         </div>
       </div>
@@ -2081,7 +2942,7 @@
     <div id="senha-admin" class="admin-content">
       <div class="form-section" style="max-width:500px">
         <h3>ALTERAR MINHA SENHA</h3>
-        <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">A senha é armazenada como hash no Firebase — ninguém, nem a staff, consegue ver sua senha.</p>
+        <p style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.75rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">A senha é armazenada como hash no Firebase — ninguém, nem a staff, consegue ver sua senha.</p>
         <div style="display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.2rem">
           <div class="form-group">
             <label>SENHA ATUAL</label>
@@ -2096,8 +2957,8 @@
             <input type="password" id="cfg_passConfirm" placeholder="Repita a nova senha" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
           </div>
         </div>
-        <div id="cfg_pass_err" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:0.8rem;display:none"></div>
-        <div id="cfg_pass_ok" style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#4caf50;margin-bottom:0.8rem;display:none">✓ SENHA ALTERADA COM SUCESSO</div>
+        <div id="cfg_pass_err" style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);margin-bottom:0.8rem;display:none"></div>
+        <div id="cfg_pass_ok" style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:#4caf50;margin-bottom:0.8rem;display:none">✓ SENHA ALTERADA COM SUCESSO</div>
         <button class="submit-btn" onclick="changeAdminPassword()" id="cfg_passBtnSave">SALVAR NOVA SENHA</button>
       </div>
     </div>
@@ -2320,7 +3181,7 @@ function renderChars(filter) {
         <div class="char-available ${dotClass}" ${dotStyle}></div>
         <div class="char-avatar">${img}</div>
         <div class="char-name">${c.name.toUpperCase()}</div>
-        ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
+        ${c.player?`<div class="char-player">${c.player}</div>`:''}
         <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
       </div>`;
     }).join('') : '');
@@ -2345,7 +3206,7 @@ function renderChars(filter) {
       <div class="char-available ${dotClass}" ${dotStyle}></div>
       <div class="char-avatar">${img}</div>
       <div class="char-name">${c.name.toUpperCase()}</div>
-      ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
+      ${c.player?`<div class="char-player">${c.player}</div>`:''}
       <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
     </div>`;
   }).join('') + classifiedBlock;
@@ -4112,15 +4973,28 @@ function filtrarFotosAdmin(q = '', lang = '') {
   );
   if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
   grid.innerHTML = list.map(c => {
+    const photoData = window._charPhotosData && window._charPhotosData[c.id];
     const url = window._charPhotos[c.id] || '';
+    const approved = (window.approvedChars||[]).find(a => (a.charId||a.id) === c.id);
     const imgHtml = url
       ? `<img src="${url}" alt="${c.name}" onerror="this.parentElement.innerHTML='👤'">`
       : '👤';
     const langLabel = {ingles:'🇺🇸',espanhol:'🇪🇸',portugues:'🇧🇷',frances:'🇫🇷',coreano:'🇰🇷',huevito:'🥚',cucurucho:'🎭'}[c.lang] || '';
+    const logHtml = photoData?.updatedBy
+      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);margin-top:0.3rem;text-align:center">
+          Foto alterada por <span style="color:var(--pink)">${photoData.updatedBy.toUpperCase()}</span>
+          ${photoData.updatedAt ? `<br>${new Date(photoData.updatedAt).toLocaleString('pt-BR')}` : ''}
+        </div>` : '';
+    const playerHtml = approved?.player
+      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);margin-top:0.2rem;text-align:center">
+          Ficha enviada por <span style="color:#4caf50">${approved.player.toUpperCase()}</span>
+        </div>` : '';
     return `<div class="foto-card" id="fotoCard_${c.id}">
       <div class="foto-card-img">${imgHtml}</div>
       <div class="foto-card-name">${c.name.toUpperCase()}</div>
       <div class="foto-card-lang">${langLabel} ${c.lang.toUpperCase()}</div>
+      ${playerHtml}
+      ${logHtml}
       <input class="foto-card-input" id="fotoInput_${c.id}" type="text" placeholder="https://i.imgur.com/..." value="${url}">
       <button class="foto-card-btn" id="fotoBtn_${c.id}" onclick="salvarFotoAdmin('${c.id}')">💾 SALVAR FOTO</button>
     </div>`;
@@ -4144,11 +5018,23 @@ async function salvarFotoAdmin(charId) {
   try {
     const { doc, setDoc, deleteDoc } = window._fbModules;
     if(url) {
-      await setDoc(doc(window._db, 'charPhotos', charId), { charId, imageUrl: url });
+      await setDoc(doc(window._db, 'charPhotos', charId), { charId, imageUrl: url, updatedBy: window._adminUser||'?', updatedAt: new Date().toISOString() });
       window._charPhotos[charId] = url;
+      // Sincroniza com approvedChars se o personagem tiver ficha aprovada
+      const approved = (window.approvedChars||[]).find(c => (c.charId||c.id) === charId);
+      if(approved) {
+        const { doc: docFn, updateDoc } = window._fbModules;
+        await updateDoc(docFn(window._db, 'approvedChars', approved.id), { imageUrl: url });
+      }
+      if(window._logAcaoAdmin) await window._logAcaoAdmin('FOTO ATUALIZADA', charId, '—', window._adminUser||'?', 'Foto atualizada via aba Fotos');
     } else {
       await deleteDoc(doc(window._db, 'charPhotos', charId));
       window._charPhotos[charId] = '';
+      const approved = (window.approvedChars||[]).find(c => (c.charId||c.id) === charId);
+      if(approved) {
+        const { doc: docFn, updateDoc } = window._fbModules;
+        await updateDoc(docFn(window._db, 'approvedChars', approved.id), { imageUrl: '' });
+      }
     }
     // Atualiza preview no card
     const imgDiv = card.querySelector('.foto-card-img');
@@ -4286,6 +5172,7 @@ buildNavPersonagensMenu();
 
   function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if(!img.complete || img.naturalWidth === 0) { animId = requestAnimationFrame(loop); return; }
     const mobile = isMobile();
     const cols = mobile ? 3 : 5;
     const colW = canvas.width / cols;
@@ -4331,5 +5218,6 @@ buildNavPersonagensMenu();
   });
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>
