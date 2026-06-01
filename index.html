@@ -2784,11 +2784,15 @@
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="showPlayerTab(&#39;player-perfil&#39;,this);loadPlayerPerfil()">👤 MEU PERFIL</button>
       <button class="admin-tab" onclick="showPlayerTab(&#39;player-meus-chars&#39;,this)">MEUS PERSONAGENS</button>
+      <button class="admin-tab" onclick="showPlayerTab(&#39;player-todos&#39;,this);loadTodosPlayers()">👥 PLAYERS</button>
       <button class="admin-tab" onclick="showPlayerTab(&#39;player-senha&#39;,this)">🔐 MINHA SENHA</button>
       <button class="admin-tab" onclick="playerLogout()" style="margin-left:auto;color:var(--text-dim)">↩ SAIR</button>
     </div>
     <div id="player-perfil" class="admin-content active">
       <div id="playerPerfilContent"><div class="empty-state">CARREGANDO...</div></div>
+    </div>
+    <div id="player-todos" class="admin-content">
+      <div id="todosPlayersList"><div class="empty-state">CARREGANDO...</div></div>
     </div>
     <div id="player-meus-chars" class="admin-content">
       <div id="playerCharsList"><div class="empty-state">CARREGANDO...</div></div>
@@ -4394,10 +4398,24 @@ async function doPlayerLogin() {
   if(!u || !p) { errEl.textContent = '⚠ PREENCHA USUÁRIO E SENHA'; errEl.style.display = 'block'; return; }
   btn.textContent = 'AGUARDE...'; btn.disabled = true;
   try {
-    const ok = await window._checkPlayerFirebase(u, p);
+    // Verificar primeiro no sistema de player
+    let ok = await window._checkPlayerFirebase(u, p);
+    let isAdminLogin = false;
+    // Se não achou, verificar no sistema de admin
+    if(!ok && window._checkAdminFirebase && isValidAdminUser(u)) {
+      ok = await window._checkAdminFirebase(u, p);
+      if(ok) isAdminLogin = true;
+    }
     if(ok) {
       window._playerLogado = true;
       window._playerUser = u;
+      if(isAdminLogin) {
+        window._adminLogado = true;
+        window._adminUser = u;
+        updateAdminNotify();
+        const secao = document.getElementById('secaoGerenciarAdmins');
+        if(secao) secao.style.display = ['ryu','twik'].includes(u) ? 'block' : 'none';
+      }
       document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
       document.getElementById('nav-ficha-li').style.display = 'block';
       showPage('player-panel');
@@ -4461,6 +4479,44 @@ function playerLogout() {
   if(lp) lp.value = '';
 }
 
+async function loadTodosPlayers() {
+  const el = document.getElementById('todosPlayersList');
+  if(!el) return;
+  el.innerHTML = '<div class="empty-state">CARREGANDO...</div>';
+  try {
+    const { collection, getDocs } = window._fbModules;
+    const snap = await getDocs(collection(window._db, 'playerAuth'));
+    const players = snap.docs.map(d => ({id: d.id, ...d.data()}))
+      .filter(p => p.username) // só contas reais
+      .sort((a,b) => (a.username||'').localeCompare(b.username||''));
+
+    if(!players.length) { el.innerHTML = '<div class="empty-state">NENHUM PLAYER CADASTRADO</div>'; return; }
+
+    el.innerHTML = `
+      <div style="margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:2px">${players.length} PLAYER(S) CADASTRADO(S)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem">
+        ${players.map(p => {
+          const myChars = approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === (p.username||'').toLowerCase());
+          const role = p.role || 'player';
+          const roleColor = role === 'adminplayer' ? '#ff6b00' : '#4caf50';
+          const roleLabel = role === 'adminplayer' ? 'ADMIN PLAYER' : 'PLAYER';
+          return `<div style="background:var(--bg2);border:1px solid var(--border);padding:1rem;display:flex;flex-direction:column;align-items:center;gap:0.6rem;text-align:center">
+            ${p.avatarUrl
+              ? `<img src="${p.avatarUrl}" style="width:64px;height:64px;object-fit:cover;border:2px solid var(--border);border-radius:50%" onerror="this.style.display='none'">`
+              : `<div style="width:64px;height:64px;border-radius:50%;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.8rem">👤</div>`
+            }
+            <div style="font-family:'Orbitron',monospace;font-size:0.7rem;color:#fff;letter-spacing:2px">${(p.username||p.id).toUpperCase()}</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.55rem;letter-spacing:1px;padding:0.15rem 0.5rem;border:1px solid ${roleColor};color:${roleColor}">${roleLabel}</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim)">${myChars.length} personagem(s)</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state">ERRO AO CARREGAR.</div>';
+    console.error(e);
+  }
+}
+
 async function loadAdminPerfil() {
   const el = document.getElementById('adminPerfilContent');
   if(!el || !window._adminUser) return;
@@ -4483,7 +4539,7 @@ async function loadAdminPerfil() {
               ? `<img src="${avatar}" alt="${window._adminUser}" style="width:160px;height:160px;object-fit:cover;border:2px solid var(--red);display:block;margin:0 auto 1rem">`
               : `<div style="width:160px;height:160px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--border);font-size:4rem;margin:0 auto 1rem">👤</div>`
             }
-            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:2px;padding:0.2rem 0.8rem;border:1px solid var(--red-bright);color:var(--red-bright);display:inline-block;margin-bottom:1rem">ADMIN</div>
+
             <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:#fff;letter-spacing:3px;margin-bottom:1.2rem">${window._adminUser.toUpperCase()}</div>
             <!-- Input foto -->
             <div style="text-align:left">
