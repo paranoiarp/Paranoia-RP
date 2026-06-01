@@ -5245,10 +5245,36 @@ async function adminEditarPlayer(username) {
   const modal = document.createElement('div');
   modal.id = 'editPlayerModal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  // Carregar dados do player para preencher avatar atual
+  let playerData = {};
+  try {
+    const { doc, getDoc } = window._fbModules;
+    const snap = await getDoc(doc(window._db, 'playerAuth', username.toLowerCase()));
+    if(snap.exists()) playerData = snap.data();
+  } catch(e) {}
+  const currentAvatar = playerData.avatarUrl || '';
+
   modal.innerHTML = `
-    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:460px;width:100%">
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:460px;width:100%;max-height:90vh;overflow-y:auto">
       <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// EDITAR PLAYER //</div>
       <h3 style="font-family:'Orbitron',monospace;color:#fff;margin-bottom:1.4rem;font-size:0.95rem;letter-spacing:3px">${username.toUpperCase()}</h3>
+
+      <!-- SEÇÃO: FOTO -->
+      <div style="margin-bottom:1.4rem;padding-bottom:1.4rem;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--silver);letter-spacing:2px;margin-bottom:0.7rem">FOTO DE PERFIL</div>
+        <div style="display:flex;gap:1rem;align-items:center;margin-bottom:0.7rem">
+          <div id="ep_avatarPreview" style="width:60px;height:60px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;overflow:hidden">👤</div>
+          <div style="flex:1">
+            <input type="text" id="ep_avatarUrl" placeholder="https://i.imgur.com/..." style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.6rem 0.8rem;font-family:'Share Tech Mono',monospace;font-size:0.72rem;outline:none;box-sizing:border-box;margin-bottom:0.4rem" oninput="(function(v){const p=document.getElementById('ep_avatarPreview');if(v.includes('imgur')){p.innerHTML='<img src=\''+v+'\' style=\'width:100%;height:100%;object-fit:cover\'>'}else{p.innerHTML='👤'}})(this.value)">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--text-dim)">Apenas Imgur. Deixe em branco para remover.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.5rem">
+          <button onclick="adminSalvarAvatar('${username}')" style="flex:1;padding:0.6rem;background:rgba(139,0,0,0.2);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer">SALVAR FOTO</button>
+          <button onclick="adminRemoverAvatar('${username}')" style="padding:0.6rem 0.8rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.7rem;cursor:pointer" title="Remover foto">🗑</button>
+        </div>
+        <div id="ep_avatarMsg" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.7rem;margin-top:0.4rem"></div>
+      </div>
 
       <!-- SEÇÃO: RENOMEAR -->
       <div style="margin-bottom:1.4rem;padding-bottom:1.4rem;border-bottom:1px solid var(--border)">
@@ -5276,6 +5302,41 @@ async function adminEditarPlayer(username) {
     </div>`;
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  // Preencher campos com dados atuais
+  const urlInput = document.getElementById('ep_avatarUrl');
+  const preview = document.getElementById('ep_avatarPreview');
+  if(urlInput && currentAvatar) {
+    urlInput.value = currentAvatar;
+    preview.innerHTML = `<img src="${currentAvatar}" style="width:100%;height:100%;object-fit:cover">`;
+  }
+}
+
+async function adminSalvarAvatar(username) {
+  const url = document.getElementById('ep_avatarUrl')?.value.trim() || '';
+  const msgEl = document.getElementById('ep_avatarMsg');
+  if(url && !url.match(/^https?:\/\/(i\.)?imgur\.com\//i)) {
+    msgEl.textContent = '⚠ Apenas imagens do Imgur.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block'; return;
+  }
+  try {
+    const { doc, updateDoc } = window._fbModules;
+    await updateDoc(doc(window._db, 'playerAuth', username.toLowerCase()), { avatarUrl: url });
+    msgEl.textContent = '✓ Foto salva!';
+    msgEl.style.color = '#4caf50'; msgEl.style.display = 'block';
+    renderPlayersAdmin();
+  } catch(e) { msgEl.textContent = '⚠ Erro ao salvar.'; msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block'; }
+}
+
+async function adminRemoverAvatar(username) {
+  try {
+    const { doc, updateDoc } = window._fbModules;
+    await updateDoc(doc(window._db, 'playerAuth', username.toLowerCase()), { avatarUrl: '' });
+    document.getElementById('ep_avatarUrl').value = '';
+    document.getElementById('ep_avatarPreview').innerHTML = '👤';
+    const msgEl = document.getElementById('ep_avatarMsg');
+    msgEl.textContent = '✓ Foto removida.'; msgEl.style.color = '#4caf50'; msgEl.style.display = 'block';
+    renderPlayersAdmin();
+  } catch(e) { alert('Erro ao remover foto.'); }
 }
 
 async function adminRenomearPlayer(oldUsername) {
@@ -5435,7 +5496,12 @@ async function renderPlayersAdmin() {
         : `<div style="margin-top:0.5rem;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--text-dim);letter-spacing:1px">Nenhum personagem vinculado.</div>`;
       return `<div class="pending-card" style="flex-direction:column;align-items:flex-start;gap:0.3rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;gap:1rem;flex-wrap:wrap">
-          <div class="pending-info" style="flex:1">
+          <div class="pending-info" style="flex:1;display:flex;gap:1rem;align-items:flex-start">
+            ${p.avatarUrl
+              ? `<img src="${p.avatarUrl}" style="width:54px;height:54px;object-fit:cover;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">`
+              : `<div style="width:54px;height:54px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">👤</div>`
+            }
+            <div style="flex:1">
             <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem">
               <h4 style="margin:0">${(p.username||p.id).toUpperCase()}</h4>
               ${(()=>{
@@ -5448,7 +5514,7 @@ async function renderPlayersAdmin() {
               })()}
             </div>
             <p>// ${myChars.length} personagem(s) vinculado(s) // Criado em: ${p.createdAt ? new Date(p.createdAt).toLocaleDateString('pt-BR') : '—'}</p>
-          </div>
+          </div></div>
           <div class="pending-actions" style="flex-shrink:0;gap:0.4rem">
             <button class="btn-approve" onclick="adminEditarPlayer('${p.username||p.id}')">✎ EDITAR</button>
             <button class="btn-approve" onclick="adminChangeRole('${p.username||p.id}','${p.role||'player'}')">🏷 TIPO</button>
