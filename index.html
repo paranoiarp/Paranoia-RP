@@ -4127,19 +4127,25 @@ function filtrarFotosAdmin(q = '', lang = '') {
   grid.innerHTML = list.map(c => {
     const photoData = window._charPhotosData && window._charPhotosData[c.id];
     const url = window._charPhotos[c.id] || '';
+    const approved = (window.approvedChars||[]).find(a => (a.charId||a.id) === c.id);
     const imgHtml = url
       ? `<img src="${url}" alt="${c.name}" onerror="this.parentElement.innerHTML='👤'">`
       : '👤';
     const langLabel = {ingles:'🇺🇸',espanhol:'🇪🇸',portugues:'🇧🇷',frances:'🇫🇷',coreano:'🇰🇷',huevito:'🥚',cucurucho:'🎭'}[c.lang] || '';
     const logHtml = photoData?.updatedBy
       ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);margin-top:0.3rem;text-align:center">
-          Alterado por <span style="color:var(--pink)">${photoData.updatedBy.toUpperCase()}</span>
+          Foto alterada por <span style="color:var(--pink)">${photoData.updatedBy.toUpperCase()}</span>
           ${photoData.updatedAt ? `<br>${new Date(photoData.updatedAt).toLocaleString('pt-BR')}` : ''}
+        </div>` : '';
+    const playerHtml = approved?.player
+      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);margin-top:0.2rem;text-align:center">
+          Ficha enviada por <span style="color:#4caf50">${approved.player.toUpperCase()}</span>
         </div>` : '';
     return `<div class="foto-card" id="fotoCard_${c.id}">
       <div class="foto-card-img">${imgHtml}</div>
       <div class="foto-card-name">${c.name.toUpperCase()}</div>
       <div class="foto-card-lang">${langLabel} ${c.lang.toUpperCase()}</div>
+      ${playerHtml}
       ${logHtml}
       <input class="foto-card-input" id="fotoInput_${c.id}" type="text" placeholder="https://i.imgur.com/..." value="${url}">
       <button class="foto-card-btn" id="fotoBtn_${c.id}" onclick="salvarFotoAdmin('${c.id}')">💾 SALVAR FOTO</button>
