@@ -202,7 +202,6 @@
   html.light .progress-bar-bg { background: var(--bg3); border-color: var(--border); }
 
   /* Seção hero canvas — leve overlay claro */
-  html.light #bgCanvas { opacity: 0.12; }
 
   
   /* Captura todos os color:#fff inline no HTML */
@@ -218,13 +217,15 @@
   }
 
   /* Hero no tema claro */
+  /* Canvas: só aparece no tema escuro */
+  html.light #bgCanvas { display: none; }
+
   html.light .hero-grid {
     background-image:
       linear-gradient(rgba(139,0,0,0.08) 1px, transparent 1px),
       linear-gradient(90deg, rgba(139,0,0,0.08) 1px, transparent 1px);
   }
   html.light .hero { background: var(--bg); }
-  html.light #bgCanvas { opacity: 0.06; filter: invert(1); }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -426,7 +427,7 @@
 
   /* PAGES */
   .page { display: none !important; padding-top: 60px; min-height: 100vh; position: relative; z-index: 1; }
-  .page.active:not(#home) { background: var(--card-overlay); }
+  .page.active:not(#home) { background: transparent; }
   .page.active { display: block !important; opacity: 0; animation: pageFadeIn 0.2s ease forwards; }
   #home { flex-direction: column; }
   #home.active { display: flex !important; }
