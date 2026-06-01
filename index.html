@@ -4251,9 +4251,10 @@ buildNavPersonagensMenu();
   const img = new Image();
   img.crossOrigin = 'anonymous';
   img.src = 'https://i.imgur.com/OSV9nga.png';
-  const N = 55;
   let fichas = [];
   let animId = null;
+
+  const isMobile = () => window.innerWidth <= 768;
 
   function resize() {
     canvas.width = window.innerWidth;
@@ -4262,7 +4263,10 @@ buildNavPersonagensMenu();
 
   function initFichas() {
     fichas = [];
-    const cols = 5;
+    const mobile = isMobile();
+    // Mobile: menos fichas, menores, sem rotação
+    const N = mobile ? 18 : 55;
+    const cols = mobile ? 3 : 5;
     const colW = canvas.width / cols;
     for(let i = 0; i < N; i++) {
       const col = i % cols;
@@ -4270,25 +4274,31 @@ buildNavPersonagensMenu();
       fichas.push({
         x: col * colW + Math.random() * colW,
         y: Math.random() * canvas.height * 2 - canvas.height,
-        size: 15 + Math.random() * 80,
-        speed: 0.1 + Math.random() * 0.35,
-        opacity: r < 0.3 ? 0.15 + Math.random() * 0.1 : 0.3 + Math.random() * 0.3,
-        drift: (Math.random() - 0.5) * 0.2,
-        rot: (Math.random() - 0.5) * 0.6,
-        rotSpeed: (Math.random() - 0.5) * 0.0008,
-        col
+        size: mobile ? 18 + Math.random() * 28 : 15 + Math.random() * 80,
+        speed: mobile ? 0.15 + Math.random() * 0.2 : 0.1 + Math.random() * 0.35,
+        opacity: mobile
+          ? (r < 0.4 ? 0.08 + Math.random() * 0.06 : 0.14 + Math.random() * 0.1)
+          : (r < 0.3 ? 0.15 + Math.random() * 0.1 : 0.3 + Math.random() * 0.3),
+        drift: mobile ? (Math.random() - 0.5) * 0.08 : (Math.random() - 0.5) * 0.2,
+        rot: mobile ? 0 : (Math.random() - 0.5) * 0.6,
+        rotSpeed: mobile ? 0 : (Math.random() - 0.5) * 0.0008,
+        col, cols
       });
     }
   }
 
   function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const colW = canvas.width / 5;
+    const mobile = isMobile();
+    const cols = mobile ? 3 : 5;
+    const colW = canvas.width / cols;
     fichas.forEach(f => {
       f.y += f.speed;
       f.x += f.drift;
-      f.rot += f.rotSpeed;
-      f.rot = Math.max(-0.7, Math.min(0.7, f.rot));
+      if(!mobile) {
+        f.rot += f.rotSpeed;
+        f.rot = Math.max(-0.7, Math.min(0.7, f.rot));
+      }
       if(f.y > canvas.height + f.size) {
         f.y = -f.size * 2;
         f.x = f.col * colW + Math.random() * colW;
@@ -4296,7 +4306,7 @@ buildNavPersonagensMenu();
       ctx.save();
       ctx.globalAlpha = f.opacity;
       ctx.translate(f.x, f.y);
-      ctx.rotate(f.rot);
+      if(!mobile) ctx.rotate(f.rot);
       ctx.drawImage(img, -f.size/2, -f.size/2, f.size, f.size);
       ctx.restore();
     });
@@ -4311,6 +4321,7 @@ buildNavPersonagensMenu();
 
   window.addEventListener('resize', () => {
     resize();
+    initFichas(); // reinicia com config certa para o tamanho atual
   });
 
   document.addEventListener('visibilitychange', () => {
