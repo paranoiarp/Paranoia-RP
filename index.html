@@ -2860,7 +2860,58 @@
       </div>
     </div></div></div>
     <div id="players-admin" class="admin-content"><div id="playersAdminList"><div class="empty-state">CARREGANDO...</div></div></div>
-    <div id="admin-meus-chars" class="admin-content"><div id="adminOwnCharsList"><div class="empty-state">CARREGANDO...</div></div></div>
+    <div id="admin-meus-chars" class="admin-content">
+      <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
+        <button class="submit-btn" style="max-width:280px" onclick="abrirFichaAdmin()">+ ENVIAR NOVA FICHA (AUTO-APROVAR)</button>
+      </div>
+      <div id="adminFichaInline" style="display:none;margin-bottom:2rem;padding:1.5rem;background:var(--bg3);border:1px solid var(--red)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px">// NOVA FICHA — APROVAÇÃO AUTOMÁTICA //</div>
+          <button onclick="fecharFichaAdmin()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕ FECHAR</button>
+        </div>
+        <div style="padding:0.6rem 1rem;background:rgba(139,0,0,0.15);border:1px solid var(--red);margin-bottom:1.2rem;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--red-bright);letter-spacing:1px">
+          ⚡ MODO ADMIN — Esta ficha será aprovada automaticamente e registrada no LOG.
+        </div>
+        <!-- Personagem -->
+        <div class="form-section">
+          <h3>INFORMAÇÕES BÁSICAS</h3>
+          <div class="form-grid">
+            <div class="form-group full"><label>Personagem *</label>
+              <div style="display:flex;gap:0.5rem">
+                <input type="text" id="af_nome" placeholder="Clique em escolher..." readonly style="cursor:pointer;flex:1" onclick="openCharPopupAdmin()">
+                <button type="button" onclick="openCharPopupAdmin()" style="padding:0.6rem 1rem;background:var(--red);border:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">ESCOLHER</button>
+              </div>
+            </div>
+            <div class="form-group full" id="af_cucurucho_nome_group" style="display:none"><label>Nome do Cucurucho *</label><input type="text" id="af_cucurucho_nome" placeholder="Ex: Cucurucho Vermelho..."></div>
+            <div class="form-group"><label>Nome do Player *</label><input type="text" id="af_player" placeholder="Nome do player"></div>
+            <div class="form-group"><label>Data de Nascimento do Player</label><input type="text" id="af_nascimento_player" placeholder="DD/MM/AAAA" maxlength="10"></div>
+            <div class="form-group"><label>Idade do Player</label><input type="text" id="af_idade_player" placeholder="Automático" readonly style="opacity:0.5;cursor:not-allowed"></div>
+            <div class="form-group"><label>Data de Nascimento do Personagem</label><input type="text" id="af_nascimento" placeholder="DD/MM/AAAA" maxlength="10"></div>
+            <div class="form-group"><label>Idade do Personagem</label><input type="text" id="af_idade" placeholder="Automático" readonly style="opacity:0.5;cursor:not-allowed"></div>
+            <div class="form-group full"><label>Foto do Personagem — URL do Imgur</label><input type="text" id="af_imagem" placeholder="https://i.imgur.com/..."><div id="af_imagem_err" style="display:none;margin-top:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright)">⚠ Apenas imagens do Imgur são aceitas.</div></div>
+          </div>
+        </div>
+        <div class="form-section">
+          <h3>CARACTERÍSTICAS</h3>
+          <div class="form-grid">
+            <div class="form-group full"><label>Características Físicas *</label><textarea id="af_fisico" placeholder="Descreva a aparência..."></textarea></div>
+            <div class="form-group full"><label>Personalidade *</label><textarea id="af_personalidade" placeholder="Traços marcantes..."></textarea></div>
+            <div class="form-group full"><label>Backstory *</label><textarea id="af_backstory" placeholder="História antes da ilha..." style="min-height:150px"></textarea></div>
+          </div>
+        </div>
+        <div class="form-section">
+          <h3>ATRIBUTOS <span style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);font-weight:400">— sem limite de pontos</span></h3>
+          <div class="attrs-form-grid" id="af_attrsGrid"></div>
+        </div>
+        <div class="form-section">
+          <h3>PERÍCIAS <span style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);font-weight:400">— sem limite de seleção</span></h3>
+          <div class="skills-check-grid" id="af_skillsGrid"></div>
+        </div>
+        <div id="af_err" style="display:none;padding:0.7rem 1rem;background:rgba(139,0,0,0.12);border:1px solid var(--red);font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--red-bright);margin-bottom:1rem"></div>
+        <button class="submit-btn" onclick="submitFichaAdmin()" id="af_submitBtn">⚡ APROVAR E CRIAR PERSONAGEM</button>
+      </div>
+      <div id="adminOwnCharsList"><div class="empty-state">CARREGANDO...</div></div>
+    </div>
 
     <!-- ABA FOTOS -->
     <div id="fotos-admin" class="admin-content">
@@ -3898,6 +3949,12 @@ function renderPopupChars() {
 function selectChar(id, name, lang) {
   const st = getCharStatus(id);
   if(st !== 'disponivel') return;
+  // Se houver callback do admin, redireciona para ele
+  if(typeof window._charPopupCallback === 'function') {
+    window._charPopupCallback(id, name, lang);
+    closeCharPopup();
+    return;
+  }
   selectedCharId = id;
   window._selectedCharId = id;
   document.getElementById('f_nome').value = name;
@@ -4379,6 +4436,165 @@ function showPlayerTab(id, btn) {
   document.getElementById(id).classList.add('active');
   if(btn) btn.classList.add('active');
   if(id === 'player-meus-chars') loadPlayerPanel();
+}
+
+// ===== ADMIN: FICHA RÁPIDA (AUTO-APROVAÇÃO) =====
+let afCharId = null;
+let afAttrs = {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
+let afSkills = new Set();
+
+function abrirFichaAdmin() {
+  afCharId = null;
+  afAttrs = {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
+  afSkills = new Set();
+  // Reset fields
+  ['af_nome','af_player','af_nascimento_player','af_idade_player','af_nascimento','af_idade','af_imagem','af_fisico','af_personalidade','af_backstory','af_cucurucho_nome'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('af_cucurucho_nome_group').style.display = 'none';
+  document.getElementById('af_imagem_err').style.display = 'none';
+  document.getElementById('af_err').style.display = 'none';
+  document.getElementById('af_submitBtn').textContent = '⚡ APROVAR E CRIAR PERSONAGEM';
+  document.getElementById('af_submitBtn').disabled = false;
+  buildAdminFichaAttrs();
+  buildAdminFichaSkills();
+  initAdminFichaDates();
+  document.getElementById('adminFichaInline').style.display = 'block';
+  document.getElementById('adminFichaInline').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function fecharFichaAdmin() {
+  document.getElementById('adminFichaInline').style.display = 'none';
+}
+
+function buildAdminFichaAttrs() {
+  const g = document.getElementById('af_attrsGrid');
+  if(!g) return;
+  g.innerHTML = ATTRS.map(a => `
+    <div class="attr-ctrl">
+      <span class="attr-ctrl-name">${a}</span>
+      <div class="attr-ctrl-row">
+        <button class="attr-btn" onclick="afChangeAttr('${a}',-1)" type="button">−</button>
+        <span class="attr-display" id="af_av_${a}">${afAttrs[a]}</span>
+        <button class="attr-btn" onclick="afChangeAttr('${a}',+1)" type="button">+</button>
+      </div>
+    </div>`).join('');
+}
+
+function afChangeAttr(attr, delta) {
+  const next = Math.max(0, Math.min(10, (afAttrs[attr]||1) + delta));
+  afAttrs[attr] = next;
+  const el = document.getElementById('af_av_' + attr);
+  if(el) el.textContent = next;
+}
+
+function buildAdminFichaSkills() {
+  const g = document.getElementById('af_skillsGrid');
+  if(!g) return;
+  g.innerHTML = SKILLS.map(s => `
+    <label class="skill-check" id="af_sc_${s}" onclick="afToggleSkill('${s}')">
+      <div class="skill-check-box" id="af_sb_${s}"></div>
+      <span class="skill-check-name">${s}</span>
+    </label>`).join('');
+}
+
+function afToggleSkill(s) {
+  const el = document.getElementById('af_sc_' + s);
+  const box = document.getElementById('af_sb_' + s);
+  if(afSkills.has(s)) {
+    afSkills.delete(s);
+    if(el) el.classList.remove('selected');
+    if(box) box.textContent = '';
+  } else {
+    afSkills.add(s);
+    if(el) el.classList.add('selected');
+    if(box) box.textContent = '✓';
+  }
+}
+
+function initAdminFichaDates() {
+  const pairs = [['af_nascimento_player','af_idade_player'],['af_nascimento','af_idade']];
+  pairs.forEach(([dateId, ageId]) => {
+    const el = document.getElementById(dateId);
+    if(!el || el._afMaskDone) return;
+    el._afMaskDone = true;
+    maskDate(el);
+    el.addEventListener('input', function() {
+      const ageEl = document.getElementById(ageId);
+      if(ageEl) ageEl.value = calcAge(this.value);
+    });
+  });
+}
+
+function openCharPopupAdmin() {
+  // Reutiliza o popup existente mas com callback para admin ficha
+  window._charPopupCallback = (id, name, lang) => {
+    afCharId = id;
+    const el = document.getElementById('af_nome');
+    if(el) el.value = name;
+    const cucGroup = document.getElementById('af_cucurucho_nome_group');
+    if(cucGroup) cucGroup.style.display = lang === 'cucurucho' ? 'block' : 'none';
+    window._charPopupCallback = null;
+  };
+  openCharPopup();
+}
+
+async function submitFichaAdmin() {
+  const errEl = document.getElementById('af_err');
+  errEl.style.display = 'none';
+  const nome = document.getElementById('af_nome').value.trim();
+  const player = document.getElementById('af_player').value.trim();
+  if(!nome || !player) { errEl.textContent = '⚠ Preencha ao menos o personagem e o nome do player.'; errEl.style.display='block'; return; }
+  if(!afCharId) { errEl.textContent = '⚠ Selecione um personagem clicando em ESCOLHER.'; errEl.style.display='block'; return; }
+  const imgVal = document.getElementById('af_imagem').value.trim();
+  const imgErrEl = document.getElementById('af_imagem_err');
+  imgErrEl.style.display = 'none';
+  if(imgVal && !imgVal.match(/^https?:\/\/(i\.)?imgur\.com\//i)) {
+    imgErrEl.style.display = 'block'; return;
+  }
+  const charData = CHARS_DATA.find(c => c.id === afCharId);
+  const cucuruchoNome = document.getElementById('af_cucurucho_nome').value.trim();
+  if(charData?.lang === 'cucurucho' && !cucuruchoNome) {
+    errEl.textContent = '⚠ Preencha o nome do Cucurucho.'; errEl.style.display='block'; return;
+  }
+  const btn = document.getElementById('af_submitBtn');
+  btn.disabled = true; btn.textContent = '⏳ CRIANDO...';
+  const ficha = {
+    charId: afCharId,
+    cucuruchoNome: cucuruchoNome || '',
+    name: nome,
+    player,
+    playerAccount: window._adminUser,
+    nascimento_player: document.getElementById('af_nascimento_player').value,
+    idade_player: document.getElementById('af_idade_player').value,
+    nascimento: document.getElementById('af_nascimento').value,
+    idade: document.getElementById('af_idade').value,
+    imageUrl: imgVal || '',
+    minecraft: '',
+    fisico: document.getElementById('af_fisico').value,
+    personalidade: document.getElementById('af_personalidade').value,
+    backstory: document.getElementById('af_backstory').value,
+    attrs: {...afAttrs},
+    skills: [...afSkills],
+    gameStatus: 'vivo',
+    status: 'ocupado',
+    lang: charData?.lang || 'custom',
+    history: [],
+    pending: false
+  };
+  try {
+    const { collection, addDoc } = window._fbModules;
+    await addDoc(collection(window._db, 'approvedChars'), ficha);
+    if(window._logAcaoAdmin) await window._logAcaoAdmin('FICHA ADMIN (AUTO-APROVADA)', nome, player, window._adminUser||'?', 'Ficha criada diretamente pelo admin via painel — aprovação automática.');
+    showToast('✓ Personagem criado e aprovado automaticamente!', 'success');
+    fecharFichaAdmin();
+    renderAdminOwnChars();
+  } catch(e) {
+    errEl.textContent = '✗ Erro ao criar personagem. Verifique o console.'; errEl.style.display='block';
+    console.error(e);
+  } finally {
+    btn.disabled = false; btn.textContent = '⚡ APROVAR E CRIAR PERSONAGEM';
+  }
 }
 
 // ===== ADMIN: MEUS PERSONAGENS =====
