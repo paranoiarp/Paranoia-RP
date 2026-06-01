@@ -19,6 +19,200 @@
     --border: #2a2a2a;
     --text: #c8c8c8;
     --text-dim: #666;
+    --nav-bg: rgba(10,10,10,0.97);
+    --card-overlay: rgba(10,10,10,0.88);
+    --hero-gradient: rgba(10,10,10,0.92);
+  }
+
+  /* ─── TEMA CLARO ─── */
+  html.light {
+    --red: #8B0000;
+    --red-bright: #b30000;
+    --silver: #444444;
+    --silver-bright: #222222;
+    --pink: #a0506e;
+    --bg: #f0ebe8;
+    --bg2: #e8e2de;
+    --bg3: #ddd6d0;
+    --border: #c8bfba;
+    --text: #2a2020;
+    --text-dim: #7a6a6a;
+    --nav-bg: rgba(240,235,232,0.97);
+    --card-overlay: rgba(240,235,232,0.88);
+    --hero-gradient: rgba(240,235,232,0.85);
+  }
+
+  /* ─── BOTÃO DE TEMA ─── */
+  #theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--silver);
+    cursor: pointer;
+    padding: 0.35rem 0.6rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+  }
+  #theme-toggle:hover {
+    border-color: var(--silver);
+    color: var(--text);
+  }
+  #theme-toggle .theme-icon { font-size: 0.95rem; }
+
+
+  /* ─── OVERRIDES TEMA CLARO ─── */
+
+  /* Variáveis extras para o tema claro */
+  html.light {
+    --white-text: #1a1010;        /* substitui #fff em textos */
+    --hover-text: #0d0808;        /* substitui #fff em hovers */
+  }
+
+  /* Elementos que usam color:#fff hardcoded — forçar cor escura */
+  html.light .lore-page-title,
+  html.light .section-title,
+  html.light .hero-title,
+  html.light .char-name,
+  html.light .modal-title,
+  html.light .ficha-section-title,
+  html.light .system-title,
+  html.light .fed-title,
+  html.light .reg-title,
+  html.light .admin-title,
+  html.light .attr-label,
+  html.light h1, html.light h2, html.light h3 { color: #1a1010 !important; }
+
+  /* PARANOIA texto na logo da nav */
+  html.light #navLogoWrap2 span,
+  html.light .nav-logo span { color: #1a1010 !important; text-shadow: 0 0 20px rgba(139,0,0,0.3) !important; }
+
+  /* Nav e menus */
+  html.light nav { background: var(--nav-bg) !important; border-bottom-color: var(--border) !important; }
+  html.light .nav-links li a { color: var(--silver) !important; }
+  html.light .nav-links li a:hover,
+  html.light .nav-links li a.active { color: #1a1010 !important; border-bottom-color: var(--red) !important; }
+  html.light .nav-dropdown-menu,
+  html.light .nav-submenu { background: var(--bg2) !important; border-color: var(--border) !important; }
+  html.light .nav-dropdown-menu a,
+  html.light .nav-submenu a { color: var(--silver) !important; border-color: var(--border) !important; }
+  html.light .nav-dropdown-menu a:hover,
+  html.light .nav-submenu a:hover { color: #1a1010 !important; background: var(--bg3) !important; }
+  html.light .nav-mobile-btn { color: var(--silver); }
+
+  /* Hero */
+  html.light .hero-title { color: #1a1010; text-shadow: 0 0 30px rgba(139,0,0,0.25); }
+  html.light .hero-subtitle { color: var(--text-dim); }
+  html.light .hero-card { background: var(--bg2); border-color: var(--border); color: var(--text); }
+  html.light .hero-card:hover { border-color: var(--red); }
+  html.light .hero-card h3, html.light .hero-card p { color: var(--text); }
+
+  /* Botões */
+  html.light .btn-primary,
+  html.light .submit-btn,
+  html.light .secret-btn { background: var(--red); color: #fff !important; border-color: var(--red-bright); }
+  html.light .btn-secondary,
+  html.light .lore-back-btn { border-color: var(--border); color: var(--text); background: none; }
+  html.light .btn-secondary:hover,
+  html.light .lore-back-btn:hover { border-color: var(--silver); color: #1a1010; }
+  html.light .filter-btn { background: var(--bg2); border-color: var(--border); color: var(--text); }
+  html.light .filter-btn:hover,
+  html.light .filter-btn.active { background: var(--red); color: #fff !important; border-color: var(--red-bright); }
+
+  /* Cards de personagens */
+  html.light .char-card { background: var(--bg2); border-color: var(--border); }
+  html.light .char-card:hover { border-color: var(--red); }
+  html.light .char-card-name { color: #1a1010; }
+  html.light .char-card-status { color: var(--text-dim); }
+
+  /* Popup de escolha de personagem */
+  html.light .ficha-popup { background: var(--bg2); border-color: var(--border); }
+  html.light .ficha-popup-overlay { background: rgba(0,0,0,0.45); }
+  html.light .ficha-popup h2,
+  html.light [style*="color:#fff"],
+  html.light [style*="color: #fff"] { color: #1a1010 !important; }
+  html.light .char-pick-btn { background: var(--bg3); border-color: var(--border); color: var(--text); }
+  html.light .char-pick-btn:hover { border-color: var(--red); color: #1a1010; }
+
+  /* Modais */
+  html.light .modal-overlay { background: rgba(200,190,185,0.8); }
+  html.light .modal { background: var(--bg2); border-color: var(--border); }
+  html.light .modal h2, html.light .modal h3 { color: #1a1010; }
+  html.light .modal p, html.light .modal label,
+  html.light .modal span { color: var(--text); }
+
+  /* Inputs */
+  html.light input, html.light textarea, html.light select {
+    background: var(--bg3); border-color: var(--border);
+    color: #1a1010;
+  }
+  html.light input:focus, html.light textarea:focus,
+  html.light select:focus { border-color: var(--red); outline: none; }
+  html.light input::placeholder, html.light textarea::placeholder { color: var(--text-dim); }
+
+  /* Cards gerais, tabelas, painéis */
+  html.light .card, html.light .info-card, html.light .rule-card,
+  html.light .system-card, html.light .pending-card, html.light .admin-card,
+  html.light .foto-card, html.light .player-card, html.light .log-card { 
+    background: var(--bg2); border-color: var(--border);
+  }
+  html.light .card h3, html.light .info-card h3, html.light .rule-card h3,
+  html.light .system-card h3, html.light .pending-card h3 { color: #1a1010; }
+
+  html.light table th { background: var(--bg3); border-color: var(--border); color: var(--text); }
+  html.light table td { border-color: var(--border); color: var(--text); }
+  html.light table tr:hover td { background: var(--bg3); }
+
+  /* Tags, badges, attrs */
+  html.light .tag, html.light .skill-tag { background: var(--bg3); border-color: var(--border); color: var(--text-dim); }
+  html.light .attr-box { background: var(--bg3); border-color: var(--border); color: var(--text); }
+  html.light .attr-value { color: #1a1010; }
+
+  /* Timeline */
+  html.light .timeline::before { background: linear-gradient(to bottom, var(--red), transparent); }
+  html.light .timeline-title { color: #1a1010; }
+
+  /* Toast */
+  html.light .toast { background: var(--bg2); border-color: var(--border); color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+
+  /* Scrollbar */
+  html.light ::-webkit-scrollbar-track { background: var(--bg2); }
+  html.light ::-webkit-scrollbar-thumb { background: var(--red); }
+
+  /* Área admin */
+  html.light .admin-tab { background: var(--bg2); border-color: var(--border); color: var(--text); }
+  html.light .admin-tab.active { background: var(--red); color: #fff !important; }
+  html.light .admin-tab:hover:not(.active) { background: var(--bg3); color: #1a1010; }
+  html.light .admin-section { background: var(--bg); }
+
+  /* Área player */
+  html.light .player-notif { background: var(--bg2); border-color: var(--border); }
+  html.light .player-notif p { color: var(--text); }
+
+  /* Texto geral que pode ficar branco */
+  html.light p, html.light li, html.light span:not([style*="background"]),
+  html.light label, html.light td, html.light th { color: var(--text); }
+
+  /* Progress bar */
+  html.light .progress-bar-bg { background: var(--bg3); border-color: var(--border); }
+
+  /* Seção hero canvas — leve overlay claro */
+  html.light #bgCanvas { opacity: 0.12; }
+
+  
+  /* Captura todos os color:#fff inline no HTML */
+  html.light [style*="color:#fff"]:not(.btn-primary):not(.submit-btn):not(.secret-btn):not(.admin-tab):not(.filter-btn):not([class*="status"]) {
+    color: #1a1010 !important;
+  }
+  html.light [style*="color: #fff"]:not(.btn-primary):not(.submit-btn):not(.secret-btn):not(.admin-tab):not(.filter-btn):not([class*="status"]) {
+    color: #1a1010 !important;
+  }
+  /* text-shadow do titulo PARANOIA na nav */
+  html.light [style*="text-shadow:0 0 40px rgba(139,0,0"] {
+    text-shadow: 0 0 20px rgba(139,0,0,0.25) !important;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -41,7 +235,7 @@
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 100;
-    background: rgba(10,10,10,0.97);
+    background: var(--nav-bg);
     border-bottom: 1px solid var(--border);
     backdrop-filter: blur(10px);
     padding: 0 2rem;
@@ -159,7 +353,7 @@
     border-bottom: 1px solid transparent;
     padding-bottom: 2px;
   }
-  .timeline-item:hover .timeline-title { color:#fff; border-bottom-color: var(--red-bright); }
+  .timeline-item:hover .timeline-title { color:var(--silver-bright); border-bottom-color: var(--red-bright); }
 
   /* Lore Page */
   .lore-page-banner { width:100%; max-height:420px; object-fit:cover; object-position:center; display:block; }
@@ -221,7 +415,7 @@
 
   /* PAGES */
   .page { display: none !important; padding-top: 60px; min-height: 100vh; position: relative; z-index: 1; }
-  .page.active:not(#home) { background: rgba(10,10,10,0.88); }
+  .page.active:not(#home) { background: var(--card-overlay); }
   .page.active { display: block !important; opacity: 0; animation: pageFadeIn 0.2s ease forwards; }
   #home { flex-direction: column; }
   #home.active { display: flex !important; }
@@ -1445,7 +1639,10 @@
     <li><a href="#" onclick="showPage('minha-area')" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
     <li><a href="#" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
-  <button class="nav-mobile-btn" onclick="toggleNav()">☰</button>
+  <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+    <button id="theme-toggle" onclick="toggleTheme()" title="Alternar tema"><span class="theme-icon" id="themeIcon">☀️</span></button>
+    <button class="nav-mobile-btn" onclick="toggleNav()">☰</button>
+  </div>
 </nav>
 
 <!-- HOME -->
@@ -6175,5 +6372,35 @@ buildNavPersonagensMenu();
 })();
 </script>
 
+
+
+<script>
+// ─── TEMA CLARO/ESCURO ───────────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const isLight = html.classList.toggle('light');
+  localStorage.setItem('paranoia-theme', isLight ? 'light' : 'dark');
+  updateThemeIcon(isLight);
+}
+
+function updateThemeIcon(isLight) {
+  const icon = document.getElementById('themeIcon');
+  if (icon) icon.textContent = isLight ? '🌙' : '☀️';
+}
+
+// Aplicar tema salvo ao carregar
+(function() {
+  const saved = localStorage.getItem('paranoia-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isLight = saved === 'light' || (!saved && !prefersDark);
+  if (isLight) {
+    document.documentElement.classList.add('light');
+    // O icon será atualizado quando o DOM carregar
+    document.addEventListener('DOMContentLoaded', function() {
+      updateThemeIcon(true);
+    });
+  }
+})();
+</script>
 
 </body></html>
