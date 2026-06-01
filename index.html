@@ -2333,7 +2333,7 @@ function renderChars(filter) {
         <div class="char-available ${dotClass}" ${dotStyle}></div>
         <div class="char-avatar">${img}</div>
         <div class="char-name">${c.name.toUpperCase()}</div>
-        ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
+        ${c.player?`<div class="char-player">${c.player}</div>`:''}
         <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
       </div>`;
     }).join('') : '');
@@ -2358,7 +2358,7 @@ function renderChars(filter) {
       <div class="char-available ${dotClass}" ${dotStyle}></div>
       <div class="char-avatar">${img}</div>
       <div class="char-name">${c.name.toUpperCase()}</div>
-      ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
+      ${c.player?`<div class="char-player">${c.player}</div>`:''}
       <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
     </div>`;
   }).join('') + classifiedBlock;
@@ -4324,6 +4324,7 @@ buildNavPersonagensMenu();
 
   function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if(!img.complete || img.naturalWidth === 0) { animId = requestAnimationFrame(loop); return; }
     const mobile = isMobile();
     const cols = mobile ? 3 : 5;
     const colW = canvas.width / cols;
