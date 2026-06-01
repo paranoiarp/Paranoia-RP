@@ -3141,6 +3141,7 @@ function showPage(id) {
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
   if(id==='player-panel') { if(!window._playerLogado) { showPage('minha-area'); return; } loadPlayerPanel(); }
+  if(id==='minha-area' && window._adminLogado) { showPage('admin-panel'); return; }
   if(id==='minha-area' && window._playerLogado) { showPage('player-panel'); return; }
   if(id==='ficha') {
     if(!window._playerLogado) { showPage('minha-area'); return; }
@@ -3647,6 +3648,9 @@ async function checkAdmin() {
     if(ok) {
       window._adminLogado = true;
       window._adminUser = u.toLowerCase();
+      // Logar também como player usando as mesmas credenciais
+      window._playerLogado = true;
+      window._playerUser = u.toLowerCase();
       updateAdminNotify();
       // Mostrar seção de gerenciar admins só para ryu e twik
       const secao = document.getElementById('secaoGerenciarAdmins');
@@ -3700,6 +3704,8 @@ async function confirmFirstAccess(user) {
     // Loga automaticamente
     window._adminLogado = true;
     window._adminUser = user.toLowerCase();
+    window._playerLogado = true;
+    window._playerUser = user.toLowerCase();
     updateAdminNotify();
     const secao = document.getElementById('secaoGerenciarAdmins');
     if(secao) secao.style.display = ['ryu','twik'].includes(user.toLowerCase()) ? 'block' : 'none';
@@ -4445,10 +4451,14 @@ async function doPlayerCadastro() {
 function playerLogout() {
   window._playerLogado = false;
   window._playerUser = '';
+  window._adminLogado = false;
+  window._adminUser = '';
   document.getElementById('nav-ficha-li').style.display = 'none';
   showPage('minha-area');
-  document.getElementById('playerLoginUser').value = '';
-  document.getElementById('playerLoginPass').value = '';
+  const lu = document.getElementById('playerLoginUser');
+  const lp = document.getElementById('playerLoginPass');
+  if(lu) lu.value = '';
+  if(lp) lp.value = '';
 }
 
 async function loadAdminPerfil() {
