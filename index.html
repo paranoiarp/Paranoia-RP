@@ -5979,7 +5979,8 @@ function renderPlayersHTML(el, playersComChars) {
         : `<span style="font-size:1.5rem">👤</span>`;
       const isCucurucho = c.lang === 'cucurucho';
       const displayName = isCucurucho ? (c.cucuruchoNome || c.name) : c.name;
-      return `<div onclick="showCharProfile('${c.charId||c.id}')" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;cursor:pointer;padding:0.8rem;background:var(--bg3);border:1px solid var(--border);transition:all 0.2s;min-width:100px;max-width:130px;flex:1" onmouseover="this.style.borderColor='var(--red-bright)';this.style.background='rgba(139,0,0,0.08)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
+      const cid = c.charId || c.id || '';
+      return `<div onclick="showPage('personagens');setTimeout(()=>showCharProfile('${cid}'),80)" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;cursor:pointer;padding:0.8rem;background:var(--bg3);border:1px solid var(--border);transition:all 0.2s;min-width:100px;max-width:130px;flex:1" onmouseover="this.style.borderColor='var(--red-bright)';this.style.background='rgba(139,0,0,0.08)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
         <div style="width:56px;height:56px;border-radius:4px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;position:relative">
           ${imgHtml}
           <span style="position:absolute;bottom:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:${gsColor};border:2px solid var(--bg3)"></span>
