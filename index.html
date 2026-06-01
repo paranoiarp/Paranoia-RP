@@ -5047,19 +5047,35 @@ async function renderPlayersAdmin() {
     el.innerHTML = players.map(p => {
       const myChars = approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === p.username?.toLowerCase());
       const charsHtml = myChars.length
-        ? `<div style="margin-top:0.8rem;display:flex;flex-wrap:wrap;gap:0.4rem">
+        ? `<div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.8rem">
             ${myChars.map(c => {
               const gs = c.gameStatus || 'vivo';
               const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
-              return `<button onclick="showCharProfile('${c.charId||c.id}')" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.35rem 0.8rem;background:var(--bg3);border:1px solid var(--border);color:var(--silver-bright);font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='#fff'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--silver-bright)'">
-                <span style="width:7px;height:7px;border-radius:50%;background:${gsColor};display:inline-block;flex-shrink:0"></span>
-                ${(c.name||'?').toUpperCase()}${c.cucuruchoNome?' — '+c.cucuruchoNome:''}
-                <span style="color:var(--text-dim);font-size:0.6rem">↗</span>
+              const gsLabel = gs==='vivo'?'VIVO':gs==='morto'?'MORTO':gs==='desaparecido'?'DESAPARECIDO':gs.toUpperCase();
+              const photoUrl = (window._charPhotos && window._charPhotos[c.charId||c.id]) || c.imageUrl || '';
+              const charStatic = CHARS_DATA.find(x => x.id === (c.charId||c.id));
+              const imgHtml = photoUrl
+                ? `<img src="${photoUrl}" alt="${c.name}" style="width:52px;height:52px;object-fit:cover;border:1px solid var(--border);display:block" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                : charStatic && charStatic.minecraft
+                  ? `<img loading="lazy" src="https://mc-heads.net/avatar/${charStatic.minecraft}/52" alt="${c.name}" style="width:52px;height:52px;object-fit:cover;border:1px solid var(--border);display:block" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                  : '';
+              const fallbackHtml = `<div style="width:52px;height:52px;display:${photoUrl||charStatic?.minecraft?'none':'flex'};align-items:center;justify-content:center;background:var(--bg2);border:1px solid var(--border);font-size:1.4rem;flex-shrink:0">👤</div>`;
+              return `<button onclick="showCharProfile('${c.charId||c.id}')" title="Ver ficha de ${c.name}" style="display:flex;align-items:center;gap:0.7rem;padding:0.5rem 0.8rem 0.5rem 0.5rem;background:var(--bg3);border:1px solid var(--border);color:var(--silver-bright);cursor:pointer;transition:all 0.2s;text-align:left;min-width:160px" onmouseover="this.style.borderColor='var(--red-bright)';this.style.background='rgba(139,0,0,0.1)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
+                <div style="flex-shrink:0;position:relative">
+                  ${imgHtml}
+                  ${fallbackHtml}
+                  <span style="position:absolute;bottom:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:${gsColor};border:2px solid var(--bg3)"></span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.2rem;overflow:hidden">
+                  <span style="font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:1px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">${(c.name||'?').toUpperCase()}</span>
+                  ${c.cucuruchoNome?`<span style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">${c.cucuruchoNome}</span>`:''}
+                  <span style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;color:${gsColor};letter-spacing:1px">${gsLabel}</span>
+                </div>
               </button>`;
             }).join('')}
           </div>`
         : `<div style="margin-top:0.5rem;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--text-dim);letter-spacing:1px">Nenhum personagem vinculado.</div>`;
-      return `<div class="pending-card" style="flex-direction:column;align-items:flex-start;gap:0.5rem">
+      return `<div class="pending-card" style="flex-direction:column;align-items:flex-start;gap:0.3rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;gap:1rem;flex-wrap:wrap">
           <div class="pending-info" style="flex:1">
             <h4>${(p.username||p.id).toUpperCase()}</h4>
