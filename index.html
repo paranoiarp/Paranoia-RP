@@ -1148,15 +1148,9 @@
 
   // ===== EDIÇÃO DIRETA ADMIN =====
   window._adminEditChar = async function(charDocId, fichaData, obs, adminUser) {
-    const { doc, updateDoc, setDoc, deleteDoc } = window._fbModules;
+    const { doc, updateDoc } = window._fbModules;
     const db = window._db;
     await updateDoc(doc(db, 'approvedChars', charDocId), {...fichaData});
-    // Sincroniza foto com charPhotos
-    const charId = fichaData.charId || charDocId;
-    if(fichaData.imageUrl) {
-      await setDoc(doc(db, 'charPhotos', charId), { charId, imageUrl: fichaData.imageUrl, updatedBy: adminUser, updatedAt: new Date().toISOString() });
-      if(window._charPhotos) window._charPhotos[charId] = fichaData.imageUrl;
-    }
     if(window._logAcaoAdmin) await window._logAcaoAdmin('EDIÇÃO ADMIN', fichaData.name||'?', fichaData.player||'?', adminUser, obs);
   };
 
@@ -1234,11 +1228,7 @@
   // Sincroniza fotos pré-cadastradas em tempo real
   onSnapshot(collection(db, 'charPhotos'), snap => {
     window._charPhotos = {};
-    window._charPhotosData = {};
-    snap.docs.forEach(d => {
-      window._charPhotos[d.id] = d.data().imageUrl || '';
-      window._charPhotosData[d.id] = d.data();
-    });
+    snap.docs.forEach(d => { window._charPhotos[d.id] = d.data().imageUrl || ''; });
     if(typeof renderChars === 'function') renderChars('all');
     if(typeof renderFotosAdmin === 'function') {
       const tab = document.getElementById('fotos-admin');
@@ -2061,7 +2051,7 @@
         </div>
         <div id="cfg_msg" style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4caf50;display:none">✓ CONFIGURAÇÃO SALVA</div>
       </div>
-      <div class="form-section" style="margin-top:2rem" id="secaoGerenciarAdmins" style="display:none">
+      <div class="form-section" style="margin-top:2rem" id="secaoGerenciarAdmins">
         <h3>GERENCIAR SENHAS DE ADMINS</h3>
         <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem;line-height:1.8">Redefina a senha de qualquer admin. Use para recuperar acesso ou cadastrar novos admins.</p>
         <div style="display:flex;flex-direction:column;gap:0.8rem;max-width:500px">
@@ -2112,9 +2102,6 @@
       </div>
     </div>
 
-    <div id="log-admin" class="admin-content">
-      <div id="logAdminList"><div class="empty-state">CARREGANDO LOG...</div></div>
-    </div>
   </div>
 </div>
 <script>
@@ -2333,7 +2320,7 @@ function renderChars(filter) {
         <div class="char-available ${dotClass}" ${dotStyle}></div>
         <div class="char-avatar">${img}</div>
         <div class="char-name">${c.name.toUpperCase()}</div>
-        ${c.player?`<div class="char-player">${c.player}</div>`:''}
+        ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
         <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
       </div>`;
     }).join('') : '');
@@ -2358,7 +2345,7 @@ function renderChars(filter) {
       <div class="char-available ${dotClass}" ${dotStyle}></div>
       <div class="char-avatar">${img}</div>
       <div class="char-name">${c.name.toUpperCase()}</div>
-      ${c.player?`<div class="char-player">${c.player}</div>`:''}
+      ${c.player?`<div class="char-player">// ${c.player} //</div>`:''}
       <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
     </div>`;
   }).join('') + classifiedBlock;
@@ -2868,7 +2855,7 @@ async function rejectFicha(id) {
     if(window._logAcaoAdmin && ficha) await window._logAcaoAdmin('REJEIÇÃO', ficha.name||'?', ficha.player||'?', window._adminUser||'?');
     // Notificação para o player
     if(ficha?.playerAccount && window._sendPlayerNotif) {
-      await window._sendPlayerNotif(ficha.playerAccount, 'rejeitada', ficha.name||'?', motivo || 'Sua ficha foi rejeitada pela administração. Entre em contato via Discord para mais informações.');
+      await window._sendPlayerNotif(ficha.playerAccount, 'rejeitada', ficha.name||'?', 'Sua ficha foi rejeitada pela administração. Entre em contato via Discord para mais informações.');
     }
     return true;
   } catch(err) {
@@ -4125,28 +4112,15 @@ function filtrarFotosAdmin(q = '', lang = '') {
   );
   if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
   grid.innerHTML = list.map(c => {
-    const photoData = window._charPhotosData && window._charPhotosData[c.id];
     const url = window._charPhotos[c.id] || '';
-    const approved = (window.approvedChars||[]).find(a => (a.charId||a.id) === c.id);
     const imgHtml = url
       ? `<img src="${url}" alt="${c.name}" onerror="this.parentElement.innerHTML='👤'">`
       : '👤';
     const langLabel = {ingles:'🇺🇸',espanhol:'🇪🇸',portugues:'🇧🇷',frances:'🇫🇷',coreano:'🇰🇷',huevito:'🥚',cucurucho:'🎭'}[c.lang] || '';
-    const logHtml = photoData?.updatedBy
-      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);margin-top:0.3rem;text-align:center">
-          Foto alterada por <span style="color:var(--pink)">${photoData.updatedBy.toUpperCase()}</span>
-          ${photoData.updatedAt ? `<br>${new Date(photoData.updatedAt).toLocaleString('pt-BR')}` : ''}
-        </div>` : '';
-    const playerHtml = approved?.player
-      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);margin-top:0.2rem;text-align:center">
-          Ficha enviada por <span style="color:#4caf50">${approved.player.toUpperCase()}</span>
-        </div>` : '';
     return `<div class="foto-card" id="fotoCard_${c.id}">
       <div class="foto-card-img">${imgHtml}</div>
       <div class="foto-card-name">${c.name.toUpperCase()}</div>
       <div class="foto-card-lang">${langLabel} ${c.lang.toUpperCase()}</div>
-      ${playerHtml}
-      ${logHtml}
       <input class="foto-card-input" id="fotoInput_${c.id}" type="text" placeholder="https://i.imgur.com/..." value="${url}">
       <button class="foto-card-btn" id="fotoBtn_${c.id}" onclick="salvarFotoAdmin('${c.id}')">💾 SALVAR FOTO</button>
     </div>`;
@@ -4170,23 +4144,11 @@ async function salvarFotoAdmin(charId) {
   try {
     const { doc, setDoc, deleteDoc } = window._fbModules;
     if(url) {
-      await setDoc(doc(window._db, 'charPhotos', charId), { charId, imageUrl: url, updatedBy: window._adminUser||'?', updatedAt: new Date().toISOString() });
+      await setDoc(doc(window._db, 'charPhotos', charId), { charId, imageUrl: url });
       window._charPhotos[charId] = url;
-      // Sincroniza com approvedChars se o personagem tiver ficha aprovada
-      const approved = (window.approvedChars||[]).find(c => (c.charId||c.id) === charId);
-      if(approved) {
-        const { doc: docFn, updateDoc } = window._fbModules;
-        await updateDoc(docFn(window._db, 'approvedChars', approved.id), { imageUrl: url });
-      }
-      if(window._logAcaoAdmin) await window._logAcaoAdmin('FOTO ATUALIZADA', charId, '—', window._adminUser||'?', 'Foto atualizada via aba Fotos');
     } else {
       await deleteDoc(doc(window._db, 'charPhotos', charId));
       window._charPhotos[charId] = '';
-      const approved = (window.approvedChars||[]).find(c => (c.charId||c.id) === charId);
-      if(approved) {
-        const { doc: docFn, updateDoc } = window._fbModules;
-        await updateDoc(docFn(window._db, 'approvedChars', approved.id), { imageUrl: '' });
-      }
     }
     // Atualiza preview no card
     const imgDiv = card.querySelector('.foto-card-img');
@@ -4234,7 +4196,7 @@ function updateFichaProgress() {
   const fields = [
     document.getElementById('f_nome'),
     document.getElementById('f_player'),
-    document.getElementById('f_personagem_nasc'),
+    document.getElementById('f_nascimento'),
     document.getElementById('f_fisico'),
     document.getElementById('f_personalidade'),
     document.getElementById('f_backstory'),
@@ -4324,7 +4286,6 @@ buildNavPersonagensMenu();
 
   function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if(!img.complete || img.naturalWidth === 0) { animId = requestAnimationFrame(loop); return; }
     const mobile = isMobile();
     const cols = mobile ? 3 : 5;
     const colW = canvas.width / cols;
