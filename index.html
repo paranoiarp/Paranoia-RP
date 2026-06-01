@@ -227,6 +227,34 @@
   }
   html.light .hero { background: var(--bg); }
 
+  /* ── Glow roxo no tema claro ── */
+  @keyframes pulse-light {
+    0%, 100% { filter: drop-shadow(0 0 30px rgba(107, 33, 168, 0.55)); }
+    50%       { filter: drop-shadow(0 0 80px rgba(107, 33, 168, 0.9)); }
+  }
+
+  html.light .hero-logo,
+  html.light #heroLogo {
+    filter: drop-shadow(0 0 50px rgba(107, 33, 168, 0.75)) !important;
+    animation: pulse-light 4s ease-in-out infinite !important;
+  }
+
+  html.light .hero h1 {
+    color: #1a1010;
+    text-shadow: 0 0 35px rgba(107, 33, 168, 0.35);
+  }
+
+  html.light .hero-divider {
+    background: rgba(107, 33, 168, 0.6);
+    box-shadow: 0 0 12px rgba(107, 33, 168, 0.4);
+  }
+
+  html.light .hero-grid {
+    background-image:
+      linear-gradient(rgba(107, 33, 168, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(107, 33, 168, 0.07) 1px, transparent 1px);
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
