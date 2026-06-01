@@ -877,78 +877,16 @@
   .char-card:hover::after { opacity: 1; }
 
   @media (max-width: 768px) {
-    /* NAV */
-    .nav-links { display: none; flex-direction: column; position: absolute; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 999; max-height: 80vh; overflow-y: auto; }
+    .nav-links { display: none; flex-direction: column; position: absolute; top: 60px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
     .nav-links.open { display: flex; }
-    .nav-links li a { height: auto; line-height: 1; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+    .nav-links li a { height: auto; line-height: 1; padding: 1rem 2rem; border-bottom: 1px solid var(--border); }
     .nav-mobile-btn { display: block; }
-    .nav-dropdown-menu { display: none !important; }
-    .nav-submenu { display: none !important; }
-
-    /* HERO */
-    .hero { padding: 1rem; }
-    .hero h1 { font-size: clamp(1.8rem, 10vw, 3rem); letter-spacing: 6px; }
-    .hero-desc { font-size: 0.9rem; }
-    #heroLogo { width: clamp(120px, 40vw, 200px) !important; height: clamp(120px, 40vw, 200px) !important; }
-
-    /* HIGHLIGHTS */
-    .highlights { grid-template-columns: 1fr; padding: 2rem 1rem; gap: 1rem; }
-
-    /* PERFIL */
-    .profile-layout { grid-template-columns: 1fr; gap: 1rem; padding: 0 1rem 3rem; }
-    .profile-sidebar { position: static; order: 1; }
-    .profile-main { order: 2; }
-    .profile-img-container { max-height: 250px; }
-    .profile-img { max-height: 250px; object-fit: cover; }
-    .attrs-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
-    .skills-grid { grid-template-columns: repeat(2, 1fr); }
-
-    /* FORMULÁRIO */
+    .profile-layout { grid-template-columns: 1fr; }
+    .profile-sidebar { position: static; order: 2; }
+    .profile-main { order: 1; }
+    .attrs-grid, .attrs-form-grid { grid-template-columns: repeat(3, 1fr); }
     .form-grid { grid-template-columns: 1fr; }
     .form-group.full { grid-column: 1; }
-    .attrs-form-grid { grid-template-columns: repeat(3, 1fr); }
-    .skills-form-grid { grid-template-columns: repeat(2, 1fr); }
-    #fichaForm { padding: 1rem; }
-
-    /* POPUP PERSONAGENS */
-    .char-popup-inner { width: 95vw; max-height: 85vh; padding: 1rem; }
-    .char-category-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-    .char-card { padding: 0.6rem; }
-
-    /* MODAIS */
-    .profile-layout.modal-layout { grid-template-columns: 1fr !important; }
-    #fichaPreviewModal > div { padding: 1rem; }
-    #fichaPreviewModal .profile-layout { grid-template-columns: 1fr; }
-
-    /* ADMIN */
-    .admin-tabs { flex-wrap: wrap; gap: 0.3rem; }
-    .admin-tab { font-size: 0.6rem; padding: 0.5rem 0.7rem; }
-    .pending-card { flex-direction: column; gap: 0.8rem; }
-    .pending-actions { flex-wrap: wrap; gap: 0.4rem; justify-content: flex-start; }
-    .pending-actions button { font-size: 0.6rem; padding: 0.4rem 0.6rem; }
-
-    /* PERSONAGENS PAGE */
-    .chars-filters { flex-wrap: wrap; gap: 0.4rem; }
-    .filter-btn { font-size: 0.6rem; padding: 0.4rem 0.7rem; }
-    .chars-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
-    .char-card-public { padding: 0.8rem; }
-
-    /* SISTEMA / REGRAS */
-    .system-grid, .rules-grid { grid-template-columns: 1fr; }
-    .stat-table { font-size: 0.8rem; }
-    .stat-table th, .stat-table td { padding: 0.4rem 0.5rem; }
-
-    /* FEDERAÇÃO */
-    .fed-content { padding: 1rem; }
-
-    /* LORE */
-    .lore-page-title { font-size: 1.4rem; letter-spacing: 3px; }
-    .lore-page-banner { max-height: 220px; }
-    .timeline { padding-left: 1.5rem; }
-
-    /* GERAL */
-    .page { padding-top: 60px; }
-    .section-header h2 { font-size: 1.2rem; letter-spacing: 4px; }
   }
 
   @media (max-width: 480px) {
@@ -960,7 +898,13 @@
     .skills-grid { grid-template-columns: 1fr; }
     .skills-form-grid { grid-template-columns: 1fr; }
     .admin-tab { font-size: 0.55rem; padding: 0.4rem 0.5rem; }
+    .pending-actions button { font-size: 0.58rem; padding: 0.35rem 0.5rem; }
+    .profile-img-container { max-height: 200px; }
+    .lore-page-title { font-size: 1.2rem; letter-spacing: 2px; }
   }
+
+  * { -webkit-tap-highlight-color: transparent; }
+  .nav-links, .char-popup, .nav-dropdown-menu { -webkit-overflow-scrolling: touch; }
 </style>
 
 <!-- Firebase -->
@@ -1315,7 +1259,7 @@
   <ul class="nav-links" id="navLinks">
     <li><a href="#" onclick="showPage('home')" id="nav-home" class="active">Início</a></li>
     <li class="nav-dropdown">
-      <a href="#" onclick="showPage('historia');toggleNav()" id="nav-historia">História</a>
+      <a href="#" onclick="showPage('historia')" id="nav-historia">História</a>
       <div class="nav-dropdown-menu">
         <a href="#" onclick="showPage('historia')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Sinopse</a>
         <a href="#" onclick="showLorePage('chegada')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> A Chegada de Trem</a>
@@ -2265,8 +2209,6 @@ function initImages() {
 function showLorePage(slug) { showPage('lore-' + slug); }
 
 function showPage(id) {
-  const navLinks = document.getElementById('navLinks');
-  if(navLinks) navLinks.classList.remove('open');
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById(id);
   if(p) p.classList.add('active');
@@ -3190,7 +3132,7 @@ function viewPendingFicha(id) {
 
   const modal = document.createElement('div');
   modal.id = 'fichaPreviewModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:70px 1rem 2rem;display:flex;align-items:flex-start;justify-content:center;-webkit-overflow-scrolling:touch';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;padding:80px 2rem 2rem;display:flex;align-items:flex-start;justify-content:center;-webkit-overflow-scrolling:touch';
   modal.innerHTML = `
     <div style="max-width:1100px;width:100%;margin:auto">
       <!-- Header -->
