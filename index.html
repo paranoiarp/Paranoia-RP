@@ -5046,14 +5046,30 @@ async function renderPlayersAdmin() {
     if(!players.length) { el.innerHTML = '<div class="empty-state">NENHUM PLAYER CADASTRADO</div>'; return; }
     el.innerHTML = players.map(p => {
       const myChars = approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === p.username?.toLowerCase());
-      return `<div class="pending-card">
-        <div class="pending-info">
-          <h4>${(p.username||p.id).toUpperCase()}</h4>
-          <p>// ${myChars.length} personagem(s) vinculado(s) // Criado em: ${p.createdAt ? new Date(p.createdAt).toLocaleDateString('pt-BR') : '—'}</p>
+      const charsHtml = myChars.length
+        ? `<div style="margin-top:0.8rem;display:flex;flex-wrap:wrap;gap:0.4rem">
+            ${myChars.map(c => {
+              const gs = c.gameStatus || 'vivo';
+              const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
+              return `<button onclick="showCharProfile('${c.charId||c.id}')" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.35rem 0.8rem;background:var(--bg3);border:1px solid var(--border);color:var(--silver-bright);font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='#fff'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--silver-bright)'">
+                <span style="width:7px;height:7px;border-radius:50%;background:${gsColor};display:inline-block;flex-shrink:0"></span>
+                ${(c.name||'?').toUpperCase()}${c.cucuruchoNome?' — '+c.cucuruchoNome:''}
+                <span style="color:var(--text-dim);font-size:0.6rem">↗</span>
+              </button>`;
+            }).join('')}
+          </div>`
+        : `<div style="margin-top:0.5rem;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--text-dim);letter-spacing:1px">Nenhum personagem vinculado.</div>`;
+      return `<div class="pending-card" style="flex-direction:column;align-items:flex-start;gap:0.5rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;gap:1rem;flex-wrap:wrap">
+          <div class="pending-info" style="flex:1">
+            <h4>${(p.username||p.id).toUpperCase()}</h4>
+            <p>// ${myChars.length} personagem(s) vinculado(s) // Criado em: ${p.createdAt ? new Date(p.createdAt).toLocaleDateString('pt-BR') : '—'}</p>
+          </div>
+          <div class="pending-actions" style="flex-shrink:0">
+            <button class="btn-reject" onclick="adminDeletePlayer('${p.username||p.id}')">🗑 EXCLUIR</button>
+          </div>
         </div>
-        <div class="pending-actions">
-          <button class="btn-reject" onclick="adminDeletePlayer('${p.username||p.id}')">🗑 EXCLUIR</button>
-        </div>
+        ${charsHtml}
       </div>`;
     }).join('');
   } catch(e) {
