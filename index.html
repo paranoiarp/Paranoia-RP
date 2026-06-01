@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0046)file:///C:/Users/gleid/Downloads/Update_3.html -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <link rel="icon" type="image/png" href="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png">
@@ -1442,7 +1441,8 @@
     <li><a href="#" onclick="showPage(&#39;federacao&#39;)" id="nav-federacao">The Federation</a></li>
     <li><a href="#" onclick="showPage(&#39;registro&#39;)" id="nav-registro">Registro</a></li>
     <li id="nav-ficha-li" style="display:none"><a href="#" onclick="showPage(&#39;ficha&#39;)" id="nav-ficha">Enviar Ficha</a></li>
-    <li><a href="#" onclick="showPage(&#39;minha-area&#39;)" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
+    <li><a href="#" onclick="showPage('players')" id="nav-players">Players</a></li>
+    <li><a href="#" onclick="showPage('minha-area')" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
     <li><a href="#" onclick="showPage(&#39;admin-gate&#39;)" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
   <button class="nav-mobile-btn" onclick="toggleNav()">☰</button>
@@ -2735,6 +2735,17 @@
   </div>
 </div>
 
+<!-- PLAYERS -->
+<div id="players" class="page">
+  <div class="section-header">
+    <div class="section-label">// HABITANTES DA ILHA //</div>
+    <h1 class="section-title">PLAYERS</h1>
+  </div>
+  <div class="section-content">
+    <div id="playersPublicList"></div>
+  </div>
+</div>
+
 <!-- MINHA ÁREA — LOGIN / CADASTRO -->
 <div id="minha-area" class="page">
   <div class="section-header">
@@ -3142,6 +3153,7 @@ function showPage(id) {
   if(nav) nav.classList.add('active');
   document.getElementById('navLinks').classList.remove('open');
   setTimeout(() => window.scrollTo({top:0, behavior:'instant'}), 0);
+  if(id==='players') renderPlayersPublic();
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
   if(id==='player-panel') { if(!window._playerLogado) { showPage('minha-area'); return; } loadPlayerPanel(); }
@@ -5614,6 +5626,74 @@ async function adminDeletePlayer(username) {
       console.error(e);
     }
   });
+}
+
+async function renderPlayersPublic() {
+  const el = document.getElementById('playersPublicList');
+  if(!el) return;
+  el.innerHTML = '<div class="empty-state">CARREGANDO...</div>';
+  try {
+    const { collection, getDocs } = window._fbModules;
+    const snap = await getDocs(collection(window._db, 'playerAuth'));
+    const players = snap.docs.map(d => ({id: d.id, ...d.data()}));
+
+    // Filtra só players que têm personagens aprovados
+    const playersComChars = players
+      .map(p => ({
+        ...p,
+        chars: approvedChars.filter(c => c.playerAccount && c.playerAccount.toLowerCase() === (p.username||p.id).toLowerCase())
+      }))
+      .filter(p => p.chars.length > 0)
+      .sort((a,b) => b.chars.length - a.chars.length);
+
+    if(!playersComChars.length) {
+      el.innerHTML = '<div class="empty-state">NENHUM PLAYER COM PERSONAGEM APROVADO</div>';
+      return;
+    }
+
+    el.innerHTML = playersComChars.map(p => {
+      const isAdmin = ['twik','ryu','andy','ali'].includes((p.username||p.id).toLowerCase());
+      const roleLabel = isAdmin ? '<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.58rem;letter-spacing:2px;padding:0.15rem 0.5rem;border:1px solid var(--red-bright);color:var(--red-bright);background:rgba(204,0,0,0.1)">STAFF</span>' : '';
+
+      const charsHtml = p.chars.map(c => {
+        const gs = c.gameStatus || 'vivo';
+        const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
+        const photoUrl = (window._charPhotos && window._charPhotos[c.charId||c.id]) || c.imageUrl || '';
+        const imgHtml = photoUrl
+          ? `<img src="${photoUrl}" alt="${c.name}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='👤'">`
+          : `<span style="font-size:1.5rem">👤</span>`;
+        const isCucurucho = c.lang === 'cucurucho';
+        const displayName = isCucurucho ? (c.cucuruchoNome || c.name) : c.name;
+        return `<div onclick="showCharProfile('${c.charId||c.id}')" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;cursor:pointer;padding:0.8rem;background:var(--bg3);border:1px solid var(--border);transition:all 0.2s;min-width:100px;max-width:130px;flex:1" onmouseover="this.style.borderColor='var(--red-bright)';this.style.background='rgba(139,0,0,0.08)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
+          <div style="width:56px;height:56px;border-radius:4px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;position:relative">
+            ${imgHtml}
+            <span style="position:absolute;bottom:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:${gsColor};border:2px solid var(--bg3)"></span>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:1px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">${displayName.toUpperCase()}</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:${gsColor};letter-spacing:1px;margin-top:0.2rem">${gs.toUpperCase()}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<div style="background:var(--bg2);border:1px solid var(--border);padding:1.5rem;margin-bottom:1rem">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;padding-bottom:0.8rem;border-bottom:1px solid var(--border)">
+          <div style="width:42px;height:42px;background:var(--bg3);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">👤</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+              <span style="font-family:'Orbitron',monospace;font-size:0.85rem;letter-spacing:3px;color:#fff">${(p.username||p.id).toUpperCase()}</span>
+              ${roleLabel}
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;margin-top:0.2rem">${p.chars.length} PERSONAGEM${p.chars.length>1?'S':''}</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.6rem">${charsHtml}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state">ERRO AO CARREGAR.</div>';
+    console.error(e);
+  }
 }
 
 async function renderPlayersAdmin() {
