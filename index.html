@@ -222,6 +222,7 @@
 
   /* PAGES */
   .page { display: none !important; padding-top: 60px; min-height: 100vh; position: relative; z-index: 1; }
+  .page.active:not(#home) { background: var(--bg); }
   .page.active { display: block !important; opacity: 0; animation: pageFadeIn 0.2s ease forwards; }
   #home { flex-direction: column; }
   #home.active { display: flex !important; }
@@ -672,7 +673,8 @@
   /* ADMIN */
   .admin-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 2rem; }
   .admin-tabs { display: flex; gap: 0; margin-bottom: 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-  .admin-tab { padding: 0.8rem 1.5rem; background: none; border: none; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 2px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  #admin-panel, #admin-gate { background: var(--bg); position: relative; z-index: 1; }
+  .admin-tab { padding: 0.8rem 1.5rem; background: var(--bg2); border: none; border-right: 1px solid var(--border); color: var(--text-dim); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 2px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
   .admin-tab:hover, .admin-tab.active { color: var(--red-bright); border-bottom-color: var(--red); }
   .admin-content { display: none; }
   .admin-content.active { display: block; }
