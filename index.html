@@ -4237,11 +4237,104 @@ function renderApprovedAdmin() {
         <button class="btn-approve" onclick="adminGerenciarTraumas('${f.id}')">😰 TRAUMAS</button>
         <button class="btn-approve" onclick="adminGerenciarHistorico('${f.id}')">📖 HISTÓRICO</button>
         <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${(f.player||f.name).replace(/'/g,"\\'")}')">🔑 SENHA</button>
+        <button class="btn-approve" onclick="adminVincularPersonagem('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}','${(f.playerAccount||'').replace(/'/g,"\\'")}')">🔗 VINCULAR</button>
         <button class="btn-reject" style="margin-left:auto" onclick="deleteApprovedChar('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}')">🗑 EXCLUIR</button>
       </div>
     </div>`;
   }).join('');
 }
+// ===== ADMIN: VINCULAR PERSONAGEM A OUTRO PLAYER =====
+async function adminVincularPersonagem(fichaDocId, charName, currentAccount) {
+  // Busca lista de players cadastrados
+  const { collection, getDocs, doc, updateDoc } = window._fbModules;
+  let players = [];
+  try {
+    const snap = await getDocs(collection(window._db, 'playerAuth'));
+    players = snap.docs.map(d => d.data().username || d.id).sort();
+  } catch(e) { players = []; }
+
+  // Também inclui admins como opção
+  const admins = ['twik','ryu','andy','ali'];
+  const allAccounts = [...new Set([...admins, ...players])].sort();
+
+  const existing = document.getElementById('vincularModal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'vincularModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:440px;width:100%">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.5rem">// VINCULAR PERSONAGEM //</div>
+      <h3 style="font-family:'Orbitron',monospace;color:#fff;margin-bottom:0.4rem;font-size:0.95rem;letter-spacing:3px">${charName.toUpperCase()}</h3>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.4rem">
+        Conta atual: <span style="color:var(--silver-bright)">${currentAccount||'— nenhuma —'}</span>
+      </p>
+
+      <div style="margin-bottom:1rem">
+        <label style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--silver);letter-spacing:2px;display:block;margin-bottom:0.5rem">SELECIONAR CONTA EXISTENTE</label>
+        <select id="vincularSelect" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.8rem;outline:none;margin-bottom:0.5rem">
+          <option value="">— escolha um usuário —</option>
+          ${allAccounts.map(u => `<option value="${u}" ${u===currentAccount?'selected':''}>${u.toUpperCase()}${admins.includes(u)?' ★':''}</option>`).join('')}
+        </select>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px">★ = admin</div>
+      </div>
+
+      <div style="margin-bottom:1.4rem">
+        <label style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--silver);letter-spacing:2px;display:block;margin-bottom:0.5rem">OU DIGITAR MANUALMENTE</label>
+        <input type="text" id="vincularInput" placeholder="nome da conta..." style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.8rem;outline:none;text-transform:lowercase" oninput="this.value=this.value.toLowerCase()">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;margin-top:0.3rem">O campo manual tem prioridade sobre o seletor.</div>
+      </div>
+
+      <div id="vincularMsg" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.72rem;margin-bottom:0.8rem"></div>
+
+      <div style="display:flex;gap:0.5rem">
+        <button onclick="document.getElementById('vincularModal').remove()" style="flex:1;padding:0.75rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
+        <button id="vincularBtn" onclick="confirmarVinculacao('${fichaDocId}','${charName.replace(/'/g,"\'")}','${currentAccount}')" style="flex:2;padding:0.75rem;background:rgba(139,0,0,0.2);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:2px;cursor:pointer">🔗 CONFIRMAR VÍNCULO</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function confirmarVinculacao(fichaDocId, charName, oldAccount) {
+  const manual = (document.getElementById('vincularInput')?.value || '').trim().toLowerCase();
+  const select = (document.getElementById('vincularSelect')?.value || '').trim().toLowerCase();
+  const newAccount = manual || select;
+  const msgEl = document.getElementById('vincularMsg');
+  const btn = document.getElementById('vincularBtn');
+
+  if(!newAccount) {
+    msgEl.textContent = '⚠ Selecione ou digite uma conta de destino.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block'; return;
+  }
+  if(newAccount === oldAccount.toLowerCase()) {
+    msgEl.textContent = '⚠ O personagem já está vinculado a esta conta.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true; btn.textContent = '⏳ SALVANDO...';
+  try {
+    const { doc, updateDoc } = window._fbModules;
+    await updateDoc(doc(window._db, 'approvedChars', fichaDocId), { playerAccount: newAccount });
+    if(window._logAcaoAdmin) {
+      await window._logAcaoAdmin(
+        'VÍNCULO ALTERADO', charName, newAccount,
+        window._adminUser||'?',
+        `Conta anterior: ${oldAccount||'nenhuma'} → Nova conta: ${newAccount}`
+      );
+    }
+    document.getElementById('vincularModal')?.remove();
+    showToast(`✓ ${charName.toUpperCase()} vinculado a "${newAccount}"`, 'success');
+    renderApprovedAdmin();
+  } catch(e) {
+    msgEl.textContent = '✗ Erro ao salvar. Verifique o console.';
+    msgEl.style.color = 'var(--red-bright)'; msgEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '🔗 CONFIRMAR VÍNCULO';
+    console.error(e);
+  }
+}
+
 async function deleteApprovedChar(id, name) {
   confirmarAcao('Excluir o personagem "' + name + '"?<br>O personagem voltará a ficar disponível.', async () => {
     try {
