@@ -1148,9 +1148,15 @@
 
   // ===== EDIÇÃO DIRETA ADMIN =====
   window._adminEditChar = async function(charDocId, fichaData, obs, adminUser) {
-    const { doc, updateDoc } = window._fbModules;
+    const { doc, updateDoc, setDoc, deleteDoc } = window._fbModules;
     const db = window._db;
     await updateDoc(doc(db, 'approvedChars', charDocId), {...fichaData});
+    // Sincroniza foto com charPhotos
+    const charId = fichaData.charId || charDocId;
+    if(fichaData.imageUrl) {
+      await setDoc(doc(db, 'charPhotos', charId), { charId, imageUrl: fichaData.imageUrl, updatedBy: adminUser, updatedAt: new Date().toISOString() });
+      if(window._charPhotos) window._charPhotos[charId] = fichaData.imageUrl;
+    }
     if(window._logAcaoAdmin) await window._logAcaoAdmin('EDIÇÃO ADMIN', fichaData.name||'?', fichaData.player||'?', adminUser, obs);
   };
 
@@ -1228,7 +1234,11 @@
   // Sincroniza fotos pré-cadastradas em tempo real
   onSnapshot(collection(db, 'charPhotos'), snap => {
     window._charPhotos = {};
-    snap.docs.forEach(d => { window._charPhotos[d.id] = d.data().imageUrl || ''; });
+    window._charPhotosData = {};
+    snap.docs.forEach(d => {
+      window._charPhotos[d.id] = d.data().imageUrl || '';
+      window._charPhotosData[d.id] = d.data();
+    });
     if(typeof renderChars === 'function') renderChars('all');
     if(typeof renderFotosAdmin === 'function') {
       const tab = document.getElementById('fotos-admin');
@@ -4115,15 +4125,22 @@ function filtrarFotosAdmin(q = '', lang = '') {
   );
   if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">NENHUM PERSONAGEM ENCONTRADO</div>'; return; }
   grid.innerHTML = list.map(c => {
+    const photoData = window._charPhotosData && window._charPhotosData[c.id];
     const url = window._charPhotos[c.id] || '';
     const imgHtml = url
       ? `<img src="${url}" alt="${c.name}" onerror="this.parentElement.innerHTML='👤'">`
       : '👤';
     const langLabel = {ingles:'🇺🇸',espanhol:'🇪🇸',portugues:'🇧🇷',frances:'🇫🇷',coreano:'🇰🇷',huevito:'🥚',cucurucho:'🎭'}[c.lang] || '';
+    const logHtml = photoData?.updatedBy
+      ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);margin-top:0.3rem;text-align:center">
+          Alterado por <span style="color:var(--pink)">${photoData.updatedBy.toUpperCase()}</span>
+          ${photoData.updatedAt ? `<br>${new Date(photoData.updatedAt).toLocaleString('pt-BR')}` : ''}
+        </div>` : '';
     return `<div class="foto-card" id="fotoCard_${c.id}">
       <div class="foto-card-img">${imgHtml}</div>
       <div class="foto-card-name">${c.name.toUpperCase()}</div>
       <div class="foto-card-lang">${langLabel} ${c.lang.toUpperCase()}</div>
+      ${logHtml}
       <input class="foto-card-input" id="fotoInput_${c.id}" type="text" placeholder="https://i.imgur.com/..." value="${url}">
       <button class="foto-card-btn" id="fotoBtn_${c.id}" onclick="salvarFotoAdmin('${c.id}')">💾 SALVAR FOTO</button>
     </div>`;
@@ -4147,11 +4164,23 @@ async function salvarFotoAdmin(charId) {
   try {
     const { doc, setDoc, deleteDoc } = window._fbModules;
     if(url) {
-      await setDoc(doc(window._db, 'charPhotos', charId), { charId, imageUrl: url });
+      await setDoc(doc(window._db, 'charPhotos', charId), { charId, imageUrl: url, updatedBy: window._adminUser||'?', updatedAt: new Date().toISOString() });
       window._charPhotos[charId] = url;
+      // Sincroniza com approvedChars se o personagem tiver ficha aprovada
+      const approved = (window.approvedChars||[]).find(c => (c.charId||c.id) === charId);
+      if(approved) {
+        const { doc: docFn, updateDoc } = window._fbModules;
+        await updateDoc(docFn(window._db, 'approvedChars', approved.id), { imageUrl: url });
+      }
+      if(window._logAcaoAdmin) await window._logAcaoAdmin('FOTO ATUALIZADA', charId, '—', window._adminUser||'?', 'Foto atualizada via aba Fotos');
     } else {
       await deleteDoc(doc(window._db, 'charPhotos', charId));
       window._charPhotos[charId] = '';
+      const approved = (window.approvedChars||[]).find(c => (c.charId||c.id) === charId);
+      if(approved) {
+        const { doc: docFn, updateDoc } = window._fbModules;
+        await updateDoc(docFn(window._db, 'approvedChars', approved.id), { imageUrl: '' });
+      }
     }
     // Atualiza preview no card
     const imgDiv = card.querySelector('.foto-card-img');
