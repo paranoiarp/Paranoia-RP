@@ -1270,16 +1270,14 @@
     <span style="font-family:&#39;Orbitron&#39;,monospace;font-weight:900;font-size:1.1rem;color:#fff;letter-spacing:12px;text-shadow:0 0 40px rgba(139,0,0,0.8);text-transform:uppercase;-webkit-font-smoothing:antialiased">PARANOIA</span>
   </div>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#" onclick="showPage(&#39;home&#39;)" id="nav-home" class="active">Início</a></li>
+    <li><a href="#" onclick="showPage('home')" id="nav-home" class="active">Início</a></li>
     <li class="nav-dropdown">
-      <a href="#" onclick="showPage(&#39;historia&#39;)" id="nav-historia">História</a>
+      <a href="#" onclick="showPage('historia')" id="nav-historia">História</a>
       <div class="nav-dropdown-menu">
-        <a href="#" onclick="showPage(&#39;historia&#39;)"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Sinopse</a>
-        <a href="#" onclick="showLorePage(&#39;chegada&#39;)"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> A Chegada de Trem</a>
+        <a href="#" onclick="showPage('historia')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> Sinopse</a>
+        <a href="#" onclick="showLorePage('chegada')"><img loading="lazy" src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="nav-logo-img" alt=""> A Chegada de Trem</a>
       </div>
     </li>
-    <li><a href="#" onclick="showPage(&#39;regras&#39;)" id="nav-regras">Regras</a></li>
-    <li><a href="#" onclick="showPage(&#39;sistema&#39;)" id="nav-sistema">Sistema</a></li>
     <li class="nav-dropdown" id="nav-personagens-li">
       <a href="#" onclick="showPage(&#39;personagens&#39;)" id="nav-personagens">Personagens</a>
       <div class="nav-dropdown-menu" id="navPersonagensMenu">
@@ -1438,12 +1436,14 @@
         </div>
       </div>
     </li>
-    <li><a href="#" onclick="showPage(&#39;federacao&#39;)" id="nav-federacao">The Federation</a></li>
-    <li><a href="#" onclick="showPage(&#39;registro&#39;)" id="nav-registro">Registro</a></li>
-    <li id="nav-ficha-li" style="display:none"><a href="#" onclick="showPage(&#39;ficha&#39;)" id="nav-ficha">Enviar Ficha</a></li>
     <li><a href="#" onclick="showPage('players')" id="nav-players">Players</a></li>
+    <li><a href="#" onclick="showPage('regras')" id="nav-regras">Regras</a></li>
+    <li><a href="#" onclick="showPage('sistema')" id="nav-sistema">Sistema</a></li>
+    <li><a href="#" onclick="showPage('federacao')" id="nav-federacao">The Federation</a></li>
+    <li><a href="#" onclick="showPage('registro')" id="nav-registro">Registro</a></li>
+    <li id="nav-ficha-li" style="display:none"><a href="#" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
     <li><a href="#" onclick="showPage('minha-area')" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
-    <li><a href="#" onclick="showPage(&#39;admin-gate&#39;)" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
+    <li><a href="#" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
   <button class="nav-mobile-btn" onclick="toggleNav()">☰</button>
 </nav>
