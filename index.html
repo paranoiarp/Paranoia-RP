@@ -5967,44 +5967,91 @@ function renderPlayersFiltered(query) {
 }
 
 function renderPlayersHTML(el, playersComChars) {
-  el.innerHTML = playersComChars.map(p => {
-    const isAdmin = ['twik','ryu','andy','ali'].includes((p.username||p.id).toLowerCase());
-    const roleLabel = isAdmin ? '<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.58rem;letter-spacing:2px;padding:0.15rem 0.5rem;border:1px solid var(--red-bright);color:var(--red-bright);background:rgba(204,0,0,0.1)">STAFF</span>' : '';
-    const charsHtml = p.chars.map(c => {
-      const gs = c.gameStatus || 'vivo';
-      const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
-      const photoUrl = (window._charPhotos && window._charPhotos[c.charId||c.id]) || c.imageUrl || '';
-      const imgHtml = photoUrl
-        ? `<img src="${photoUrl}" alt="${c.name}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='👤'">`
-        : `<span style="font-size:1.5rem">👤</span>`;
-      const isCucurucho = c.lang === 'cucurucho';
-      const displayName = isCucurucho ? (c.cucuruchoNome || c.name) : c.name;
-      const cid = c.charId || c.id || '';
-      return `<div onclick="showPage('personagens');setTimeout(()=>showCharProfile('${cid}'),80)" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;cursor:pointer;padding:0.8rem;background:var(--bg3);border:1px solid var(--border);transition:all 0.2s;min-width:100px;max-width:130px;flex:1" onmouseover="this.style.borderColor='var(--red-bright)';this.style.background='rgba(139,0,0,0.08)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
-        <div style="width:56px;height:56px;border-radius:4px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;position:relative">
-          ${imgHtml}
-          <span style="position:absolute;bottom:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:${gsColor};border:2px solid var(--bg3)"></span>
+  // Grid de cards quadrados igual ao de personagens
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem">` +
+    playersComChars.map(p => {
+      const username = (p.username || p.id);
+      const isAdmin = ['twik','ryu','andy','ali'].includes(username.toLowerCase());
+      const avatarUrl = p.avatarUrl || '';
+      const imgHtml = avatarUrl
+        ? `<img src="${avatarUrl}" alt="${username}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        : '';
+      const n = p.chars.length;
+      const staffBadge = isAdmin
+        ? `<div style="position:absolute;top:6px;right:6px;font-family:'Share Tech Mono',monospace;font-size:0.5rem;letter-spacing:1px;padding:0.1rem 0.35rem;background:rgba(204,0,0,0.85);color:#fff;border:1px solid var(--red-bright)">STAFF</div>`
+        : '';
+      return `<div onclick="showPlayerPublicProfile('${username}')"
+        style="background:var(--bg2);border:1px solid var(--border);cursor:pointer;transition:all 0.2s;position:relative;display:flex;flex-direction:column;align-items:center;padding:1.2rem 0.8rem 0.9rem"
+        onmouseover="this.style.borderColor='var(--red-bright)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(139,0,0,0.18)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow=''">
+        ${staffBadge}
+        <div style="width:80px;height:80px;border-radius:50%;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:0.8rem;font-size:2rem;flex-shrink:0">
+          ${imgHtml}<span style="display:${avatarUrl?'none':'flex'};align-items:center;justify-content:center;width:100%;height:100%;font-size:2rem">👤</span>
         </div>
-        <div style="text-align:center">
-          <div style="font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:1px;color:var(--silver-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">${displayName.toUpperCase()}</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:${gsColor};letter-spacing:1px;margin-top:0.2rem">${gs.toUpperCase()}</div>
-        </div>
+        <div style="font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--silver-bright);text-align:center;margin-bottom:0.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${username.toUpperCase()}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#4caf50;letter-spacing:1px">${n} PERSONAGEM${n!==1?'S':''}</div>
       </div>`;
-    }).join('');
-    return `<div style="background:var(--bg2);border:1px solid var(--border);padding:1.5rem;margin-bottom:1rem">
-      <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;padding-bottom:0.8rem;border-bottom:1px solid var(--border)">
-        <div style="width:42px;height:42px;background:var(--bg3);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">👤</div>
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
-            <span style="font-family:'Orbitron',monospace;font-size:0.85rem;letter-spacing:3px;color:var(--silver-bright)">${(p.username||p.id).toUpperCase()}</span>
-            ${roleLabel}
-          </div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;margin-top:0.2rem">${p.chars.length} PERSONAGEM${p.chars.length>1?'S':''}</div>
-        </div>
+    }).join('') + `</div>`;
+}
+
+function showPlayerPublicProfile(username) {
+  const data = (window._playersPublicData||[]).find(p => (p.username||p.id).toLowerCase() === username.toLowerCase());
+  if(!data) return;
+  const modal = document.getElementById('playerPublicModal');
+  const body = document.getElementById('playerPublicModalBody');
+  if(!modal || !body) return;
+
+  const avatarUrl = data.avatarUrl || '';
+  const isAdmin = ['twik','ryu','andy','ali'].includes(username.toLowerCase());
+  const n = data.chars.length;
+
+  const charsHtml = data.chars.map(c => {
+    const gs = c.gameStatus || 'vivo';
+    const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
+    const photoUrl = (window._charPhotos && window._charPhotos[c.charId||c.id]) || c.imageUrl || '';
+    const imgHtml = photoUrl
+      ? `<img src="${photoUrl}" alt="${c.name}" style="width:100%;height:100%;object-fit:cover">`
+      : `<span style="font-size:1.4rem">👤</span>`;
+    const isCucurucho = c.lang === 'cucurucho';
+    const displayName = isCucurucho ? (c.cucuruchoNome || c.name) : c.name;
+    const cid = c.charId || c.id || '';
+    return `<div onclick="closePlayerPublicModal();showPage('personagens');setTimeout(()=>showCharProfile('${cid}'),80)"
+      style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;cursor:pointer;padding:0.8rem;background:var(--bg3);border:1px solid var(--border);transition:all 0.2s;flex:1;min-width:110px;max-width:140px"
+      onmouseover="this.style.borderColor='var(--red-bright)';this.style.background='rgba(139,0,0,0.08)'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
+      <div style="width:60px;height:60px;border-radius:4px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
+        ${imgHtml}
+        <span style="position:absolute;bottom:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:${gsColor};border:2px solid var(--bg3)"></span>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:0.6rem">${charsHtml}</div>
+      <div style="text-align:center">
+        <div style="font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:1px;color:var(--silver-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">${displayName.toUpperCase()}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:${gsColor};letter-spacing:1px;margin-top:0.2rem">${gs.toUpperCase()}</div>
+      </div>
     </div>`;
   }).join('');
+
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:1.2rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border)">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:2rem">
+        ${avatarUrl ? `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover">` : '👤'}
+      </div>
+      <div>
+        <div style="font-family:'Orbitron',monospace;font-size:1rem;letter-spacing:3px;color:var(--silver-bright)">${username.toUpperCase()}</div>
+        ${isAdmin ? `<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--red-bright);margin-top:0.3rem">★ STAFF</div>` : ''}
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#4caf50;letter-spacing:1px;margin-top:0.3rem">${n} PERSONAGEM${n!==1?'S':''}</div>
+      </div>
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:0.8rem">PERSONAGENS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.6rem">${charsHtml}</div>
+  `;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closePlayerPublicModal() {
+  const modal = document.getElementById('playerPublicModal');
+  if(modal) modal.style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 async function renderPlayersAdmin() {
@@ -6516,4 +6563,12 @@ function updateThemeIcon(isLight) {
 })();
 </script>
 
+
+<!-- MODAL PERFIL PÚBLICO DO PLAYER -->
+<div id="playerPublicModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)closePlayerPublicModal()">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--red);max-width:560px;width:100%;max-height:80vh;overflow-y:auto;position:relative">
+    <button onclick="closePlayerPublicModal()" style="position:absolute;top:0.8rem;right:0.8rem;background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
+    <div style="padding:1.5rem" id="playerPublicModalBody"></div>
+  </div>
+</div>
 </body></html>
