@@ -2893,7 +2893,7 @@
         <div class="form-section">
           <h3>ATRIBUTOS</h3>
           <div class="attrs-points-info">
-            Você possui <span class="attrs-points-remaining" id="pointsLeft">5</span> pontos para distribuir. Cada atributo começa com 1 ponto. Reduzir um atributo abaixo de 1 devolve esse ponto para distribuição.
+            Você possui <span class="attrs-points-remaining" id="pointsLeft">5</span> pontos para distribuir. Cada atributo começa com 1 ponto. Reduzir um atributo abaixo de 1 devolve esse ponto para distribuição. <span id="huevito-attr-note" style="display:none;color:var(--red-bright)">🥚 Huevitos têm limite de 2 pontos e 2 perícias.</span>
           </div>
           <div class="attrs-form-grid" id="attrsGrid">
     <div class="attr-ctrl">
@@ -3467,6 +3467,15 @@ const ADMIN_USERS = ['twik','ryu','andy','ali'];
 function isValidAdminUser(u) { return ADMIN_USERS.includes(u.toLowerCase()); }
 const MAX_ATTR_POINTS = 5;
 const MAX_SKILLS = 8;
+// Limites dinâmicos por tipo de personagem
+function getMaxAttrPoints() {
+  const c = CHARS_DATA.find(x => x.id === selectedCharId);
+  return (c && c.lang === 'huevito') ? 2 : MAX_ATTR_POINTS;
+}
+function getMaxSkills() {
+  const c = CHARS_DATA.find(x => x.id === selectedCharId);
+  return (c && c.lang === 'huevito') ? 2 : MAX_SKILLS;
+}
 
 let attrValues = {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
 let selectedSkills = new Set();
@@ -3818,18 +3827,18 @@ function changeAttr(attr, delta) {
   const next = cur + delta;
   if(next < 0) return; // não pode ir abaixo de 0
   if(next > 5) return; // máximo 5
-  if(delta > 0 && getUsedPoints() >= MAX_ATTR_POINTS) return; // sem pontos sobrando
+  if(delta > 0 && getUsedPoints() >= getMaxAttrPoints()) return; // sem pontos sobrando
   attrValues[attr] = next;
   document.getElementById('av_'+attr).textContent = next;
   const btnMinus = document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',-1)"]`);
   const btnPlus = document.querySelector(`#attrsGrid [onclick="changeAttr('${attr}',+1)"]`);
   if(btnMinus) btnMinus.style.opacity = next <= 0 ? '0.3' : '1';
-  if(btnPlus) btnPlus.style.opacity = (getUsedPoints() >= MAX_ATTR_POINTS) || next >= 5 ? '0.3' : '1';
+  if(btnPlus) btnPlus.style.opacity = (getUsedPoints() >= getMaxAttrPoints()) || next >= 5 ? '0.3' : '1';
   updatePointsDisplay();
 }
 
 function updatePointsDisplay() {
-  const left = MAX_ATTR_POINTS - getUsedPoints();
+  const left = getMaxAttrPoints() - getUsedPoints();
   document.getElementById('pointsLeft').textContent = left;
 }
 
@@ -3853,7 +3862,7 @@ function toggleSkill(s) {
     document.getElementById('sc_'+s).classList.remove('selected');
     document.getElementById('sb_'+s).textContent = '';
   } else {
-    if(selectedSkills.size >= MAX_SKILLS) return;
+    if(selectedSkills.size >= getMaxSkills()) return;
     selectedSkills.add(s);
     document.getElementById('sc_'+s).classList.add('selected');
     document.getElementById('sb_'+s).textContent = '✓';
@@ -3863,7 +3872,7 @@ function toggleSkill(s) {
 }
 
 function updateSkillsDisplay() {
-  document.getElementById('skillsLeft').textContent = MAX_SKILLS - selectedSkills.size;
+  document.getElementById('skillsLeft').textContent = getMaxSkills() - selectedSkills.size;
 }
 
 // ===== IDADE AUTOMÁTICA =====
@@ -3949,8 +3958,8 @@ async function submitFicha() {
   }
   // Validar atributos — obrigar distribuir todos os pontos
   const pontosUsados = getUsedPoints();
-  if(pontosUsados < MAX_ATTR_POINTS) {
-    showToast(`⚠ Distribua todos os ${MAX_ATTR_POINTS} pontos de atributo. Você usou ${pontosUsados} de ${MAX_ATTR_POINTS}.`, 'error');
+  if(pontosUsados < getMaxAttrPoints()) {
+    showToast(`⚠ Distribua todos os ${getMaxAttrPoints()} pontos de atributo. Você usou ${pontosUsados} de ${getMaxAttrPoints()}.`, 'error');
     return;
   }
   const charData = CHARS_DATA.find(c => c.id === selectedCharId);
@@ -3959,8 +3968,8 @@ async function submitFicha() {
     showToast('⚠ Preencha o nome do Cucurucho.', 'error');
     return;
   }
-  if(selectedSkills.size < MAX_SKILLS) {
-    showToast(`⚠ Selecione ${MAX_SKILLS} perícias. Você selecionou ${selectedSkills.size} de ${MAX_SKILLS}.`, 'error');
+  if(selectedSkills.size < getMaxSkills()) {
+    showToast(`⚠ Selecione ${getMaxSkills()} perícias. Você selecionou ${selectedSkills.size} de ${getMaxSkills()}.`, 'error');
     return;
   }
   const ficha = {
@@ -4382,6 +4391,20 @@ function selectChar(id, name, lang) {
     document.getElementById('f_cucurucho_nome_group').style.display = 'none';
     document.getElementById('f_cucurucho_nome').value = '';
   }
+  // Aplica limites especiais de huevito
+  const huevito = lang === 'huevito';
+  const note = document.getElementById('huevito-attr-note');
+  if(note) note.style.display = huevito ? 'inline' : 'none';
+  // Reinicia atributos e perícias ao trocar personagem
+  attrValues = {AGI:1,FOR:1,INT:1,PRE:1,VIG:1};
+  selectedSkills = new Set();
+  if(typeof buildAttrsForm === 'function') buildAttrsForm();
+  if(typeof buildSkillsForm === 'function') buildSkillsForm();
+  // Atualiza contador de pontos
+  const pl = document.getElementById('pointsLeft');
+  if(pl) pl.textContent = huevito ? 2 : MAX_ATTR_POINTS;
+  const sl = document.getElementById('skillsLeft');
+  if(sl) sl.textContent = huevito ? 2 : MAX_SKILLS;
   // Exibe preview do personagem com foto pré-cadastrada (se houver)
   showFichaCharPreview(id);
   closeCharPopup();
@@ -6702,7 +6725,7 @@ function updateFichaProgress() {
   ];
   const filled = fields.filter(f => f && f.value && f.value.trim()).length;
   const hasChar = !!selectedCharId;
-  const hasSkills = selectedSkills && selectedSkills.size >= 8;
+  const hasSkills = selectedSkills && selectedSkills.size >= getMaxSkills();
   const hasAttrs = (() => {
     let total = 0;
     document.querySelectorAll('.attr-input').forEach(i => total += parseInt(i.value)||0);
