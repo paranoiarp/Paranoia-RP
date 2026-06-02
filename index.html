@@ -211,6 +211,17 @@
   html.light [style*="color: #fff"]:not(.btn-primary):not(.submit-btn):not(.secret-btn):not(.admin-tab):not(.filter-btn):not([class*="status"]) {
     color: #1a1010 !important;
   }
+  /* Captura color:#d0d0d0 e silver-bright inline */
+  html.light [style*="color:#d0d0d0"],
+  html.light [style*="color: #d0d0d0"] { color: #1a1010 !important; }
+  /* Captura color:#c8c8c8 inline */
+  html.light [style*="color:#c8c8c8"],
+  html.light [style*="color: #c8c8c8"] { color: #2a2020 !important; }
+  /* Backgrounds escuros inline */
+  html.light [style*="background:var(--bg2)"],
+  html.light [style*="background: var(--bg2)"] { background: var(--bg2) !important; }
+  html.light [style*="background:var(--bg3)"],
+  html.light [style*="background: var(--bg3)"] { background: var(--bg3) !important; }
   /* text-shadow do titulo PARANOIA na nav */
   html.light [style*="text-shadow:0 0 40px rgba(139,0,0"] {
     text-shadow: 0 0 20px rgba(139,0,0,0.25) !important;
@@ -1227,6 +1238,11 @@
       if(window._playerLogado && typeof loadPlayerPanel === 'function') {
         const pp = document.getElementById('player-panel');
         if(pp && pp.classList.contains('active')) loadPlayerPanel();
+      }
+      // Atualiza lista de players se a página estiver ativa
+      if(typeof renderPlayersPublic === 'function') {
+        const pl = document.getElementById('players');
+        if(pl && pl.classList.contains('active')) renderPlayersPublic();
       }
     });
   }
@@ -3773,7 +3789,7 @@ function updateSkillsDisplay() {
 function calcAge(dateStr) {
   if(!dateStr || dateStr.length < 10) return '';
   const [d,m,y] = dateStr.split('/').map(Number);
-  if(!d||!m||!y||y<1900) return '';
+  if(!d||!m||!y||y<1900||m>12||d>31) return '⚠';
   const today = new Date();
   let age = today.getFullYear() - y;
   if(today.getMonth()+1 < m || (today.getMonth()+1===m && today.getDate()<d)) age--;
@@ -3805,13 +3821,15 @@ function initDateMasks() {
     const el = document.getElementById(dateId);
     if(!el) return;
     maskDate(el);
-    if(!el._ageListenerInitialized) {
-      el._ageListenerInitialized = true;
-      el.addEventListener('input', function() {
+    // Usar função nomeada para evitar duplicar ao chamar initDateMasks múltiplas vezes
+    if(!el._ageHandler) {
+      el._ageHandler = function() {
         const ageEl = document.getElementById(ageId);
         if(ageEl) ageEl.value = calcAge(this.value);
-      });
+      };
     }
+    el.removeEventListener('input', el._ageHandler);
+    el.addEventListener('input', el._ageHandler);
   });
 }
 
@@ -4289,33 +4307,107 @@ function selectChar(id, name, lang) {
 }
 
 // ===== EDIÇÃO DE FICHA =====
-async function showEditFicha() {
-  const senha = prompt('Digite sua senha de edição (solicitada via ticket no Discord):');
-  if(!senha) return;
-  // Verifica se é admin: testa todos os usuários admin válidos
+function showEditFicha() {
+  // Modal estilizado em vez de prompt()
+  const existing = document.getElementById('editFichaModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'editFichaModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2.5rem;max-width:420px;width:100%">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem">// EDITAR FICHA //</div>
+      <h3 style="font-family:'Orbitron',monospace;color:var(--silver-bright);font-size:0.9rem;letter-spacing:3px;margin-bottom:0.5rem">SENHA DE EDIÇÃO</h3>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.5rem">Solicite a senha via ticket no Discord.</p>
+      <input id="editFichaSenha" type="password" placeholder="sua senha..." autocomplete="off"
+        style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.8rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;outline:none;margin-bottom:0.5rem;letter-spacing:2px"
+        onkeydown="if(event.key==='Enter')confirmarEditFicha()">
+      <div id="editFichaErr" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:1px;margin-bottom:1rem"></div>
+      <div style="display:flex;gap:0.8rem;margin-top:1rem">
+        <button onclick="document.getElementById('editFichaModal').remove()"
+          style="flex:1;padding:0.7rem;background:none;border:1px solid var(--border);color:var(--silver);font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
+        <button id="editFichaBtn" onclick="confirmarEditFicha()"
+          style="flex:1;padding:0.7rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">CONFIRMAR</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
+  setTimeout(() => document.getElementById('editFichaSenha')?.focus(), 100);
+}
+
+async function confirmarEditFicha() {
+  const senhaEl = document.getElementById('editFichaSenha');
+  const errEl = document.getElementById('editFichaErr');
+  const btn = document.getElementById('editFichaBtn');
+  const senha = (senhaEl?.value || '').trim();
+  if(!senha) { errEl.textContent = '⚠ Digite a senha.'; errEl.style.display='block'; return; }
+  btn.textContent = 'AGUARDE...'; btn.disabled = true;
+  errEl.style.display = 'none';
+  // Verifica se é admin — só um request usando o user logado se já logado
+  if(window._adminLogado && window._adminUser) {
+    try {
+      const ok = await window._checkAdminFirebase(window._adminUser, senha);
+      if(ok) { document.getElementById('editFichaModal')?.remove(); openEditForm(window._adminUser, senha); return; }
+    } catch(e) {}
+  }
+  // Testa contra todos os admins
   for(const u of ADMIN_USERS) {
     try {
       const ok = await window._checkAdminFirebase(u, senha);
-      if(ok) { openEditForm(u, senha); return; }
-    } catch(e) { /* continua */ }
+      if(ok) { document.getElementById('editFichaModal')?.remove(); openEditForm(u, senha); return; }
+    } catch(e) {}
   }
-  // Verifica senha de player no Firestore
-  window._getPlayerEditKey(senha).then(player => {
-    if(player) {
-      openEditForm(player, senha);
-    } else {
-      showToast('⚠ Senha inválida. Solicite acesso via ticket no Discord.', 'error');
-    }
-  });
+  // Verifica senha de player
+  try {
+    const player = await window._getPlayerEditKey(senha);
+    if(player) { document.getElementById('editFichaModal')?.remove(); openEditForm(player, senha); return; }
+  } catch(e) {}
+  errEl.textContent = '⚠ Senha inválida. Solicite acesso via ticket no Discord.';
+  errEl.style.display = 'block';
+  btn.textContent = 'CONFIRMAR'; btn.disabled = false;
 }
 
 function openEditForm(playerName, senha, fichaOverride) {
-  // Busca ficha aprovada do player
-  const ficha = fichaOverride || approvedChars.find(c => c.player && c.player.toLowerCase() === playerName.toLowerCase());
-  if(!ficha) {
+  // Busca TODAS as fichas aprovadas do player
+  const fichas = fichaOverride
+    ? [fichaOverride]
+    : approvedChars.filter(c => c.player && c.player.toLowerCase() === playerName.toLowerCase());
+
+  if(!fichas.length) {
     showToast('⚠ Nenhuma ficha aprovada encontrada para ' + playerName, 'error');
     return;
   }
+
+  // Se mais de uma ficha, mostra modal de seleção
+  if(fichas.length > 1) {
+    const existing = document.getElementById('selectFichaModal');
+    if(existing) existing.remove();
+    const modal = document.createElement('div');
+    modal.id = 'selectFichaModal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+    modal.innerHTML = `
+      <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:440px;width:100%">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:1rem">// QUAL PERSONAGEM? //</div>
+        <h3 style="font-family:'Orbitron',monospace;color:var(--silver-bright);font-size:0.85rem;letter-spacing:3px;margin-bottom:1.5rem">SELECIONE O PERSONAGEM</h3>
+        <div style="display:flex;flex-direction:column;gap:0.6rem">
+          ${fichas.map((f,i) => `
+            <button onclick="document.getElementById('selectFichaModal').remove();openEditForm('${playerName}','${senha}',window._editFichaOptions[${i}])"
+              style="padding:0.9rem 1.2rem;background:var(--bg3);border:1px solid var(--border);color:var(--silver-bright);font-family:'Share Tech Mono',monospace;font-size:0.8rem;letter-spacing:2px;cursor:pointer;text-align:left;transition:all 0.2s"
+              onmouseover="this.style.borderColor='var(--red-bright)'"
+              onmouseout="this.style.borderColor='var(--border)'">
+              ${(f.name||'?').toUpperCase()}
+            </button>`).join('')}
+        </div>
+        <button onclick="document.getElementById('selectFichaModal').remove()"
+          style="margin-top:1rem;width:100%;padding:0.6rem;background:none;border:1px solid var(--border);color:var(--silver);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
+      </div>`;
+    window._editFichaOptions = fichas;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+    return;
+  }
+
+  const ficha = fichas[0];
   // Garante que fichaSuccess não está visível
   document.getElementById('fichaForm').style.display = 'block';
   document.getElementById('fichaSuccess').style.display = 'none';
@@ -4569,7 +4661,7 @@ async function adminVincularPersonagem(fichaDocId, charName, currentAccount) {
   } catch(e) { players = []; }
 
   // Também inclui admins como opção
-  const admins = ['twik','ryu','andy','ali'];
+  const admins = ADMIN_USERS;
   const allAccounts = [...new Set([...admins, ...players])].sort();
 
   const existing = document.getElementById('vincularModal');
@@ -5958,7 +6050,7 @@ function buildNavPlayersMenu() {
   }
   container.innerHTML = data.map(p => {
     const username = (p.username || p.id).toUpperCase();
-    const isAdmin = ['twik','ryu','andy','ali'].includes((p.username||p.id).toLowerCase());
+    const isAdmin = ADMIN_USERS.includes((p.username||p.id).toLowerCase());
     const badge = isAdmin ? ' <span style="color:var(--red-bright);font-size:0.55rem">★</span>' : '';
     return `<a href="#" onclick="showPage('players');filterPlayers('search',null,'${(p.username||p.id).toLowerCase()}');document.getElementById('playersSearch').value='${(p.username||p.id).toLowerCase()}';event.stopPropagation()">
       <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:0.5rem;flex-shrink:0"></span>${username}${badge} <span style="color:var(--text-dim);font-size:0.6rem;margin-left:auto">${p.chars.length}▸</span>
@@ -6007,7 +6099,7 @@ function renderPlayersHTML(el, playersComChars) {
   el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem">` +
     playersComChars.map(p => {
       const username = (p.username || p.id);
-      const isAdmin = ['twik','ryu','andy','ali'].includes(username.toLowerCase());
+      const isAdmin = ADMIN_USERS.includes(username.toLowerCase());
       const avatarUrl = p.avatarUrl || '';
       const imgHtml = avatarUrl
         ? `<img src="${avatarUrl}" alt="${username}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
@@ -6038,7 +6130,7 @@ function showPlayerPublicProfile(username) {
   if(!modal || !body) return;
 
   const avatarUrl = data.avatarUrl || '';
-  const isAdmin = ['twik','ryu','andy','ali'].includes(username.toLowerCase());
+  const isAdmin = ADMIN_USERS.includes(username.toLowerCase());
   const chars = data.chars || [];
   const vivos = chars.filter(c => (c.gameStatus||'vivo') === 'vivo').length;
   const total = chars.length;
@@ -6174,7 +6266,7 @@ async function renderPlayersAdmin() {
               <h4 style="margin:0">${(p.username||p.id).toUpperCase()}</h4>
               ${(()=>{
                 const role = p.role || 'player';
-                const isAdm = ['twik','ryu','andy','ali'].includes((p.username||p.id).toLowerCase());
+                const isAdm = ADMIN_USERS.includes((p.username||p.id).toLowerCase());
                 const r = isAdm ? 'admin' : role;
                 const colors = { admin:'#cc0000', adminplayer:'#ff6b00', player:'#4caf50' };
                 const labels = { admin:'ADMIN', adminplayer:'ADMIN PLAYER', player:'PLAYER' };
@@ -6284,6 +6376,20 @@ function resetFichaForm() {
   // Volta para a tela do formulário
   document.getElementById('fichaForm').style.display = 'block';
   document.getElementById('fichaSuccess').style.display = 'none';
+  // Reseta barra de progresso
+  const fill = document.getElementById('fichaProgressFill');
+  const pct = document.getElementById('fichaProgressPct');
+  if(fill) { fill.style.width='0%'; fill.style.background='var(--red-bright)'; }
+  if(pct) pct.textContent = '0%';
+  // Re-hookear listeners de progresso após rebuild do DOM
+  setTimeout(() => {
+    document.querySelectorAll('#fichaForm input, #fichaForm textarea').forEach(el => {
+      el.removeEventListener('input', updateFichaProgress);
+      el.removeEventListener('change', updateFichaProgress);
+      el.addEventListener('input', updateFichaProgress);
+      el.addEventListener('change', updateFichaProgress);
+    });
+  }, 150);
   showPage('home');
 }
 
@@ -6490,6 +6596,8 @@ function updateFichaProgress() {
 // ===== TOAST =====
 function showToast(msg, type = 'info', duration = 3500) {
   const container = document.getElementById('toastContainer');
+  // Máximo 3 toasts simultâneos
+  while(container.children.length >= 3) container.firstChild.remove();
   const t = document.createElement('div');
   t.className = `toast toast-${type}`;
   t.textContent = msg;
