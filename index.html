@@ -1553,10 +1553,7 @@
 
   loadFromFirestore();
 
-  // Cadastra Twik se ainda não existir
-  window._adminExistsFirebase('twik').then(exists => {
-    if(!exists) window._setAdminPasswordFirebase('twik', 'mestrerp');
-  });
+  // Admin inicial removido — cadastro feito diretamente pelo painel.
 
   // Sincroniza fotos pré-cadastradas em tempo real
   onSnapshot(collection(db, 'charPhotos'), snap => {
