@@ -4153,10 +4153,15 @@ function renderPopupChars() {
   // Render tab bar
   const tabBar = document.getElementById('popupTabBar');
   if(tabBar) {
-    tabBar.innerHTML = cats.map(cat => {
+    tabBar.innerHTML = '';
+    cats.forEach(cat => {
       const isActive = cat.key === _popupActiveTab;
-      return `<button onclick="switchPopupTab('${cat.key}')" style="padding:0.7rem 1.1rem;background:${isActive?'var(--bg2)':'transparent'};border:none;border-bottom:2px solid ${isActive?'var(--red)':'transparent'};color:${isActive?'#fff':'var(--text-dim)'};font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:1.5px;cursor:pointer;white-space:nowrap;transition:all 0.15s" onmouseover="if('${cat.key}'!=='${_popupActiveTab}')this.style.color='var(--silver)'" onmouseout="if('${cat.key}'!=='${_popupActiveTab}')this.style.color='var(--text-dim)'">${cat.label}</button>`;
-    }).join('');
+      const btn = document.createElement('button');
+      btn.textContent = cat.label;
+      btn.onclick = () => switchPopupTab(cat.key);
+      btn.style.cssText = `padding:0.7rem 1.1rem;background:${isActive?'var(--bg2)':'transparent'};border:none;border-bottom:2px solid ${isActive?'var(--red)':'transparent'};color:${isActive?'#fff':'var(--text-dim)'};font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:1.5px;cursor:pointer;white-space:nowrap;transition:all 0.15s`;
+      tabBar.appendChild(btn);
+    });
   }
 
   renderPopupTabContent(_popupActiveTab);
@@ -4185,7 +4190,8 @@ function renderPopupTabContent(key) {
         : c.minecraft
         ? `<img src="https://mc-heads.net/head/${c.minecraft}/80" alt="${c.name}" style="width:100%;height:80px;object-fit:cover;display:block" onerror="this.style.display='none'">`
         : `<div style="width:100%;height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--text-dim)">👤</div>`;
-      return `<div onclick="${bloqueado?'':` selectChar('${c.id}','${c.name.replace(/'/g,"\'")}','${c.lang}')`}" style="background:var(--bg3);border:1px solid ${cor};cursor:${bloqueado?'not-allowed':'pointer'};opacity:${bloqueado?'0.5':'1'};overflow:hidden;transition:border-color 0.15s" ${!bloqueado?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
+      const cardOnclick = bloqueado ? '' : `onclick="selectChar('${c.id}','${c.name}','${c.lang}')"`;
+      return `<div ${cardOnclick} style="background:var(--bg3);border:1px solid ${cor};cursor:${bloqueado?'not-allowed':'pointer'};opacity:${bloqueado?'0.5':'1'};overflow:hidden;transition:border-color 0.15s" ${!bloqueado?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
         ${imgHtml}
         <div style="padding:0.5rem 0.6rem">
           <div style="font-family:'Orbitron',monospace;font-size:0.68rem;color:${bloqueado?'var(--text-dim)':'#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
