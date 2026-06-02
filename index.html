@@ -3604,7 +3604,7 @@ function showCharProfile(id) {
   if(!c) return;
   const gs = c.gameStatus || 'vivo';
   const sc = gs === 'classified' ? 'status-morto' : `status-${gs}`;
-  const sl = gs === 'classified' ? '??' : gs;
+  const sl = gs === 'classified' ? '🔒 CLASSIFIED' : gs;
   const prePhoto = window._charPhotos && window._charPhotos[id];
   const imgHtml = c.imageUrl
     ? `<img src="${c.imageUrl}" alt="${c.name}" class="profile-img">`
@@ -3669,7 +3669,10 @@ function showCharProfile(id) {
       </div>
       <div class="profile-status-box">
         <div class="profile-status-label">// STATUS ATUAL //</div>
-        <div class="status-badge ${sc}" style="font-size:0.75rem;padding:0.4rem 1rem">${sl.toUpperCase()}</div>
+        ${gs === 'classified'
+          ? `<div style="display:inline-flex;align-items:center;gap:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:3px;color:var(--red-bright);border:1px solid var(--red);padding:0.4rem 1rem;background:rgba(139,0,0,0.15);animation:flicker 3s infinite">🔒 CLASSIFIED</div>`
+          : `<div class="status-badge ${sc}" style="font-size:0.75rem;padding:0.4rem 1rem">${sl.toUpperCase()}</div>`
+        }
       </div>
       <div class="profile-info-box">
         <div class="profile-info-item"><span class="label">IDENTIDADE</span><span class="value">${clf}</span></div>
@@ -3696,7 +3699,10 @@ function showCharProfile(id) {
       <div class="profile-img-container">${imgHtml}</div>
       <div class="profile-status-box">
         <div class="profile-status-label">// STATUS ATUAL //</div>
-        <div class="status-badge ${sc}" style="font-size:0.75rem;padding:0.4rem 1rem">${sl.toUpperCase()}</div>
+        ${gs === 'classified'
+          ? `<div style="display:inline-flex;align-items:center;gap:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:3px;color:var(--red-bright);border:1px solid var(--red);padding:0.4rem 1rem;background:rgba(139,0,0,0.15);animation:flicker 3s infinite">🔒 CLASSIFIED</div>`
+          : `<div class="status-badge ${sc}" style="font-size:0.75rem;padding:0.4rem 1rem">${sl.toUpperCase()}</div>`
+        }
       </div>
       <div class="profile-info-box">
         <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${c.name}</span></div>
