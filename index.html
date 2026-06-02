@@ -2629,219 +2629,17 @@
 
 
 <!-- POPUP SELEÇÃO DE PERSONAGEM -->
-<div id="charSelectPopup" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.85);overflow-y:auto;padding:2rem">
-  <div style="max-width:900px;margin:0 auto;background:var(--bg2);border:1px solid var(--red);padding:2rem">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-      <h2 style="font-family:&#39;Orbitron&#39;,monospace;font-size:1rem;letter-spacing:3px;color:#fff">ESCOLHER PERSONAGEM</h2>
-      <button onclick="closeCharPopup()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;cursor:pointer;font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem">✕ FECHAR</button>
+<div id="charSelectPopup" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.92);overflow-y:auto;padding:1.5rem">
+  <div style="max-width:860px;margin:0 auto;background:var(--bg2);border:1px solid var(--red)">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:1.2rem 1.5rem;border-bottom:1px solid var(--red)">
+      <h2 style="font-family:'Orbitron',monospace;font-size:0.95rem;letter-spacing:3px;color:#fff">ESCOLHER PERSONAGEM</h2>
+      <button onclick="closeCharPopup()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕ FECHAR</button>
     </div>
-    <div id="popupCharList"><div style="margin-bottom:1.5rem">
-      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)"><img src="https://flagcdn.com/w20/us.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        <div onclick="selectChar(&#39;badboyhalo&#39;,&#39;BadBoyHalo&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">BadBoyHalo</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;dantdm&#39;,&#39;DanTDM&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">DanTDM</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;fitmc&#39;,&#39;FitMC&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">FitMC</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;foolish&#39;,&#39;Foolish&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Foolish</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;ironmouse&#39;,&#39;Ironmouse&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Ironmouse</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;jaiden&#39;,&#39;Jaiden&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Jaiden</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;lenay&#39;,&#39;Lenay&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Lenay</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;nihachu&#39;,&#39;Nihachu&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Nihachu</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;philza&#39;,&#39;Philza&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Philza</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;slimecicle&#39;,&#39;Slimecicle&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--red);cursor:not-allowed;opacity:0.5;transition:all 0.2s">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:var(--text-dim)">Slimecicle</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:var(--red-bright)">🔴 OCUPADO</div>
-          </div><div onclick="selectChar(&#39;tinakitten&#39;,&#39;TinaKitten&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">TinaKitten</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;tubbo&#39;,&#39;Tubbo&#39;,&#39;ingles&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Tubbo</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div>
-      </div>
-    </div><div style="margin-bottom:1.5rem">
-      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)"><img src="https://flagcdn.com/w20/es.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> ESPANHOL</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        <div onclick="selectChar(&#39;carre&#39;,&#39;Carre&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Carre</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;elmariana&#39;,&#39;ElMariana&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">ElMariana</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;german&#39;,&#39;German&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">German</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;luzu&#39;,&#39;Luzu&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Luzu</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;maximus&#39;,&#39;Maximus&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Maximus</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;missasinfonia&#39;,&#39;Missasinfonia&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Missasinfonia</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;polispol&#39;,&#39;Polispol&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Polispol</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;quackity&#39;,&#39;Quackity&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Quackity</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;rivers&#39;,&#39;Rivers&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Rivers</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;roier&#39;,&#39;Roier&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Roier</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;rubius&#39;,&#39;Rubius&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Rubius</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;spreen&#39;,&#39;Spreen&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Spreen</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;vegetta&#39;,&#39;Vegetta&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Vegetta</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;willyrex&#39;,&#39;Willyrex&#39;,&#39;espanhol&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Willyrex</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div>
-      </div>
-    </div><div style="margin-bottom:1.5rem">
-      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)"><img src="https://flagcdn.com/w20/br.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> PORTUGUÊS</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        <div onclick="selectChar(&#39;bagi&#39;,&#39;Bagi&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Bagi</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;cellbit&#39;,&#39;Cellbit&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Cellbit</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;felps&#39;,&#39;Felps&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Felps</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;mike&#39;,&#39;Mike&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Mike</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;pac&#39;,&#39;Pac&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Pac</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;forever&#39;,&#39;Forever&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Forever</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;jinki&#39;,&#39;Jinki&#39;,&#39;portugues&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Jinki</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div>
-      </div>
-    </div><div style="margin-bottom:1.5rem">
-      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)"><img src="https://flagcdn.com/w20/fr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        <div onclick="selectChar(&#39;antoine&#39;,&#39;Antoine&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Antoine</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;aypierre&#39;,&#39;Aypierre&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Aypierre</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;baghera&#39;,&#39;Baghera&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Baghera</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;etoiles&#39;,&#39;Etoiles&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Etoiles</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;kameto&#39;,&#39;Kameto&#39;,&#39;frances&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Kameto</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div>
-      </div>
-    </div><div style="margin-bottom:1.5rem">
-      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)"><img src="https://flagcdn.com/w20/kr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        <div onclick="selectChar(&#39;bjacau&#39;,&#39;Acau&#39;,&#39;coreano&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Acau</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;jungryeok&#39;,&#39;Jungryeok&#39;,&#39;coreano&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Jungryeok</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;yangdding&#39;,&#39;Yangdding&#39;,&#39;coreano&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Yangdding</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;kongkong&#39;,&#39;Kongkong&#39;,&#39;coreano&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Kongkong</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div>
-      </div>
-    </div><div style="margin-bottom:1.5rem">
-      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)">🥚 HUEVITOS</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        <div onclick="selectChar(&#39;bobby&#39;,&#39;Bobby&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Bobby</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;chayanne&#39;,&#39;Chayanne&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Chayanne</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;chunsik&#39;,&#39;Chunsik&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Chunsik</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;dapper&#39;,&#39;Dapper&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Dapper</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;empanada&#39;,&#39;Empanada&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Empanada</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;gegg&#39;,&#39;Gegg&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Gegg</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;juanaflippa&#39;,&#39;Juanaflippa&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Juanaflippa</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;leonarda&#39;,&#39;Leonarda&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Leonarda</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;pepito&#39;,&#39;Pepito&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Pepito</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;pomme&#39;,&#39;Pomme&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Pomme</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;ramon&#39;,&#39;Ramón&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Ramón</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;richarlyson&#39;,&#39;Richarlyson&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Richarlyson</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;sunnysideup&#39;,&#39;Sunnysideup&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Sunnysideup</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;tallulah&#39;,&#39;Tallulah&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Tallulah</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;tilin&#39;,&#39;Tilin&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Tilin</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div><div onclick="selectChar(&#39;trump&#39;,&#39;Trump&#39;,&#39;huevito&#39;)" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);cursor:pointer;opacity:1;transition:all 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;var(--border)&#39;">
-            <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.75rem;color:#fff">Trump</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:#4caf50">🟢 DISPONÍVEL</div>
-          </div>
-      </div>
-    </div></div>
+    <div id="popupTabBar" style="display:flex;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--bg3)"></div>
+    <div id="popupCharList" style="padding:1.2rem 1.5rem;min-height:180px"></div>
   </div>
 </div>
+
 <!-- ENVIAR FICHA -->
 <div id="ficha" class="page">
   <div class="section-header">
@@ -4335,39 +4133,67 @@ function getCharStatus(charId) {
   return 'disponivel';
 }
 
+let _popupActiveTab = null;
+
 function renderPopupChars() {
   const isAdmin = !!window._adminLogado;
   const cats = [
-    {key:'ingles', label:'<img src="https://flagcdn.com/w20/us.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> INGLÊS'},
-    {key:'espanhol', label:'<img src="https://flagcdn.com/w20/es.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> ESPANHOL'},
-    {key:'portugues', label:'<img src="https://flagcdn.com/w20/br.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> PORTUGUÊS'},
-    {key:'frances', label:'<img src="https://flagcdn.com/w20/fr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> FRANCÊS'},
-    {key:'coreano', label:'<img src="https://flagcdn.com/w20/kr.png" width="20" height="15" style="margin-right:0.3rem;vertical-align:middle" alt=""> COREANO'},
-    {key:'huevito', label:'🥚 HUEVITOS'},
-    // Cucuruchos só aparecem para admins logados
+    {key:'ingles',    label:'🇺🇸 INGLÊS'},
+    {key:'espanhol',  label:'🇪🇸 ESPANHOL'},
+    {key:'portugues', label:'🇧🇷 PORTUGUÊS'},
+    {key:'frances',   label:'🇫🇷 FRANCÊS'},
+    {key:'coreano',   label:'🇰🇷 COREANO'},
+    {key:'huevito',   label:'🥚 HUEVITOS'},
     ...(isAdmin ? [{key:'cucurucho', label:'🎭 CUCURUCHOS'}] : []),
-  ];
+  ].filter(cat => CHARS_DATA.some(c => c.lang === cat.key));
+
+  // Se a aba ativa não existe mais, volta para a primeira
+  if(!cats.find(c => c.key === _popupActiveTab)) _popupActiveTab = cats[0]?.key || null;
+
+  // Render tab bar
+  const tabBar = document.getElementById('popupTabBar');
+  if(tabBar) {
+    tabBar.innerHTML = cats.map(cat => {
+      const isActive = cat.key === _popupActiveTab;
+      return `<button onclick="switchPopupTab('${cat.key}')" style="padding:0.7rem 1.1rem;background:${isActive?'var(--bg2)':'transparent'};border:none;border-bottom:2px solid ${isActive?'var(--red)':'transparent'};color:${isActive?'#fff':'var(--text-dim)'};font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:1.5px;cursor:pointer;white-space:nowrap;transition:all 0.15s" onmouseover="if('${cat.key}'!=='${_popupActiveTab}')this.style.color='var(--silver)'" onmouseout="if('${cat.key}'!=='${_popupActiveTab}')this.style.color='var(--text-dim)'">${cat.label}</button>`;
+    }).join('');
+  }
+
+  renderPopupTabContent(_popupActiveTab);
+}
+
+function switchPopupTab(key) {
+  _popupActiveTab = key;
+  renderPopupChars();
+}
+
+function renderPopupTabContent(key) {
   const container = document.getElementById('popupCharList');
-  container.innerHTML = cats.map(cat => {
-    const chars = CHARS_DATA.filter(c => c.lang === cat.key);
-    if(!chars.length) return '';
-    return `<div style="margin-bottom:1.5rem">
-      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)">${cat.label}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem">
-        ${chars.map(c => {
-          const st = getCharStatus(c.id);
-          const bloqueado = st !== 'disponivel';
-          const cor = st==='ocupado'?'var(--red)': st==='reservado'?'#ff9800':'var(--border)';
-          const label = st==='ocupado'?'🔴 OCUPADO': st==='reservado'?'🟡 RESERVADO':'🟢 DISPONÍVEL';
-          const labelCor = st==='ocupado'?'var(--red-bright)': st==='reservado'?'#ff9800':'#4caf50';
-          return `<div onclick="selectChar('${c.id}','${c.name}','${c.lang}')" style="padding:0.8rem;background:var(--bg3);border:1px solid ${cor};cursor:${bloqueado?'not-allowed':'pointer'};opacity:${bloqueado?'0.5':'1'};transition:all 0.2s" ${!bloqueado?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
-            <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:${bloqueado?'var(--text-dim)':'#fff'}">${c.name}</div>
-            <div style="font-size:0.7rem;margin-top:0.3rem;color:${labelCor}">${label}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
-  }).join('');
+  if(!container) return;
+  const chars = CHARS_DATA.filter(c => c.lang === key);
+  if(!chars.length) { container.innerHTML = '<div style="color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.75rem;padding:1rem">Nenhum personagem nesta categoria.</div>'; return; }
+  container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.6rem">
+    ${chars.map(c => {
+      const st = getCharStatus(c.id);
+      const bloqueado = st !== 'disponivel';
+      const adminPhoto = window._charPhotos && window._charPhotos[c.id];
+      const cor = st==='ocupado'?'var(--red)': st==='reservado'?'#ff9800':'var(--border)';
+      const statusLabel = st==='ocupado'?'🔴 OCUPADO': st==='reservado'?'🟡 RESERVADO':'🟢 DISPONÍVEL';
+      const statusCor = st==='ocupado'?'var(--red-bright)': st==='reservado'?'#ff9800':'#4caf50';
+      const imgHtml = adminPhoto
+        ? `<img src="${adminPhoto}" alt="${c.name}" style="width:100%;height:80px;object-fit:cover;display:block" onerror="this.style.display='none'">`
+        : c.minecraft
+        ? `<img src="https://mc-heads.net/head/${c.minecraft}/80" alt="${c.name}" style="width:100%;height:80px;object-fit:cover;display:block" onerror="this.style.display='none'">`
+        : `<div style="width:100%;height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--text-dim)">👤</div>`;
+      return `<div onclick="${bloqueado?'':` selectChar('${c.id}','${c.name.replace(/'/g,"\'")}','${c.lang}')`}" style="background:var(--bg3);border:1px solid ${cor};cursor:${bloqueado?'not-allowed':'pointer'};opacity:${bloqueado?'0.5':'1'};overflow:hidden;transition:border-color 0.15s" ${!bloqueado?`onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)'"`:''}>
+        ${imgHtml}
+        <div style="padding:0.5rem 0.6rem">
+          <div style="font-family:'Orbitron',monospace;font-size:0.68rem;color:${bloqueado?'var(--text-dim)':'#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+          <div style="font-size:0.62rem;margin-top:0.2rem;color:${statusCor}">${statusLabel}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
 }
 
 function selectChar(id, name, lang) {
