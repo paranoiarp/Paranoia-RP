@@ -3710,6 +3710,7 @@ function showCharProfile(id) {
         ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
         ${(()=>{const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
         <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>
+        ${c.classificacao?`<div class="profile-info-item"><span class="label">CLASSIFICAÇÃO</span><span class="value" style="color:#ff9800">${c.classificacao.toUpperCase()}</span></div>`:''} 
         ${(()=>{const st=getCharStatus(id);const cor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';const label=st==='ocupado'?'OCUPADA':st==='reservado'?'RESERVADO':'DISPONÍVEL';return `<div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${cor}">${label}</span></div>`;})()}
       </div>
     </div>
@@ -4658,6 +4659,7 @@ function renderApprovedAdmin() {
             <span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;letter-spacing:1px"><span style="color:var(--silver-bright)">CONTA </span><span style="color:var(--text)">${f.playerAccount||'—'}</span></span>
             <span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;letter-spacing:1px"><span style="color:var(--silver-bright)">STATUS </span><span style="color:${gsColor};font-weight:700">${gsLabel}</span></span>
             ${f.lang?`<span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;letter-spacing:1px"><span style="color:var(--silver-bright)">IDIOMA </span><span style="color:var(--text)">${f.lang.toUpperCase()}</span></span>`:''}
+            ${f.classificacao?`<span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;letter-spacing:1px"><span style="color:var(--silver-bright)"> // </span><span style="color:#ff9800">${f.classificacao.toUpperCase()}</span></span>`:''}
           </div>
         </div>
         <button onclick="showCharProfile('${f.charId||f.id}')" style="flex-shrink:0;padding:0.45rem 0.9rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s;align-self:flex-start;white-space:nowrap" onmouseover="this.style.borderColor='var(--silver)';this.style.color='#fff'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">👁 VER FICHA</button>
@@ -4669,6 +4671,7 @@ function renderApprovedAdmin() {
         <button class="btn-approve" onclick="adminGerenciarHistorico('${f.id}')">📖 HISTÓRICO</button>
         <button class="btn-approve" onclick="gerarSenhaEdicao('${f.id}','${(f.player||f.name).replace(/'/g,"\\'")}')">🔑 SENHA</button>
         <button class="btn-approve" onclick="adminVincularPersonagem('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}','${(f.playerAccount||'').replace(/'/g,"\\'")}')">🔗 VINCULAR</button>
+        <button class="btn-approve" onclick="adminChangeClassificacao('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}','${(f.classificacao||'').replace(/'/g,"\\'")}')">🏷 CLASSIFICAÇÃO</button>
         <button class="btn-reject" style="margin-left:auto" onclick="deleteApprovedChar('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}')">🗑 EXCLUIR</button>
       </div>
     </div>`;
@@ -5437,6 +5440,40 @@ function adminChangeStatus(charDocId, charName, playerName) {
     </div>`;
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+function adminChangeClassificacao(charDocId, charName, current) {
+  const existing = document.getElementById('classificacaoModal');
+  if(existing) existing.remove();
+  const tipos = ['residente','trabalhador da federação','invasor','visitante','refugiado'];
+  const modal = document.createElement('div');
+  modal.id = 'classificacaoModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:420px;width:100%">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.5rem">// CLASSIFICAÇÃO DO PERSONAGEM //</div>
+      <h3 style="font-family:'Orbitron',monospace;color:#fff;margin-bottom:1.2rem;font-size:1rem">${charName.toUpperCase()}</h3>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem">
+        ${tipos.map(t => `<button onclick="confirmClassificacao('${charDocId}','${charName}','${t}')" style="padding:0.8rem;background:${'${current}'===t?'rgba(255,152,0,0.2)':'var(--bg3)'};border:1px solid ${'${current}'===t?'#ff9800':'var(--border)'};color:${'${current}'===t?'#ff9800':'var(--text-dim)'};font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer;text-align:left;transition:all 0.2s" onmouseover="this.style.borderColor='#ff9800';this.style.color='#ff9800'" onmouseout="if('${t}'!=='${current}'){this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'}">${t.toUpperCase()}${'${current}'===t?' ✓':''}</button>`).join('')}
+        <button onclick="confirmClassificacao('${charDocId}','${charName}','')" style="padding:0.8rem;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;text-align:left">✕ REMOVER CLASSIFICAÇÃO</button>
+      </div>
+      <button onclick="document.getElementById('classificacaoModal').remove()" style="width:100%;padding:0.7rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.75rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function confirmClassificacao(charDocId, charName, classificacao) {
+  document.getElementById('classificacaoModal')?.remove();
+  try {
+    const { doc, updateDoc } = window._fbModules;
+    await updateDoc(doc(window._db, 'approvedChars', charDocId), { classificacao });
+    showToast(classificacao ? `✓ ${charName} classificado como ${classificacao.toUpperCase()}` : `✓ Classificação de ${charName} removida`, 'success');
+    renderApprovedAdmin();
+  } catch(e) {
+    showToast('✗ Erro ao salvar classificação.', 'error');
+    console.error(e);
+  }
 }
 
 async function confirmStatusChange(charDocId, charName, playerName, newStatus) {
