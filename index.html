@@ -1509,7 +1509,7 @@
   };
 
   window._getPlayerEditKey = async function(senha) {
-    const { getDoc, doc } = window._fbModules;
+    const { getDoc, doc, getDocs, collection } = window._fbModules;
     const db = window._db;
     // Search all approved chars for matching edit key
     const snap = await getDocs(collection(db, 'approvedChars'));
@@ -4270,7 +4270,10 @@ function openEditForm(playerName, senha, fichaOverride) {
   // Busca TODAS as fichas aprovadas do player
   const fichas = fichaOverride
     ? [fichaOverride]
-    : approvedChars.filter(c => c.player && c.player.toLowerCase() === playerName.toLowerCase());
+    : approvedChars.filter(c => {
+      const p = (c.player || c.playerAccount || '').toLowerCase();
+      return p === playerName.toLowerCase();
+    });
 
   if(!fichas.length) {
     showToast('⚠ Nenhuma ficha aprovada encontrada para ' + playerName, 'error');
@@ -6677,9 +6680,13 @@ function updateThemeIcon(isLight) {
   const isLight = saved === 'light';
   if (isLight) {
     document.documentElement.classList.add('light');
-    document.addEventListener('DOMContentLoaded', function() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        updateThemeIcon(true);
+      });
+    } else {
       updateThemeIcon(true);
-    });
+    }
   }
 })();
 </script>
@@ -6694,8 +6701,6 @@ function updateThemeIcon(isLight) {
   <div id="playerPublicModalBody" style="max-width:1200px;margin:0 auto;padding:2rem 2rem 4rem;display:grid;grid-template-columns:280px 1fr;gap:2rem">
   </div>
 </div>
-</body></html>
-
 <script>
 // ===== HISTÓRICO NARRATIVO — PLAYER SUBMIT =====
 function playerSubmitHistorico(charDocId) {
@@ -6830,3 +6835,4 @@ async function adminRejectHistorico(pendingId) {
   }
 }
 </script>
+</body></html>
