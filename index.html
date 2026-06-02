@@ -3614,11 +3614,23 @@ function showCharProfile(id) {
     ? `<img loading="lazy" src="https://mc-heads.net/body/${c.minecraft}/300" alt="${c.name}" class="profile-img">`
     : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
 
-  const attrsHtml = c.attrs
+  const isClassified = gs === 'classified';
+  const redactedText = `<span style="display:inline-block;background:var(--red-bright);color:var(--red-bright);user-select:none;border-radius:2px;padding:0 0.3rem">████████████████████</span>`;
+  const redactedBlock = `<div style="background:rgba(139,0,0,0.08);border:1px solid rgba(139,0,0,0.3);padding:2rem;text-align:center;margin:0.5rem 0">
+          <div style="font-size:2.5rem;margin-bottom:0.5rem">🔒</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:4px">██ CLASSIFIED ██</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);letter-spacing:2px;margin-top:0.3rem">ACESSO RESTRITO — THE FEDERATION</div>
+        </div>`;
+
+  const attrsHtml = isClassified
+    ? `<div class="attrs-grid">${Object.keys(c.attrs||{AGI:0,FOR:0,INT:0,PRE:0,VIG:0}).map(k=>`<div class="attr-box"><span class="attr-name">${k}</span><span class="attr-val" style="color:var(--red-bright);filter:blur(4px)">?</span></div>`).join('')}</div>`
+    : c.attrs
     ? `<div class="attrs-grid">${Object.entries(c.attrs).sort(([ka,va],[kb,vb])=>(vb-va)||ka.localeCompare(kb)).map(([k,v])=>`<div class="attr-box"><span class="attr-name">${k}</span><span class="attr-val">${v||'—'}</span></div>`).join('')}</div>`
     : '<p style="color:var(--text-dim);font-size:0.85rem">Atributos não definidos.</p>';
 
-  const skillsHtml = c.skills && c.skills.length
+  const skillsHtml = isClassified
+    ? redactedBlock
+    : c.skills && c.skills.length
     ? `<div class="skills-grid">${c.skills.map(s=>`<div class="skill-item"><span class="skill-name">${s}</span><span class="skill-val">✓</span></div>`).join('')}</div>`
     : '<p style="color:var(--text-dim);font-size:0.85rem">Perícias não definidas.</p>';
 
@@ -3696,8 +3708,12 @@ function showCharProfile(id) {
       </div>
     </div>
     <div class="profile-main">
-      ${c.fisico||c.personalidade?`<div class="profile-section"><h3>CARACTERÍSTICAS</h3>${c.fisico?`<p style="margin-bottom:1rem"><strong style="color:var(--silver)">Físico:</strong><br>${c.fisico}</p>`:''}${c.personalidade?`<p><strong style="color:var(--silver)">Personalidade:</strong><br>${c.personalidade}</p>`:''}</div>`:''}
-      ${c.backstory?`<div class="profile-section"><h3>HISTÓRIA</h3><p>${c.backstory}</p></div>`:''}
+      <div class="profile-section"><h3>CARACTERÍSTICAS</h3>
+        ${isClassified ? `<div style=\"background:rgba(139,0,0,0.08);border:1px solid rgba(139,0,0,0.3);padding:1.5rem;text-align:center\"><div style=\"font-size:2rem;margin-bottom:0.5rem\">🔒</div><div style=\"font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:4px\">INFORMAÇÃO CLASSIFICADA</div></div>` : `${c.fisico?`<p style="margin-bottom:1rem"><strong style="color:var(--silver)">Físico:</strong><br>${c.fisico}</p>`:""}${c.personalidade?`<p><strong style="color:var(--silver)">Personalidade:</strong><br>${c.personalidade}</p>`:""}`}
+      </div>
+      <div class="profile-section"><h3>HISTÓRIA</h3>
+        ${isClassified ? `<div style=\"background:rgba(139,0,0,0.08);border:1px solid rgba(139,0,0,0.3);padding:1.5rem;text-align:center\"><div style=\"font-size:2rem;margin-bottom:0.5rem\">🔒</div><div style=\"font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:4px\">INFORMAÇÃO CLASSIFICADA</div></div>` : c.backstory ? `<p>${c.backstory}</p>` : `<p style="color:var(--text-dim);font-size:0.85rem">Nenhuma história registrada.</p>`}
+      </div>
       <div class="profile-section"><h3>SISTEMA</h3>
         <div style="margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px">ATRIBUTOS</div>
         ${attrsHtml}
@@ -3706,7 +3722,7 @@ function showCharProfile(id) {
       </div>
       ${traumasHtml}
       ${conditionsHtml}
-      <div class="profile-section"><h3>HISTÓRICO</h3>${historyHtml}</div>
+      <div class="profile-section"><h3>HISTÓRICO</h3>${isClassified ? `<div style="background:rgba(139,0,0,0.08);border:1px solid rgba(139,0,0,0.3);padding:1.5rem;text-align:center"><div style="font-size:2rem;margin-bottom:0.5rem">🔒</div><div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:4px">INFORMAÇÃO CLASSIFICADA</div></div>` : historyHtml}</div>
     </div>`;
   showPage('char-profile');
 }
