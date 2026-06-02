@@ -4350,8 +4350,11 @@ function viewPendingFicha(id) {
     ? `<div class="skills-grid">${f.skills.map(s=>`<div class="skill-item"><span class="skill-name">${s}</span><span class="skill-val">✓</span></div>`).join('')}</div>`
     : '<p style="color:var(--text-dim);font-size:0.85rem">Nenhuma perícia definida.</p>';
 
+  const _pendingAdminPhoto = window._charPhotos && window._charPhotos[f.charId || f.id];
   const imgHtml = f.imageUrl
     ? `<img src="${f.imageUrl}" alt="${f.name}" class="profile-img">`
+    : _pendingAdminPhoto
+    ? `<img src="${_pendingAdminPhoto}" alt="${f.name}" class="profile-img">`
     : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:4rem;color:var(--text-dim)">👤</div>`;
 
   const modal = document.createElement('div');
