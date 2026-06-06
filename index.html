@@ -7143,11 +7143,11 @@ async function gerarCardPNG(id) {
   });
   CY+=Math.ceil(dados.length/2)*cellH+10;
 
-  ctx.fillStyle='#1e1e1e'; ctx.fillRect(RX,CY,RW,1); CY+=14;
+  ctx.fillStyle='#1e1e1e'; ctx.fillRect(RX,CY,RW,1); CY+=20;
 
   // ATRIBUTOS — label
   ctx.font='bold 16px "Share Tech Mono", monospace';
-  ctx.fillStyle='#8b0000'; ctx.fillText('ATRIBUTOS',RX,CY); CY+=18;
+  ctx.fillStyle='#8b0000'; ctx.fillText('ATRIBUTOS',RX,CY); CY+=22;
 
   if(c.attrs){
     const attrList=Object.entries(c.attrs);
@@ -7168,12 +7168,11 @@ async function gerarCardPNG(id) {
     CY+=70;
   }
 
-  // PERÍCIAS — grid 4 colunas, label maior
+  // PERÍCIAS
   if(c.skills&&c.skills.length){
+    CY+=12;
     ctx.font='bold 16px "Share Tech Mono", monospace';
-    ctx.fillStyle='#8b0000'; ctx.fillText('PERÍCIAS',RX,CY); CY+=18;
-
-    const COLS=4;
+    ctx.fillStyle='#8b0000'; ctx.fillText('PERÍCIAS',RX,CY); CY+=22;
     const skillW=Math.floor(RW/COLS)-4;
     const skillH=28;
     const skills=c.skills.slice(0,8);
