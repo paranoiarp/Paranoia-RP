@@ -3622,6 +3622,19 @@ function showCharProfile(id, opts = {}) {
         ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
         ${(()=>{const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
         <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>
+        ${(()=>{
+          if(c.lang!=='huevito') return '';
+          // Monta chips de pais (filiacaoIds = array novo, filiacao = texto legado)
+          const ids = Array.isArray(c.filiacaoIds) && c.filiacaoIds.length ? c.filiacaoIds : [];
+          if(!ids.length && !c.filiacao) return '';
+          if(!ids.length) return `<div class="profile-info-item"><span class="label">FILIAÇÃO</span><span class="value">${c.filiacao}</span></div>`;
+          const chips = ids.map(pid => {
+            const pc = [...approvedChars,...CHARS_DATA].find(x=>(x.charId||x.id)===pid);
+            const pname = pc ? (pc.name||pid).toUpperCase() : pid.toUpperCase();
+            return `<span onclick="showCharProfile('${pid}')" style="cursor:pointer;display:inline-flex;align-items:center;padding:0.15rem 0.55rem;background:rgba(139,0,0,0.1);border:1px solid rgba(139,0,0,0.4);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver-bright);letter-spacing:1px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(139,0,0,0.4)';this.style.color='var(--silver-bright)'">${pname}</span>`;
+          }).join(' ');
+          return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.4rem"><span class="label">FILIAÇÃO</span><span class="value" style="display:flex;flex-wrap:wrap;gap:0.3rem">${chips}</span></div>`;
+        })()}
         ${c.classificacao?`<div class="profile-info-item"><span class="label">CLASSIFICAÇÃO</span><span class="value" style="color:#ff9800">${c.classificacao.toUpperCase()}</span></div>`:''} 
         ${(()=>{const st=getCharStatus(id);const cor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';const label=st==='ocupado'?'OCUPADA':st==='reservado'?'RESERVADO':'DISPONÍVEL';return `<div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${cor}">${label}</span></div>`;})()}
       </div>
@@ -3641,6 +3654,26 @@ function showCharProfile(id, opts = {}) {
       </div>
       ${traumasHtml}
       ${conditionsHtml}
+      ${(()=>{
+        // Seção "Responsável por" — aparece na ficha de não-huevitos que são pais de huevitos
+        if(c.lang==='huevito') return '';
+        const filhos = approvedChars.filter(fc => {
+          if(fc.lang!=='huevito') return false;
+          const fcid = fc.charId||fc.id;
+          if(Array.isArray(fc.filiacaoIds)) return fc.filiacaoIds.includes(id);
+          return false;
+        });
+        if(!filhos.length) return '';
+        const chips = filhos.map(fc => {
+          const fcid = fc.charId||fc.id;
+          return `<span onclick="showCharProfile('${fcid}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:0.3rem;padding:0.15rem 0.55rem;background:rgba(80,0,0,0.12);border:1px solid rgba(139,0,0,0.35);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver-bright);letter-spacing:1px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(139,0,0,0.35)';this.style.color='var(--silver-bright)'">🥚 ${(fc.name||fcid).toUpperCase()}</span>`;
+        }).join(' ');
+        return `<div class="profile-section">
+          <h3>🥚 RESPONSÁVEL POR</h3>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:0.8rem">Huevitos sob responsabilidade deste personagem</div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem">${chips}</div>
+        </div>`;
+      })()}
       <div class="profile-section"><h3>HISTÓRICO</h3>${isClassified ? `<div style="background:rgba(139,0,0,0.08);border:1px solid rgba(139,0,0,0.3);padding:2rem;text-align:center"><div style="font-size:2.5rem;margin-bottom:0.5rem">🔒</div><div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:4px;margin-bottom:0.3rem">██ CLASSIFIED ██</div><div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);letter-spacing:2px">ACESSO RESTRITO — THE FEDERATION</div></div>` : historyHtml}
       ${!isClassified && isOwnChar ? `<button onclick="playerSubmitHistorico('${id}')" style="margin-top:1rem;padding:0.6rem 1.2rem;background:none;border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(139,0,0,0.15)'" onmouseout="this.style.background='none'">+ SUBMETER ENTRADA NARRATIVA</button>` : ''}
       </div>
@@ -5555,7 +5588,12 @@ function adminEditarFicha(fichaDocId) {
         <div class="form-grid">
           <div class="form-group"><label>Foto (Imgur URL)</label><input type="text" id="adm_imageUrl" value="${ficha.imageUrl||''}" placeholder="https://i.imgur.com/..."></div>
           <div class="form-group"><label>ID do RG (ex: POR-123) — 3 letras, hífen, 3 dígitos — deixe vazio para gerar automático</label><input type="text" id="adm_rgId" value="${ficha.rgId||''}" placeholder="POR-123" maxlength="7" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
-          ${ficha.lang==='huevito'?`<div class="form-group full"><label>🥚 FILIAÇÃO (Pais / Responsáveis) — exclusivo Huevitos</label><input type="text" id="adm_filiacao" value="${ficha.filiacao||''}" placeholder="Ex: Roier e Jaiden"></div>`:'<input type="hidden" id="adm_filiacao" value="">'}
+          ${ficha.lang==='huevito'?`<div class="form-group full" id="adm_filiacao_wrap">
+            <label>🥚 FILIAÇÃO (Pais / Responsáveis) — exclusivo Huevitos <span style="font-weight:400;color:var(--text-dim);font-size:0.75rem">— clique para vincular personagens</span></label>
+            <div id="adm_filiacao_tags" style="display:flex;flex-wrap:wrap;gap:0.4rem;min-height:36px;padding:0.5rem;background:var(--bg3);border:1px solid var(--border);margin-bottom:0.5rem"></div>
+            <button type="button" onclick="openFiliacaoSelector()" style="padding:0.5rem 1.2rem;background:none;border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(139,0,0,0.15)'" onmouseout="this.style.background='none'">+ VINCULAR PERSONAGEM</button>
+            <input type="hidden" id="adm_filiacao" value="">
+          </div>`:'<input type="hidden" id="adm_filiacao" value="">'}
           <div class="form-group"><label>Nome do Player</label><input type="text" id="adm_player" value="${ficha.player||''}"></div>
           <div class="form-group"><label>Data de Nasc. Personagem</label><input type="text" id="adm_nascimento" value="${ficha.nascimento||''}"></div>
           <div class="form-group"><label>Idade Personagem</label><input type="text" id="adm_idade" value="${ficha.idade||''}"></div>
@@ -5591,7 +5629,148 @@ function adminEditarFicha(fichaDocId) {
   window._admEditAttrs = {...av};
   window._admEditSkills = new Set(ficha.skills||[]);
   window._admEditFichaId = fichaDocId;
+  // Init filiação — suporta array (novo) e string legada
+  let initFilIds = [];
+  if(Array.isArray(ficha.filiacaoIds) && ficha.filiacaoIds.length) {
+    initFilIds = ficha.filiacaoIds;
+  } else if(typeof ficha.filiacao === 'string' && ficha.filiacao.trim()) {
+    const legacyNames = ficha.filiacao.split(/[,e&\/]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+    initFilIds = legacyNames.map(n => {
+      const found = [...approvedChars, ...CHARS_DATA].find(x => (x.name||'').toLowerCase()===n || (x.id||'').toLowerCase()===n);
+      return found ? (found.charId||found.id) : null;
+    }).filter(Boolean);
+  }
+  window._admFiliacaoIds = new Set(initFilIds);
+  renderFiliacaoTags();
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+// ===== FILIAÇÃO — FUNÇÕES =====
+function renderFiliacaoTags() {
+  const container = document.getElementById('adm_filiacao_tags');
+  if(!container) return;
+  const ids = window._admFiliacaoIds || new Set();
+  if(ids.size === 0) {
+    container.innerHTML = '<span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px">Nenhum responsável vinculado.</span>';
+    return;
+  }
+  container.innerHTML = [...ids].map(id => {
+    const ch = [...approvedChars, ...CHARS_DATA].find(x=>(x.charId||x.id)===id);
+    const name = ch ? (ch.name||id).toUpperCase() : id.toUpperCase();
+    const lang = ch ? (ch.lang||'') : '';
+    const langColor = lang==='espanhol'?'#d4a017':lang==='portugues'?'#4fc3f7':lang==='ingles'?'#4caf50':lang==='frances'?'#c084a0':'var(--silver)';
+    return `<span style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.25rem 0.7rem;background:rgba(139,0,0,0.12);border:1px solid var(--red);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver-bright);letter-spacing:1px">
+      <span style="color:${langColor}">${name}</span>
+      <button type="button" onclick="removeFiliacaoId('${id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:0.9rem;padding:0;line-height:1" title="Remover">✕</button>
+    </span>`;
+  }).join('');
+}
+
+function removeFiliacaoId(id) {
+  if(!window._admFiliacaoIds) return;
+  window._admFiliacaoIds.delete(id);
+  renderFiliacaoTags();
+}
+
+function openFiliacaoSelector() {
+  const existing = document.getElementById('filiacaoSelectorModal');
+  if(existing) existing.remove();
+  // Todos os personagens não-huevito
+  const allChars = [...CHARS_DATA, ...approvedChars.filter(c=>!CHARS_DATA.find(d=>d.id===(c.charId||c.id)))];
+  const nonHuevito = allChars.filter(c=>c.lang && c.lang !== 'huevito' && c.lang !== 'cucurucho');
+  // Remove duplicatas por id
+  const seen = new Set();
+  const uniq = nonHuevito.filter(c => {
+    const cid = c.charId||c.id;
+    if(seen.has(cid)) return false;
+    seen.add(cid); return true;
+  });
+  const langs = [...new Set(uniq.map(c=>c.lang).filter(Boolean))].sort();
+  const sel = window._admFiliacaoIds || new Set();
+
+  const selectorModal = document.createElement('div');
+  selectorModal.id = 'filiacaoSelectorModal';
+  selectorModal.style.cssText = 'position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:1rem';
+
+  const langFilters = langs.map(l => `<button class="fil-lang-btn" data-lang="${l}" onclick="filterFiliacaoLang('${l}',this)"
+    style="padding:0.3rem 0.8rem;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s">${l.toUpperCase()}</button>`).join('');
+
+  const charButtons = uniq.map(c => {
+    const cid = c.charId||c.id;
+    const isSel = sel.has(cid);
+    return `<button type="button" class="fil-char-btn" data-id="${cid}" data-lang="${c.lang||''}" data-name="${(c.name||'').toLowerCase()}"
+      onclick="toggleFiliacaoChar('${cid}',this)"
+      style="padding:0.5rem 0.8rem;background:${isSel?'rgba(139,0,0,0.25)':'var(--bg3)'};border:1px solid ${isSel?'var(--red)':'var(--border)'};color:${isSel?'var(--silver-bright)':'var(--text-dim)'};font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s;text-align:left">
+      ${isSel?'✓ ':''}<span style="color:var(--silver)">${(c.name||c.id).toUpperCase()}</span><span style="font-size:0.55rem;color:var(--text-dim);margin-left:0.4rem">${(c.lang||'').toUpperCase()}</span>
+    </button>`;
+  }).join('');
+
+  selectorModal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);width:100%;max-width:700px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--red);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.25rem">// VINCULAR RESPONSÁVEL //</div>
+          <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:#fff;letter-spacing:3px">SELECIONAR PERSONAGENS</div>
+        </div>
+        <button onclick="document.getElementById('filiacaoSelectorModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕</button>
+      </div>
+      <div style="padding:0.8rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0">
+        <input type="text" id="filiacaoBusca" placeholder="Buscar personagem..." oninput="filterFiliacaoSearch(this.value)"
+          style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.5rem 0.8rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;outline:none;margin-bottom:0.6rem"
+          onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+          <button class="fil-lang-btn active-lang" data-lang="" onclick="filterFiliacaoLang('',this)"
+            style="padding:0.3rem 0.8rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:1px;cursor:pointer">TODOS</button>
+          ${langFilters}
+        </div>
+      </div>
+      <div id="filiacaoCharList" style="overflow-y:auto;padding:1rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.5rem;flex:1">
+        ${charButtons}
+      </div>
+      <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);flex-shrink:0;display:flex;justify-content:flex-end">
+        <button onclick="document.getElementById('filiacaoSelectorModal').remove()" style="padding:0.6rem 1.5rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">✓ CONFIRMAR</button>
+      </div>
+    </div>`;
+  document.body.appendChild(selectorModal);
+  selectorModal.addEventListener('click', e => { if(e.target===selectorModal) selectorModal.remove(); });
+}
+
+function toggleFiliacaoChar(id, btn) {
+  if(!window._admFiliacaoIds) window._admFiliacaoIds = new Set();
+  if(window._admFiliacaoIds.has(id)) {
+    window._admFiliacaoIds.delete(id);
+    btn.style.background = 'var(--bg3)';
+    btn.style.borderColor = 'var(--border)';
+    btn.style.color = 'var(--text-dim)';
+    const sp = btn.querySelector('span');
+    if(sp) sp.style.color = 'var(--silver)';
+    btn.innerHTML = btn.innerHTML.replace(/^✓\s*/, '');
+  } else {
+    window._admFiliacaoIds.add(id);
+    btn.style.background = 'rgba(139,0,0,0.25)';
+    btn.style.borderColor = 'var(--red)';
+    btn.style.color = 'var(--silver-bright)';
+    if(!btn.textContent.trim().startsWith('✓')) btn.prepend(document.createTextNode('✓ '));
+  }
+  renderFiliacaoTags();
+}
+
+function filterFiliacaoLang(lang, btn) {
+  document.querySelectorAll('.fil-lang-btn').forEach(b => {
+    b.style.background = 'var(--bg3)'; b.style.borderColor = 'var(--border)'; b.style.color = 'var(--text-dim)';
+  });
+  if(btn) { btn.style.background = 'var(--red)'; btn.style.borderColor = 'var(--red-bright)'; btn.style.color = '#fff'; }
+  document.querySelectorAll('.fil-char-btn').forEach(b => {
+    const match = !lang || b.dataset.lang === lang;
+    b.style.display = match ? '' : 'none';
+  });
+}
+
+function filterFiliacaoSearch(q) {
+  const lq = q.toLowerCase();
+  document.querySelectorAll('.fil-char-btn').forEach(b => {
+    b.style.display = (!lq || b.dataset.name.includes(lq)) ? '' : 'none';
+  });
 }
 
 function adminEditAttr(attr, delta) {
@@ -5630,7 +5809,11 @@ async function salvarAdminEdit(fichaDocId) {
       if(v && !/^[A-Z]{3}-[0-9]{3}$/.test(v)) { showToast('✗ ID inválido. Use 3 letras, hífen, 3 dígitos. Ex: POR-123', 'error'); throw new Error('invalid_id'); }
       return v || ficha.rgId || '';
     })(),
-    filiacao: document.getElementById('adm_filiacao')?.value.trim() || ficha.filiacao || '',
+    filiacao: [...(window._admFiliacaoIds||new Set())].map(id => {
+      const ch = [...approvedChars, ...CHARS_DATA].find(x=>(x.charId||x.id)===id||(x.id)===id);
+      return ch ? (ch.name||id) : id;
+    }).join(', ') || ficha.filiacao || '',
+    filiacaoIds: [...(window._admFiliacaoIds||new Set())],
     player: document.getElementById('adm_player')?.value.trim() || ficha.player || '',
     nascimento: document.getElementById('adm_nascimento')?.value.trim() || '',
     idade: document.getElementById('adm_idade')?.value.trim() || '',
