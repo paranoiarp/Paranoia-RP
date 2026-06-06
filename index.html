@@ -3621,7 +3621,7 @@ function showCharProfile(id, opts = {}) {
         <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.playerAccount||c.player||'—'}</span></div>
         ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
         ${(()=>{const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
-        <div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${c.lang?.toUpperCase()||'—'}</span></div>
+        <div class="profile-info-item"><span class="label">${c.lang==='huevito'?'TIPO':'IDIOMA'}</span><span class="value">${c.lang==='huevito'?'HUEVITO':c.lang?.toUpperCase()||'—'}</span></div>
         ${(()=>{
           if(c.lang!=='huevito') return '';
           // Monta chips de pais (filiacaoIds = array novo, filiacao = texto legado)
@@ -4498,7 +4498,7 @@ function viewPendingFicha(id) {
             <div class="profile-info-item"><span class="label">IDADE PLAYER</span><span class="value">${f.idade_player||'—'}</span></div>
             <div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${f.nascimento||'—'}</span></div>
             <div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${f.idade?f.idade+' anos':'—'}</span></div>
-            ${f.lang==='cucurucho' ? `<div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>` : `<div class="profile-info-item"><span class="label">IDIOMA</span><span class="value">${(f.lang||'—').toUpperCase()}</span></div>`}
+            ${f.lang==='cucurucho' ? `<div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>` : `<div class="profile-info-item"><span class="label">${f.lang==='huevito'?'TIPO':'IDIOMA'}</span><span class="value">${f.lang==='huevito'?'HUEVITO':(f.lang||'—').toUpperCase()}</span></div>`}
           </div>
         </div>
 
@@ -6853,7 +6853,7 @@ function gerarFichaPDF(id) {
     <div class="pdf-header-title">
       <div class="pdf-header-label">// FICHA DE PERSONAGEM — PARANOIA RP //</div>
       <div class="pdf-header-name">${c.name.toUpperCase()}</div>
-      <div class="pdf-header-sub">Player: ${c.playerAccount||c.player||'—'} &nbsp;|&nbsp; ${c.lang==='cucurucho'?'QSMP CENSUS BUREAU':(c.lang||'').toUpperCase()}</div>
+      <div class="pdf-header-sub">Player: ${c.playerAccount||c.player||'—'} &nbsp;|&nbsp; ${c.lang==='cucurucho'?'QSMP CENSUS BUREAU':c.lang==='huevito'?'HUEVITO':(c.lang||'').toUpperCase()}</div>
     </div>
     <div class="pdf-status-badge" style="color:${gsColor};border-color:${gsColor};background:${gsColor}18">
       ${gsLabel}
@@ -7089,7 +7089,7 @@ async function gerarCardPNG(id) {
   ] : [
     ['PLAYER',     (c.player||'—').toUpperCase()],
     ['NASCIMENTO', c.nascimento||'—'],
-    ['IDIOMA',     (c.lang||'—').toUpperCase()],
+    [c.lang==='huevito'?'TIPO':'IDIOMA', c.lang==='huevito'?'HUEVITO':(c.lang||'—').toUpperCase()],
     ['STATUS',     gsLabel],
   ];
 
@@ -7390,7 +7390,7 @@ function filtrarFotosAdmin(q = '', lang = '') {
     return `<div class="foto-card" id="fotoCard_${c.id}">
       <div class="foto-card-img">${imgHtml}</div>
       <div class="foto-card-name">${c.name.toUpperCase()}</div>
-      <div class="foto-card-lang">${langLabel} ${c.lang.toUpperCase()}</div>
+      <div class="foto-card-lang">${c.lang==='huevito'?'🥚 HUEVITO':langLabel+' '+c.lang.toUpperCase()}</div>
       ${playerHtml}
       ${logHtml}
       <input class="foto-card-input" id="fotoInput_${c.id}" type="text" placeholder="https://i.imgur.com/..." value="${url}">
