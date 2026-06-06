@@ -3655,9 +3655,15 @@ function showCharProfile(id, opts = {}) {
       history.pushState({pageId:'char-profile', charId:id}, '', url);
     }
   }
-  // Mostrar/ocultar botão PDF dependendo de ser classified e não ser admin
-  const btnPdf = document.getElementById('btnPdfPerfil');
-  if(btnPdf) btnPdf.style.display = (isClassified && !window._adminLogado) ? 'none' : 'block';
+  // ── Controle de visibilidade dos botões PDF e Card ──
+  // Só exibe se a ficha estiver aprovada (personagem em approvedChars)
+  // Admin: qualquer aprovado | Player: só o próprio personagem aprovado
+  const isApproved = approvedChars.some(x => x.charId === id || x.id === id);
+  const canGenerate = isApproved && (window._adminLogado || isOwnChar);
+  const btnPdf  = document.getElementById('btnPdfPerfil');
+  const btnCard = document.getElementById('btnCardPerfil');
+  if(btnPdf)  btnPdf.style.display  = (canGenerate && !(isClassified && !window._adminLogado)) ? 'inline-block' : 'none';
+  if(btnCard) btnCard.style.display = canGenerate ? 'inline-block' : 'none';
 }
 
 // ===== ATRIBUTOS =====
@@ -5487,6 +5493,7 @@ function adminEditarFicha(fichaDocId) {
         <div class="form-grid">
           <div class="form-group"><label>Foto (Imgur URL)</label><input type="text" id="adm_imageUrl" value="${ficha.imageUrl||''}" placeholder="https://i.imgur.com/..."></div>
           <div class="form-group"><label>ID do RG (ex: POR-1234) — deixe vazio para gerar automático</label><input type="text" id="adm_rgId" value="${ficha.rgId||''}" placeholder="POR-1234" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+          ${ficha.lang==='huevito'?`<div class="form-group full"><label>🥚 FILIAÇÃO (Pais / Responsáveis) — exclusivo Huevitos</label><input type="text" id="adm_filiacao" value="${ficha.filiacao||''}" placeholder="Ex: Roier e Jaiden"></div>`:'<input type="hidden" id="adm_filiacao" value="">'}
           <div class="form-group"><label>Nome do Player</label><input type="text" id="adm_player" value="${ficha.player||''}"></div>
           <div class="form-group"><label>Data de Nasc. Personagem</label><input type="text" id="adm_nascimento" value="${ficha.nascimento||''}"></div>
           <div class="form-group"><label>Idade Personagem</label><input type="text" id="adm_idade" value="${ficha.idade||''}"></div>
@@ -5557,6 +5564,7 @@ async function salvarAdminEdit(fichaDocId) {
   const updates = {
     imageUrl: document.getElementById('adm_imageUrl')?.value.trim() || ficha.imageUrl || '',
     rgId: document.getElementById('adm_rgId')?.value.trim().toUpperCase() || ficha.rgId || '',
+    filiacao: document.getElementById('adm_filiacao')?.value.trim() || ficha.filiacao || '',
     player: document.getElementById('adm_player')?.value.trim() || ficha.player || '',
     nascimento: document.getElementById('adm_nascimento')?.value.trim() || '',
     idade: document.getElementById('adm_idade')?.value.trim() || '',
@@ -6366,9 +6374,15 @@ function showClassifiedModal() {
 
 // ===== GERAR FICHA PDF =====
 function gerarFichaPDF(id) {
+  // Só gera PDF de fichas aprovadas
   let c = approvedChars.find(x => x.charId === id || x.id === id);
-  if(!c) c = CHARS_DATA.find(x => x.id === id);
-  if(!c) { showToast('⚠ Personagem não encontrado.', 'error'); return; }
+  if(!c) { showToast('⚠ PDF disponível apenas para fichas aprovadas.', 'error'); return; }
+  // Player só pode gerar do próprio personagem
+  if(!window._adminLogado) {
+    const isOwn = window._playerLogado && window._playerUser && c.player &&
+      c.player.toLowerCase() === window._playerUser.toLowerCase();
+    if(!isOwn) { showToast('⚠ Você só pode gerar PDF do seu próprio personagem.', 'error'); return; }
+  }
 
   const prePhoto = window._charPhotos && window._charPhotos[id];
   const fotoUrl = c.imageUrl || prePhoto || '';
@@ -6666,13 +6680,21 @@ function gerarFichaPDF(id) {
 
 // ===== GERAR CARD PNG =====
 async function gerarCardPNG(id) {
+  // Só gera card de fichas aprovadas
   let c = approvedChars.find(x => x.charId === id || x.id === id);
-  if(!c) c = CHARS_DATA.find(x => x.id === id);
-  if(!c) { showToast('⚠ Personagem não encontrado.', 'error'); return; }
+  if(!c) { showToast('⚠ Card disponível apenas para fichas aprovadas.', 'error'); return; }
+  // Player só pode gerar do próprio personagem
+  if(!window._adminLogado) {
+    const isOwn = window._playerLogado && window._playerUser && c.player &&
+      c.player.toLowerCase() === window._playerUser.toLowerCase();
+    if(!isOwn) { showToast('⚠ Você só pode gerar card do seu próprio personagem.', 'error'); return; }
+  }
 
   showToast('⏳ Gerando RG...', 'info');
 
-  // ── IDENTIFICADOR: usa rgId customizado salvo, ou gera automático ──
+  const isHuevito = c.lang === 'huevito';
+
+  // ── IDENTIFICADOR ──
   const LANG_SIGLAS = {ingles:'ING',espanhol:'ESP',portugues:'POR',frances:'FRA',coreano:'KOR',cucurucho:'FED',huevito:'HUE'};
   const sigla = LANG_SIGLAS[c.lang] || 'PRN';
   const docId = c.id || c.charId || 'X';
@@ -6695,8 +6717,8 @@ async function gerarCardPNG(id) {
     });
   }
 
-  // ── CANVAS 900×560 ──
-  const W=900, H=560;
+  // ── CANVAS 960×580 ──
+  const W=960, H=580;
   const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
@@ -6704,234 +6726,262 @@ async function gerarCardPNG(id) {
   // ── 1. FUNDO ──
   ctx.fillStyle='#07090e';
   ctx.fillRect(0,0,W,H);
-  // Grade sutil
   ctx.strokeStyle='rgba(139,0,0,0.05)'; ctx.lineWidth=1;
   for(let x=0;x<W;x+=24){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
   for(let y=0;y<H;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
 
-  // ── 2. BORDA GERAL ──
+  // ── 2. BORDA ──
   ctx.strokeStyle='#5a0000'; ctx.lineWidth=2;
   ctx.strokeRect(1,1,W-2,H-2);
 
-  // ── 3. TOPO: faixa de cabeçalho ──
-  const HEADER_H = 58;
-  // Fundo do header
+  // ── 3. HEADER ──
+  const HEADER_H = 68;
   ctx.fillStyle='#0d0000';
   ctx.fillRect(0,0,W,HEADER_H);
-  // Linha vermelha inferior do header
   ctx.fillStyle='#8b0000'; ctx.fillRect(0,HEADER_H-2,W,2);
-  // Linha fina dourada
-  ctx.fillStyle='#2a0800'; ctx.fillRect(0,HEADER_H,W,1);
 
-  // Logo Paranoia no header esquerdo
+  // Logo Paranoia
   const parLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png');
-  if(parLogo){
-    ctx.save(); ctx.globalAlpha=0.9;
-    ctx.drawImage(parLogo, 18, 7, 44, 44);
-    ctx.restore();
-  }
-  // Textos do header
+  if(parLogo){ ctx.save(); ctx.globalAlpha=0.95; ctx.drawImage(parLogo,16,8,50,50); ctx.restore(); }
+
+  // Título ILHA QUESADILLA — branco, grande
   ctx.textAlign='left';
-  ctx.font='bold 18px "Orbitron", monospace';
+  ctx.font='bold 22px "Orbitron", monospace';
   ctx.fillStyle='#ffffff';
-  ctx.fillText('ILHA QUESADILLA', 72, 28);
-  ctx.font='8px "Share Tech Mono", monospace';
-  ctx.fillStyle='#8b0000';
-  ctx.fillText('DOCUMENTO DE IDENTIFICAÇÃO OFICIAL  //  THE FEDERATION', 73, 44);
+  ctx.fillText('ILHA QUESADILLA', 76, 34);
 
-  // Número RG no header direito
+  // Subtítulo — branco legível
+  const subtitulo = isHuevito ? 'DOCUMENTO DE ADOÇÃO  //  THE FEDERATION' : 'DOCUMENTO DE IDENTIFICAÇÃO OFICIAL  //  THE FEDERATION';
+  ctx.font='bold 10px "Share Tech Mono", monospace';
+  ctx.fillStyle='#aaaaaa';
+  ctx.fillText(subtitulo, 76, 54);
+
+  // Nº RG — direita, branco, legível
   ctx.textAlign='right';
-  ctx.font='bold 13px "Orbitron", monospace';
-  ctx.fillStyle='#cc2200';
-  ctx.fillText('Nº ' + RG_ID, W-18, 30);
-  ctx.font='7px "Share Tech Mono", monospace';
-  ctx.fillStyle='#444';
-  ctx.fillText('IDENTIFICADOR ÚNICO // THE FEDERATION', W-18, 44);
+  ctx.font='bold 16px "Orbitron", monospace';
+  ctx.fillStyle='#ffffff';
+  ctx.fillText('Nº ' + RG_ID, W-18, 34);
+  ctx.font='bold 9px "Share Tech Mono", monospace';
+  ctx.fillStyle='#aaaaaa';
+  ctx.fillText('IDENTIFICADOR ÚNICO // THE FEDERATION', W-18, 52);
   ctx.textAlign='left';
 
-  // ── 4. COLUNA ESQUERDA: FOTO quadrada ──
+  // ── 4. FOTO ──
   const FOTO_X=18, FOTO_Y=HEADER_H+14;
-  const FOTO_SIZE=210; // quadrada
-  // Moldura
+  const FOTO_SIZE=218;
   ctx.strokeStyle='#8b0000'; ctx.lineWidth=2;
-  ctx.strokeRect(FOTO_X-2, FOTO_Y-2, FOTO_SIZE+4, FOTO_SIZE+4);
+  ctx.strokeRect(FOTO_X-2,FOTO_Y-2,FOTO_SIZE+4,FOTO_SIZE+4);
   ctx.fillStyle='#111';
-  ctx.fillRect(FOTO_X, FOTO_Y, FOTO_SIZE, FOTO_SIZE);
+  ctx.fillRect(FOTO_X,FOTO_Y,FOTO_SIZE,FOTO_SIZE);
 
   if(fotoUrl){
     const foto = await loadImg(fotoUrl);
     if(foto){
-      // Encaixa sem cortar — cabe inteira dentro do quadrado com letterbox
-      const scale = Math.min(FOTO_SIZE/foto.naturalWidth, FOTO_SIZE/foto.naturalHeight);
-      const dw = foto.naturalWidth*scale, dh = foto.naturalHeight*scale;
-      const dx = FOTO_X+(FOTO_SIZE-dw)/2, dy = FOTO_Y+(FOTO_SIZE-dh)/2;
-      ctx.drawImage(foto, dx, dy, dw, dh);
+      const scale=Math.min(FOTO_SIZE/foto.naturalWidth,FOTO_SIZE/foto.naturalHeight);
+      const dw=foto.naturalWidth*scale, dh=foto.naturalHeight*scale;
+      ctx.drawImage(foto,FOTO_X+(FOTO_SIZE-dw)/2,FOTO_Y+(FOTO_SIZE-dh)/2,dw,dh);
     }
   } else {
-    ctx.fillStyle='#1a1a1a';
     ctx.font='72px serif'; ctx.textAlign='center';
-    ctx.fillText('👤', FOTO_X+FOTO_SIZE/2, FOTO_Y+FOTO_SIZE/2+26);
+    ctx.fillStyle='#333';
+    ctx.fillText('👤',FOTO_X+FOTO_SIZE/2,FOTO_Y+FOTO_SIZE/2+26);
     ctx.textAlign='left';
   }
 
-  // Badge de status abaixo da foto
-  const BADGE_Y = FOTO_Y+FOTO_SIZE+6;
+  // Badge status abaixo da foto
+  const BADGE_Y=FOTO_Y+FOTO_SIZE+6;
   ctx.fillStyle=gsColor+'22';
   ctx.strokeStyle=gsColor; ctx.lineWidth=1;
-  ctx.fillRect(FOTO_X, BADGE_Y, FOTO_SIZE, 24);
-  ctx.strokeRect(FOTO_X, BADGE_Y, FOTO_SIZE, 24);
-  ctx.font='bold 11px "Share Tech Mono", monospace';
-  ctx.fillStyle=gsColor;
-  ctx.textAlign='center';
-  ctx.fillText(gsLabel, FOTO_X+FOTO_SIZE/2, BADGE_Y+16);
+  ctx.fillRect(FOTO_X,BADGE_Y,FOTO_SIZE,26);
+  ctx.strokeRect(FOTO_X,BADGE_Y,FOTO_SIZE,26);
+  ctx.font='bold 12px "Share Tech Mono", monospace';
+  ctx.fillStyle=gsColor; ctx.textAlign='center';
+  ctx.fillText(gsLabel,FOTO_X+FOTO_SIZE/2,BADGE_Y+17);
   ctx.textAlign='left';
 
-  // ── 5. COLUNA DIREITA: DADOS ──
-  const RX = FOTO_X+FOTO_SIZE+22;
-  const RW = W-RX-18;
-  let CY = HEADER_H+14;
+  // ── 5. COLUNA DIREITA ──
+  const RX=FOTO_X+FOTO_SIZE+22;
+  const RW=W-RX-18;
+  let CY=HEADER_H+14;
 
-  // MARCA D'ÁGUA: logo federação no centro da coluna direita
+  // Carregar logo da federação
   const fedLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png');
+
+  // MARCA D'ÁGUA — logo da federação igual ao site (branca, centralizada, mais visível)
   if(fedLogo){
-    const mwSize = 220;
-    const mwX = RX+(RW-mwSize)/2;
-    const mwY = CY+20;
+    const mwSize=260;
+    const mwX=RX+(RW-mwSize)/2;
+    const mwY=CY+40;
     ctx.save();
-    ctx.globalAlpha = 0.06;
-    ctx.filter = 'brightness(100) saturate(0)';
-    ctx.drawImage(fedLogo, mwX, mwY, mwSize, mwSize);
-    ctx.filter = 'none';
+    ctx.globalAlpha=0.10;
+    ctx.filter='brightness(1000) saturate(0) invert(0)';
+    ctx.drawImage(fedLogo,mwX,mwY,mwSize,mwSize);
+    ctx.filter='none';
     ctx.restore();
   }
 
-  // NOME DO PERSONAGEM
-  ctx.font='bold 32px "Orbitron", monospace';
+  // NOME
+  ctx.font='bold 34px "Orbitron", monospace';
   ctx.fillStyle='#ffffff';
   let nomeFit=(c.name||'?').toUpperCase();
-  while(ctx.measureText(nomeFit).width>RW-8 && nomeFit.length>2) nomeFit=nomeFit.slice(0,-1);
+  while(ctx.measureText(nomeFit).width>RW-8&&nomeFit.length>2) nomeFit=nomeFit.slice(0,-1);
   if(nomeFit.length<(c.name||'').length) nomeFit+='…';
-  ctx.fillText(nomeFit, RX, CY+30);
-  CY+=44;
+  ctx.fillText(nomeFit,RX,CY+36);
+  CY+=50;
 
-  // Linha separadora
-  ctx.fillStyle='#8b0000'; ctx.fillRect(RX,CY,RW,1); CY+=12;
+  ctx.fillStyle='#8b0000'; ctx.fillRect(RX,CY,RW,1); CY+=14;
 
-  // GRID DE DADOS 2 colunas
-  const dados=[
+  // DADOS: player, nascimento, idioma, status (ou filiação para huevitos)
+  const dados = isHuevito ? [
+    ['PLAYER',     (c.player||'—').toUpperCase()],
+    ['NASCIMENTO', c.nascimento||'—'],
+    ['FILIAÇÃO',   (c.filiacao||'—').toUpperCase()],
+    ['STATUS',     gsLabel],
+  ] : [
     ['PLAYER',     (c.player||'—').toUpperCase()],
     ['NASCIMENTO', c.nascimento||'—'],
     ['IDIOMA',     (c.lang||'—').toUpperCase()],
     ['STATUS',     gsLabel],
   ];
-  const colW=RW/2, cellH=38;
-  dados.forEach(([label,val],i)=>{
-    const cx=RX+(i%2)*colW, cy=CY+Math.floor(i/2)*cellH;
-    ctx.font='bold 8px "Share Tech Mono", monospace';
-    ctx.fillStyle='#555'; ctx.fillText(label, cx, cy+10);
-    ctx.font='bold 13px "Share Tech Mono", monospace';
-    ctx.fillStyle = label==='STATUS' ? gsColor : '#d8d8d8';
-    ctx.fillText(val, cx, cy+27);
-  });
-  CY += Math.ceil(dados.length/2)*cellH+6;
 
-  // Linha
+  const colW2=RW/2, cellH=42;
+  dados.forEach(([label,val],i)=>{
+    const cx=RX+(i%2)*colW2, cy=CY+Math.floor(i/2)*cellH;
+    ctx.font='bold 9px "Share Tech Mono", monospace';
+    ctx.fillStyle='#666'; ctx.fillText(label,cx,cy+11);
+    ctx.font='bold 14px "Share Tech Mono", monospace';
+    ctx.fillStyle=label==='STATUS'?gsColor:'#e0e0e0';
+    ctx.fillText(val,cx,cy+30);
+  });
+  CY+=Math.ceil(dados.length/2)*cellH+8;
+
   ctx.fillStyle='#1e1e1e'; ctx.fillRect(RX,CY,RW,1); CY+=12;
 
   // ATRIBUTOS
-  ctx.font='bold 8px "Share Tech Mono", monospace';
-  ctx.fillStyle='#8b0000'; ctx.fillText('ATRIBUTOS', RX, CY); CY+=8;
+  ctx.font='bold 9px "Share Tech Mono", monospace';
+  ctx.fillStyle='#8b0000'; ctx.fillText('ATRIBUTOS',RX,CY); CY+=10;
 
   if(c.attrs){
     const attrList=Object.entries(c.attrs);
     const boxW=Math.floor(RW/attrList.length)-3;
     attrList.forEach(([k,v],i)=>{
       const bx=RX+i*(boxW+3);
-      // Caixa
-      ctx.fillStyle='#0d1017';
-      ctx.fillRect(bx,CY,boxW,48);
-      ctx.strokeStyle='#1e2030'; ctx.lineWidth=1;
-      ctx.strokeRect(bx,CY,boxW,48);
-      // Acento vermelho topo
+      ctx.fillStyle='#0d1017'; ctx.fillRect(bx,CY,boxW,50);
+      ctx.strokeStyle='#1e2030'; ctx.lineWidth=1; ctx.strokeRect(bx,CY,boxW,50);
       ctx.fillStyle='#8b0000'; ctx.fillRect(bx,CY,boxW,3);
-      // Label
-      ctx.font='bold 9px "Share Tech Mono", monospace';
+      ctx.font='bold 10px "Share Tech Mono", monospace';
       ctx.fillStyle='#cc2200'; ctx.textAlign='center';
-      ctx.fillText(k, bx+boxW/2, CY+17);
-      // Valor
-      ctx.font='bold 20px "Orbitron", monospace';
+      ctx.fillText(k,bx+boxW/2,CY+18);
+      ctx.font='bold 22px "Orbitron", monospace';
       ctx.fillStyle='#e8e8e8';
-      ctx.fillText(String(v||0), bx+boxW/2, CY+40);
+      ctx.fillText(String(v||0),bx+boxW/2,CY+43);
       ctx.textAlign='left';
     });
-    CY+=60;
+    CY+=62;
   }
 
-  // PERÍCIAS
+  // PERÍCIAS — grid 4 colunas, 2 linhas
   if(c.skills&&c.skills.length){
-    ctx.font='bold 8px "Share Tech Mono", monospace';
-    ctx.fillStyle='#8b0000'; ctx.fillText('PERÍCIAS', RX, CY); CY+=10;
-    ctx.font='bold 10px "Share Tech Mono", monospace';
-    let px=RX, py=CY, lineCount=0;
-    for(const s of c.skills){
-      const sw=ctx.measureText(s).width+14;
-      if(px+sw>RX+RW){ px=RX; py+=20; lineCount++; if(lineCount>=3) break; }
-      ctx.fillStyle='rgba(0,80,0,0.3)';
-      ctx.strokeStyle='#2a5a2a'; ctx.lineWidth=1;
-      ctx.fillRect(px,py-12,sw,17);
-      ctx.strokeRect(px,py-12,sw,17);
+    ctx.font='bold 9px "Share Tech Mono", monospace';
+    ctx.fillStyle='#8b0000'; ctx.fillText('PERÍCIAS',RX,CY); CY+=10;
+
+    const COLS=4;
+    const skillW=Math.floor(RW/COLS)-4;
+    const skillH=24;
+    const skills=c.skills.slice(0,8); // máx 8 = 2 linhas de 4
+
+    skills.forEach((s,i)=>{
+      const col=i%COLS;
+      const row=Math.floor(i/COLS);
+      const bx=RX+col*(skillW+4);
+      const by=CY+row*(skillH+4);
+
+      // fundo
+      ctx.fillStyle='rgba(0,60,0,0.35)';
+      ctx.strokeStyle='#2a6a2a'; ctx.lineWidth=1;
+      ctx.fillRect(bx,by,skillW,skillH);
+      ctx.strokeRect(bx,by,skillW,skillH);
+
+      // checkmark
+      ctx.font='bold 10px "Share Tech Mono", monospace';
       ctx.fillStyle='#66bb6a';
-      ctx.fillText(s, px+7, py);
-      px+=sw+4;
-    }
+      ctx.fillText('✓',bx+6,by+16);
+
+      // texto — cabe no espaço
+      ctx.font='bold 10px "Share Tech Mono", monospace';
+      ctx.fillStyle='#88dd88';
+      // truncar se necessário
+      let txt=s;
+      while(ctx.measureText(txt).width>skillW-28&&txt.length>2) txt=txt.slice(0,-1);
+      if(txt.length<s.length) txt+='…';
+      ctx.fillText(txt,bx+22,by+16);
+    });
+
+    CY+=Math.ceil(skills.length/COLS)*(skillH+4)+4;
   }
 
   // ── 6. RODAPÉ ──
-  const FOOT_Y=H-36;
-  ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(0,FOOT_Y,W,36);
+  const FOOT_Y=H-42;
+  ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,FOOT_Y,W,42);
   ctx.fillStyle='#1a0000'; ctx.fillRect(0,FOOT_Y,W,1);
-  // Data emissão
-  ctx.textAlign='left';
-  ctx.font='8px "Share Tech Mono", monospace';
-  ctx.fillStyle='#444';
-  ctx.fillText('EMITIDO EM '+new Date().toLocaleDateString('pt-BR'), 18, FOOT_Y+14);
-  ctx.fillText('DOCUMENTO OFICIAL // PARANOIA RP', 18, FOOT_Y+26);
 
-  // Site centralizado
+  // Esquerda — info legível
+  ctx.textAlign='left';
+  ctx.font='bold 10px "Share Tech Mono", monospace';
+  ctx.fillStyle='#888888';
+  ctx.fillText('EMITIDO EM '+new Date().toLocaleDateString('pt-BR'), 18, FOOT_Y+16);
+  ctx.font='bold 9px "Share Tech Mono", monospace';
+  ctx.fillStyle='#666666';
+  const tipoDoc = isHuevito ? 'DOCUMENTO DE ADOÇÃO // PARANOIA RP' : 'DOCUMENTO OFICIAL // PARANOIA RP';
+  ctx.fillText(tipoDoc, 18, FOOT_Y+30);
+
+  // Centro
   ctx.textAlign='center';
-  ctx.font='7px "Share Tech Mono", monospace';
-  ctx.fillStyle='#333';
+  ctx.font='8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#444444';
   ctx.fillText('paranoiarp.github.io/Paranoia-RP', W/2, FOOT_Y+22);
 
-  // ── 7. SELO DA FEDERAÇÃO (canto inferior direito) ──
+  // Direita — RESIDENTE
+  ctx.textAlign='right';
+  ctx.font='bold 10px "Share Tech Mono", monospace';
+  ctx.fillStyle='#888888';
+  const tipoResidente = isHuevito ? 'RESIDENTE // MENOR' : 'RESIDENTE // ILHA QUESADILLA';
+  ctx.fillText(tipoResidente, W-18, FOOT_Y+16);
+  ctx.font='8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#555555';
+  ctx.fillText('THE FEDERATION REGISTRY', W-18, FOOT_Y+30);
+  ctx.textAlign='left';
+
+  // ── 7. SELO DA FEDERAÇÃO ──
   if(fedLogo){
-    const SELO_SIZE=80;
-    const SELO_X=W-SELO_SIZE-18, SELO_Y=FOOT_Y-SELO_SIZE-6;
-    // Círculo de fundo do selo
+    const SELO_SIZE=90;
+    const SELO_X=W-SELO_SIZE-22;
+    const SELO_Y=FOOT_Y-SELO_SIZE-10;
+
+    // Anéis
     ctx.save();
     ctx.beginPath();
-    ctx.arc(SELO_X+SELO_SIZE/2, SELO_Y+SELO_SIZE/2, SELO_SIZE/2+4, 0, Math.PI*2);
-    ctx.fillStyle='rgba(139,0,0,0.12)';
-    ctx.fill();
-    ctx.strokeStyle='rgba(139,0,0,0.5)'; ctx.lineWidth=1.5;
+    ctx.arc(SELO_X+SELO_SIZE/2,SELO_Y+SELO_SIZE/2,SELO_SIZE/2+8,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1.5;
     ctx.stroke();
-    // Segundo anel
     ctx.beginPath();
-    ctx.arc(SELO_X+SELO_SIZE/2, SELO_Y+SELO_SIZE/2, SELO_SIZE/2+9, 0, Math.PI*2);
-    ctx.strokeStyle='rgba(139,0,0,0.2)'; ctx.lineWidth=1;
+    ctx.arc(SELO_X+SELO_SIZE/2,SELO_Y+SELO_SIZE/2,SELO_SIZE/2+14,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1;
     ctx.stroke();
-    // Logo
-    ctx.globalAlpha=0.85;
-    ctx.filter='brightness(100) saturate(0)';
-    ctx.drawImage(fedLogo, SELO_X, SELO_Y, SELO_SIZE, SELO_SIZE);
+
+    // Logo nítida e branca como no site
+    ctx.globalAlpha=0.92;
+    ctx.filter='brightness(1000) saturate(0)';
+    ctx.drawImage(fedLogo,SELO_X,SELO_Y,SELO_SIZE,SELO_SIZE);
     ctx.filter='none';
     ctx.restore();
-    // Texto "OFFICIAL SEAL" abaixo do selo
+
+    // Texto abaixo do selo
     ctx.textAlign='center';
-    ctx.font='bold 6px "Share Tech Mono", monospace';
-    ctx.fillStyle='rgba(139,0,0,0.6)';
-    ctx.fillText('THE FEDERATION', SELO_X+SELO_SIZE/2, SELO_Y+SELO_SIZE+16);
-    ctx.fillText('OFFICIAL SEAL', SELO_X+SELO_SIZE/2, SELO_Y+SELO_SIZE+24);
+    ctx.font='bold 7px "Share Tech Mono", monospace';
+    ctx.fillStyle='rgba(200,200,200,0.7)';
+    ctx.fillText('THE FEDERATION',SELO_X+SELO_SIZE/2,SELO_Y+SELO_SIZE+14);
+    ctx.fillText('OFFICIAL SEAL',SELO_X+SELO_SIZE/2,SELO_Y+SELO_SIZE+24);
   }
 
   ctx.textAlign='left';
@@ -6943,6 +6993,7 @@ async function gerarCardPNG(id) {
   link.click();
   showToast('✓ RG gerado! ID: '+RG_ID,'success');
 }
+
 // ===== RESET FICHA =====
 function resetFichaForm() {
   // Reseta campos de texto
