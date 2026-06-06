@@ -6668,273 +6668,314 @@ async function gerarCardPNG(id) {
   if(!c) c = CHARS_DATA.find(x => x.id === id);
   if(!c) { showToast('⚠ Personagem não encontrado.', 'error'); return; }
 
-  showToast('⏳ Gerando card...', 'info');
+  showToast('⏳ Gerando RG...', 'info');
+
+  // ── IDENTIFICADOR ÚNICO: sigla + número determinístico do docId ──
+  const LANG_SIGLAS = {ingles:'ING',espanhol:'ESP',portugues:'POR',frances:'FRA',coreano:'KOR',cucurucho:'FED',custom:'PRN'};
+  const sigla = LANG_SIGLAS[c.lang] || 'PRN';
+  // Gera número de 4 dígitos baseado no ID do documento (estável para sempre)
+  const docId = c.id || c.charId || 'X';
+  let hash = 0;
+  for(let i=0;i<docId.length;i++) hash = ((hash<<5)-hash)+docId.charCodeAt(i), hash|=0;
+  const num = String(Math.abs(hash) % 9000 + 1000); // 1000–9999
+  const RG_ID = sigla + '-' + num;
 
   const prePhoto = window._charPhotos && window._charPhotos[id];
   const fotoUrl = c.imageUrl || prePhoto || null;
   const gs = c.gameStatus || 'vivo';
-  const gsLabel = {vivo:'VIVO', morto:'MORTO', desaparecido:'DESAPARECIDO', contido:'CONTIDO', classified:'CLASSIFIED'}[gs] || gs.toUpperCase();
-  const gsColor = {vivo:'#4caf50', morto:'#cc0000', desaparecido:'#ff9800', contido:'#cc0000', classified:'#cc0000'}[gs] || '#888';
-  const age = calcAge(c.nascimento) || c.idade || '';
+  const gsLabel = {vivo:'VIVO',morto:'MORTO',desaparecido:'DESAPARECIDO',contido:'CONTIDO',classified:'CLASSIFIED'}[gs]||gs.toUpperCase();
+  const gsColor = {vivo:'#4caf50',morto:'#cc2200',desaparecido:'#ff9800',contido:'#cc2200',classified:'#cc2200'}[gs]||'#888';
+  const age = calcAge(c.nascimento)||c.idade||'';
 
-  // ── DIMENSÕES: paisagem estilo cartão maior ──
-  const W = 900, H = 540;
-  const FOTO_W = 300; // coluna esquerda
-  const PAD = 28;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
+  // ── CANVAS: 900×560 paisagem (proporção cédula) ──
+  const W=900, H=560;
+  const canvas=document.createElement('canvas');
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
 
   function loadImg(url) {
-    return new Promise(res => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => res(img);
-      img.onerror = () => res(null);
-      img.src = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+    return new Promise(res=>{
+      const img=new Image(); img.crossOrigin='anonymous';
+      img.onload=()=>res(img); img.onerror=()=>res(null);
+      img.src=url+'?_cb='+Date.now();
     });
   }
-  function wrapTextLines(ctx, text, x, y, maxW, lineH, maxLines) {
-    if(!text) return y;
-    const words = text.split(' ');
-    let line = '', count = 0;
-    for(const w of words) {
-      const test = line + w + ' ';
-      if(ctx.measureText(test).width > maxW && line !== '') {
-        if(count >= maxLines - 1) { ctx.fillText(line.trim() + '…', x, y); return y + lineH; }
-        ctx.fillText(line.trim(), x, y);
-        line = w + ' '; y += lineH; count++;
-      } else { line = test; }
-    }
-    if(line.trim()) ctx.fillText(line.trim(), x, y);
-    return y + lineH;
+
+  // ── 1. FUNDO BASE escuro texturizado ──
+  ctx.fillStyle='#070c12';
+  ctx.fillRect(0,0,W,H);
+
+  // Gradiente diagonal sutil
+  const bgGrad=ctx.createLinearGradient(0,0,W,H);
+  bgGrad.addColorStop(0,'rgba(12,0,0,0.6)');
+  bgGrad.addColorStop(0.5,'rgba(0,0,0,0)');
+  bgGrad.addColorStop(1,'rgba(0,12,24,0.4)');
+  ctx.fillStyle=bgGrad;
+  ctx.fillRect(0,0,W,H);
+
+  // Micrograde sutil
+  ctx.strokeStyle='rgba(139,0,0,0.04)';
+  ctx.lineWidth=1;
+  for(let x=0;x<W;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // ── 2. MARCA D'ÁGUA: logo da Federação centralizada ──
+  const fedLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png');
+  if(fedLogo) {
+    const mwSize=320;
+    const mwX=(W-mwSize)/2, mwY=(H-mwSize)/2;
+    ctx.save();
+    ctx.globalAlpha=0.055;
+    ctx.filter='brightness(10) saturate(0)'; // branca
+    ctx.drawImage(fedLogo,mwX,mwY,mwSize,mwSize);
+    ctx.filter='none';
+    ctx.restore();
   }
 
-  // ── FUNDO GERAL ──
-  ctx.fillStyle = '#080808';
-  ctx.fillRect(0, 0, W, H);
-
-  // Grid sutil
-  ctx.strokeStyle = 'rgba(139,0,0,0.05)';
-  ctx.lineWidth = 1;
-  for(let x=0;x<W;x+=28){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-
-  // ── COLUNA ESQUERDA: FOTO ──
-  ctx.fillStyle = '#0f0f0f';
-  ctx.fillRect(0, 0, FOTO_W, H);
-
-  if(fotoUrl) {
-    const foto = await loadImg(fotoUrl);
-    if(foto) {
-      // crop retrato centralizado
-      const scale = Math.max(FOTO_W / foto.naturalWidth, H / foto.naturalHeight);
-      const sw = FOTO_W / scale, sh = H / scale;
-      const sx = (foto.naturalWidth - sw) / 2, sy = (foto.naturalHeight - sh) / 2;
-      ctx.drawImage(foto, sx, sy, sw, sh, 0, 0, FOTO_W, H);
-      // overlay gradiente direito para fundir com conteúdo
-      const gradR = ctx.createLinearGradient(FOTO_W - 60, 0, FOTO_W, 0);
-      gradR.addColorStop(0, 'rgba(8,8,8,0)');
-      gradR.addColorStop(1, 'rgba(8,8,8,0.98)');
-      ctx.fillStyle = gradR;
-      ctx.fillRect(FOTO_W - 60, 0, 60, H);
-      // overlay escuro no topo
-      const gradT = ctx.createLinearGradient(0, 0, 0, 100);
-      gradT.addColorStop(0, 'rgba(8,8,8,0.6)');
-      gradT.addColorStop(1, 'rgba(8,8,8,0)');
-      ctx.fillStyle = gradT;
-      ctx.fillRect(0, 0, FOTO_W, 100);
-      // overlay escuro embaixo para logo
-      const gradB = ctx.createLinearGradient(0, H - 80, 0, H);
-      gradB.addColorStop(0, 'rgba(8,8,8,0)');
-      gradB.addColorStop(1, 'rgba(8,8,8,0.9)');
-      ctx.fillStyle = gradB;
-      ctx.fillRect(0, H - 80, FOTO_W, 80);
-    }
-  } else {
-    ctx.fillStyle = '#111';
-    ctx.font = '80px serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#2a2a2a';
-    ctx.fillText('👤', FOTO_W/2, H/2 + 30);
-  }
-
-  // Linha vermelha vertical separando colunas
-  ctx.fillStyle = '#8b0000';
-  ctx.fillRect(FOTO_W, 0, 2, H);
-
-  // ── FAIXA VERMELHA TOPO ──
-  ctx.fillStyle = '#8b0000';
-  ctx.fillRect(0, 0, W, 4);
-
-  // ── COLUNA DIREITA: DADOS ──
-  const RX = FOTO_W + PAD + 2; // X de início do conteúdo direito
-  const RW = W - RX - PAD;     // largura disponível
-
-  // — NOME —
-  let curY = PAD + 18;
-  ctx.textAlign = 'left';
-  ctx.font = 'bold 30px Orbitron, monospace';
-  ctx.fillStyle = '#ffffff';
-  // Encurtar nome se muito longo
-  let nomeFit = (c.name || '?').toUpperCase();
-  while(ctx.measureText(nomeFit).width > RW - 100 && nomeFit.length > 4) nomeFit = nomeFit.slice(0,-1);
-  if(nomeFit.length < (c.name||'?').length) nomeFit += '…';
-  ctx.fillText(nomeFit, RX, curY);
-
-  // Badge status inline com o nome
-  const badgeX = RX + ctx.measureText(nomeFit).width + 12;
-  ctx.fillStyle = gsColor + '22';
-  ctx.fillRect(badgeX, curY - 16, 80, 22);
-  ctx.strokeStyle = gsColor;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(badgeX, curY - 16, 80, 22);
-  ctx.font = 'bold 9px "Share Tech Mono", monospace';
-  ctx.fillStyle = gsColor;
-  ctx.textAlign = 'center';
-  ctx.fillText(gsLabel, badgeX + 40, curY - 1);
-  ctx.textAlign = 'left';
-
-  // Cucurucho
-  if(c.cucuruchoNome) {
-    curY += 18;
-    ctx.font = '11px "Share Tech Mono", monospace';
-    ctx.fillStyle = '#666';
-    ctx.fillText('— ' + c.cucuruchoNome, RX, curY);
-  }
-
-  curY += 14;
-  // Linha vermelha sob o nome
-  ctx.fillStyle = '#8b0000';
-  ctx.fillRect(RX, curY, RW, 1);
-  curY += 12;
-
-  // — DADOS BÁSICOS em linha —
-  ctx.font = '9px "Share Tech Mono", monospace';
-  const dadosCols = [
-    ['PLAYER', (c.playerAccount || c.player || '—').toUpperCase()],
-    age ? ['IDADE', age + ' ANOS'] : null,
-    c.lang ? ['IDIOMA', c.lang.toUpperCase()] : null,
-    c.nascimento ? ['NASC.', c.nascimento] : null,
-  ].filter(Boolean);
-
-  const colW = RW / Math.min(dadosCols.length, 4);
-  dadosCols.forEach(([label, val], i) => {
-    const cx = RX + i * colW;
-    ctx.fillStyle = '#555';
-    ctx.font = '9px "Share Tech Mono", monospace';
-    ctx.fillText(label, cx, curY);
-    ctx.fillStyle = '#e0e0e0';
-    ctx.font = '11px "Share Tech Mono", monospace';
-    ctx.fillText(val, cx, curY + 14);
-  });
-
-  curY += 36;
-  ctx.fillStyle = '#1e1e1e';
-  ctx.fillRect(RX, curY, RW, 1);
-  curY += 14;
-
-  // — ATRIBUTOS —
-  ctx.font = '9px "Share Tech Mono", monospace';
-  ctx.fillStyle = '#cc0000';
-  ctx.fillText('// ATRIBUTOS //', RX, curY);
-  curY += 10;
-
-  if(c.attrs) {
-    const attrs = Object.entries(c.attrs);
-    const boxW = RW / attrs.length;
-    attrs.forEach(([k, v], i) => {
-      const bx = RX + i * boxW;
-      const bH = 52;
-      ctx.fillStyle = '#0f0f0f';
-      ctx.fillRect(bx + 2, curY, boxW - 4, bH);
-      ctx.strokeStyle = '#222';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(bx + 2, curY, boxW - 4, bH);
-      // Label
-      ctx.font = 'bold 9px "Share Tech Mono", monospace';
-      ctx.fillStyle = '#cc0000';
-      ctx.textAlign = 'center';
-      ctx.fillText(k, bx + boxW/2, curY + 14);
-      // Valor
-      ctx.font = 'bold 22px Orbitron, monospace';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(String(v || 0), bx + boxW/2, curY + 42);
-    });
-    ctx.textAlign = 'left';
-  }
-  curY += 66;
-
-  // — PERÍCIAS —
-  ctx.font = '9px "Share Tech Mono", monospace';
-  ctx.fillStyle = '#cc0000';
-  ctx.fillText('// PERÍCIAS //', RX, curY);
-  curY += 12;
-
-  if(c.skills && c.skills.length) {
-    let px = RX, py = curY;
-    ctx.font = '8.5px "Share Tech Mono", monospace';
-    for(const s of c.skills) {
-      const sw = ctx.measureText(s).width + 14;
-      if(px + sw > RX + RW) { px = RX; py += 18; }
-      ctx.fillStyle = '#111';
-      ctx.fillRect(px, py - 10, sw, 15);
-      ctx.strokeStyle = '#2a2a2a';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(px, py - 10, sw, 15);
-      ctx.fillStyle = '#bbb';
-      ctx.fillText(s, px + 7, py);
-      px += sw + 5;
-    }
-    curY = py + 20;
-  } else {
-    ctx.fillStyle = '#333';
-    ctx.font = '9px "Share Tech Mono", monospace';
-    ctx.fillText('Nenhuma perícia.', RX, curY);
-    curY += 18;
-  }
-
-  // — LOGO PARANOIA no canto direito inferior —
-  const FOOTER_Y = H - 52;
-  ctx.fillStyle = '#8b0000';
-  ctx.fillRect(RX, FOOTER_Y - 6, RW, 1);
-
-  const logo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png');
-  if(logo) {
-    ctx.globalAlpha = 0.85;
-    ctx.drawImage(logo, RX, FOOTER_Y + 2, 36, 36);
-    ctx.globalAlpha = 1;
-  }
-  ctx.font = 'bold 15px Orbitron, monospace';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText('PARANOIA', RX + 44, FOOTER_Y + 18);
-  ctx.font = '8px "Share Tech Mono", monospace';
-  ctx.fillStyle = '#444';
-  ctx.fillText('ILHA QUESADILLA  //  paranoiarp.github.io', RX + 44, FOOTER_Y + 33);
-
-  // Data geração no canto direito
-  ctx.textAlign = 'right';
-  ctx.font = '8px "Share Tech Mono", monospace';
-  ctx.fillStyle = '#333';
-  ctx.fillText(new Date().toLocaleDateString('pt-BR'), W - PAD, FOOTER_Y + 36);
-  ctx.textAlign = 'left';
-
-  // Faixa vermelha base
-  ctx.fillStyle = '#8b0000';
-  ctx.fillRect(0, H - 4, W, 4);
+  // ── 3. FAIXAS DECORATIVAS ──
+  // Topo: barra vermelha grossa
+  ctx.fillStyle='#8b0000';
+  ctx.fillRect(0,0,W,6);
+  // Linha fina dourada/cobre logo abaixo
+  ctx.fillStyle='#3a1a00';
+  ctx.fillRect(0,6,W,2);
+  // Base
+  ctx.fillStyle='#8b0000';
+  ctx.fillRect(0,H-6,W,6);
+  ctx.fillStyle='#3a1a00';
+  ctx.fillRect(0,H-8,W,2);
 
   // Borda externa
-  ctx.strokeStyle = '#1e1e1e';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(1, 1, W-2, H-2);
+  ctx.strokeStyle='#1e0505';
+  ctx.lineWidth=3;
+  ctx.strokeRect(1,1,W-2,H-2);
+
+  // ── 4. COLUNA ESQUERDA: FOTO ──
+  const FOTO_W=230, FOTO_PAD=22;
+  const fotoX=FOTO_PAD, fotoY=46, fotoH=H-46-FOTO_PAD-44;
+
+  // Moldura da foto
+  ctx.strokeStyle='#8b0000';
+  ctx.lineWidth=2;
+  ctx.strokeRect(fotoX-2,fotoY-2,FOTO_W+4,fotoH+4);
+  ctx.fillStyle='#0d0d0d';
+  ctx.fillRect(fotoX,fotoY,FOTO_W,fotoH);
+
+  if(fotoUrl){
+    const foto=await loadImg(fotoUrl);
+    if(foto){
+      const sc=Math.max(FOTO_W/foto.naturalWidth,fotoH/foto.naturalHeight);
+      const sw=FOTO_W/sc,sh=fotoH/sc;
+      const sx=(foto.naturalWidth-sw)/2,sy=(foto.naturalHeight-sh)/2;
+      ctx.drawImage(foto,sx,sy,sw,sh,fotoX,fotoY,FOTO_W,fotoH);
+      // Vinheta nas bordas da foto
+      const vg=ctx.createLinearGradient(fotoX,0,fotoX+FOTO_W,0);
+      vg.addColorStop(0,'rgba(7,12,18,0.15)');
+      vg.addColorStop(0.85,'rgba(7,12,18,0)');
+      vg.addColorStop(1,'rgba(7,12,18,0.5)');
+      ctx.fillStyle=vg;
+      ctx.fillRect(fotoX,fotoY,FOTO_W,fotoH);
+    }
+  } else {
+    ctx.fillStyle='#1a1a1a';
+    ctx.font='64px serif';
+    ctx.textAlign='center';
+    ctx.fillText('👤',fotoX+FOTO_W/2,fotoY+fotoH/2+22);
+  }
+
+  // ── 5. CABEÇALHO: "THE FEDERATION" + "DOCUMENTO DE IDENTIFICAÇÃO" ──
+  const RX=FOTO_W+FOTO_PAD*2+8;
+  const RW=W-RX-FOTO_PAD;
+
+  ctx.textAlign='left';
+  // Label instituição
+  ctx.font='bold 9px "Share Tech Mono", monospace';
+  ctx.fillStyle='#8b0000';
+  ctx.fillText('THE FEDERATION  //  ILHA QUESADILLA', RX, 26);
+  // Título do documento
+  ctx.font='bold 8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#333';
+  ctx.fillText('DOCUMENTO DE IDENTIFICAÇÃO OFICIAL', RX, 38);
+
+  // Linha separadora cabeçalho
+  ctx.fillStyle='#8b0000';
+  ctx.fillRect(RX,42,RW,1);
+
+  // ── 6. NOME DO PERSONAGEM ──
+  let curY=68;
+  // Label pequeno
+  ctx.font='8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#555';
+  ctx.fillText('NOME COMPLETO', RX, curY-10);
+
+  ctx.font='bold 26px Orbitron, monospace';
+  ctx.fillStyle='#ffffff';
+  let nomeFit=(c.name||'?').toUpperCase();
+  while(ctx.measureText(nomeFit).width>RW-10 && nomeFit.length>3) nomeFit=nomeFit.slice(0,-1);
+  if(nomeFit.length<(c.name||'?').length) nomeFit+='…';
+  ctx.fillText(nomeFit,RX,curY);
+
+  if(c.cucuruchoNome){
+    curY+=16;
+    ctx.font='10px "Share Tech Mono", monospace';
+    ctx.fillStyle='#666';
+    ctx.fillText('CUCURUCHO: '+c.cucuruchoNome.toUpperCase(),RX,curY);
+  }
+
+  curY+=16;
+  ctx.fillStyle='#1a1a1a';
+  ctx.fillRect(RX,curY,RW,1);
+  curY+=14;
+
+  // ── 7. DADOS EM GRID 2×2 ──
+  const dadosCells=[
+    ['PLAYER',      (c.player||'—').toUpperCase()],
+    ['CONTA',       (c.playerAccount||'—').toUpperCase()],
+    ['IDIOMA',      (c.lang||'—').toUpperCase()],
+    ['NASCIMENTO',  c.nascimento||(c.nascimento_player||'—')],
+    age?['IDADE', age+' ANOS']:['STATUS VITAL', gsLabel],
+    ['CLASSIFICAÇÃO',(c.status||'ocupado').toUpperCase()],
+  ];
+
+  const colsCount=2;
+  const cellW=RW/colsCount, cellH=42;
+  dadosCells.forEach(([label,val],i)=>{
+    const cx=RX+(i%colsCount)*cellW;
+    const cy=curY+Math.floor(i/colsCount)*cellH;
+    ctx.font='8px "Share Tech Mono", monospace';
+    ctx.fillStyle='#444';
+    ctx.fillText(label,cx,cy+10);
+    ctx.font='bold 12px "Share Tech Mono", monospace';
+    ctx.fillStyle= label==='IDADE'||label==='STATUS VITAL' ? gsColor : '#d8d8d8';
+    ctx.fillText(val,cx,cy+26);
+    // Linha divisória entre células
+    if(i%colsCount===0 && i>0){
+      ctx.fillStyle='#151515';
+      ctx.fillRect(RX,cy,RW,1);
+    }
+  });
+
+  curY+=Math.ceil(dadosCells.length/colsCount)*cellH+8;
+  ctx.fillStyle='#1a1a1a';
+  ctx.fillRect(RX,curY,RW,1);
+  curY+=12;
+
+  // ── 8. ATRIBUTOS ──
+  ctx.font='8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#8b0000';
+  ctx.fillText('ATRIBUTOS',RX,curY);
+  curY+=8;
+
+  if(c.attrs){
+    const attrs=Object.entries(c.attrs);
+    const boxW=RW/attrs.length;
+    attrs.forEach(([k,v],i)=>{
+      const bx=RX+i*boxW;
+      const bH=44;
+      // Fundo caixa
+      ctx.fillStyle='#0d1017';
+      ctx.fillRect(bx+2,curY,boxW-4,bH);
+      ctx.strokeStyle='#1e1e2a';
+      ctx.lineWidth=1;
+      ctx.strokeRect(bx+2,curY,boxW-4,bH);
+      // Acento vermelho no topo da caixa
+      ctx.fillStyle='#8b0000';
+      ctx.fillRect(bx+2,curY,boxW-4,2);
+      // Label
+      ctx.font='bold 8px "Share Tech Mono", monospace';
+      ctx.fillStyle='#cc2200';
+      ctx.textAlign='center';
+      ctx.fillText(k,bx+boxW/2,curY+14);
+      // Valor
+      ctx.font='bold 18px Orbitron, monospace';
+      ctx.fillStyle='#e8e8e8';
+      ctx.fillText(String(v||0),bx+boxW/2,curY+36);
+    });
+    ctx.textAlign='left';
+  }
+  curY+=56;
+
+  // ── 9. PERÍCIAS (compacto) ──
+  if(c.skills && c.skills.length){
+    ctx.font='8px "Share Tech Mono", monospace';
+    ctx.fillStyle='#8b0000';
+    ctx.fillText('PERÍCIAS',RX,curY);
+    curY+=10;
+    let px=RX, py=curY;
+    ctx.font='8px "Share Tech Mono", monospace';
+    const maxLines=2;
+    let lines=0;
+    for(const s of c.skills){
+      const sw=ctx.measureText(s).width+12;
+      if(px+sw>RX+RW){px=RX;py+=16;lines++;if(lines>=maxLines)break;}
+      ctx.fillStyle='#111';
+      ctx.fillRect(px,py-9,sw,14);
+      ctx.strokeStyle='#222';
+      ctx.lineWidth=1;
+      ctx.strokeRect(px,py-9,sw,14);
+      ctx.fillStyle='#aaa';
+      ctx.fillText(s,px+6,py);
+      px+=sw+4;
+    }
+  }
+
+  // ── 10. RODAPÉ: logo Paranoia + ID + data ──
+  const FOOT_Y=H-42;
+  ctx.fillStyle='rgba(0,0,0,0.5)';
+  ctx.fillRect(0,FOOT_Y,W,42);
+  ctx.fillStyle='#1a0000';
+  ctx.fillRect(0,FOOT_Y,W,1);
+
+  // Logo Paranoia pequena
+  const parLogo=await loadImg('https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png');
+  if(parLogo){
+    ctx.globalAlpha=0.7;
+    ctx.drawImage(parLogo,FOTO_PAD,FOOT_Y+5,28,28);
+    ctx.globalAlpha=1;
+  }
+  ctx.font='bold 11px Orbitron, monospace';
+  ctx.fillStyle='#aaaaaa';
+  ctx.textAlign='left';
+  ctx.fillText('PARANOIA',FOTO_PAD+34,FOOT_Y+18);
+  ctx.font='7px "Share Tech Mono", monospace';
+  ctx.fillStyle='#333';
+  ctx.fillText('paranoiarp.github.io',FOTO_PAD+34,FOOT_Y+30);
+
+  // ID DO PERSONAGEM — centralizado e destaque
+  ctx.font='bold 14px Orbitron, monospace';
+  ctx.fillStyle='#cc2200';
+  ctx.textAlign='center';
+  ctx.fillText('Nº '+RG_ID, W/2, FOOT_Y+20);
+  ctx.font='7px "Share Tech Mono", monospace';
+  ctx.fillStyle='#333';
+  ctx.fillText('IDENTIFICADOR ÚNICO // THE FEDERATION',W/2,FOOT_Y+32);
+
+  // Data direita
+  ctx.textAlign='right';
+  ctx.font='8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#333';
+  ctx.fillText('EMITIDO EM '+new Date().toLocaleDateString('pt-BR'),W-FOTO_PAD,FOOT_Y+20);
+  ctx.font='7px "Share Tech Mono", monospace';
+  ctx.fillStyle='#222';
+  ctx.fillText('DOCUMENTO OFICIAL',W-FOTO_PAD,FOOT_Y+31);
+  ctx.textAlign='left';
+
+  // ── 11. BADGE STATUS (canto superior direito da foto) ──
+  const badgeX=fotoX+FOTO_W-2, badgeY=fotoY+fotoH-30;
+  ctx.fillStyle=gsColor+'cc';
+  ctx.fillRect(fotoX,badgeY,FOTO_W,28);
+  ctx.font='bold 11px "Share Tech Mono", monospace';
+  ctx.fillStyle='#000';
+  ctx.textAlign='center';
+  ctx.fillText(gsLabel,fotoX+FOTO_W/2,badgeY+18);
+  ctx.textAlign='left';
 
   // ── DOWNLOAD ──
-  const link = document.createElement('a');
-  link.download = 'paranoia-card-' + (c.name||'personagem').toLowerCase().replace(/\s+/g,'-') + '.png';
-  link.href = canvas.toDataURL('image/png');
+  const link=document.createElement('a');
+  link.download='paranoia-rg-'+RG_ID+'-'+(c.name||'personagem').toLowerCase().replace(/\s+/g,'-')+'.png';
+  link.href=canvas.toDataURL('image/png');
   link.click();
-  showToast('✓ Card baixado!', 'success');
+  showToast('✓ RG gerado! ID: '+RG_ID,'success');
 }
 
 // ===== RESET FICHA =====
