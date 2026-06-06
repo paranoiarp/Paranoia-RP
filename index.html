@@ -6941,6 +6941,8 @@ async function gerarCardPNG(id) {
 
   showToast('⏳ Gerando RG...', 'info');
 
+  try {
+
   const isHuevito = c.lang === 'huevito';
 
   // ── IDENTIFICADOR ──
@@ -6961,7 +6963,9 @@ async function gerarCardPNG(id) {
   function loadImg(url) {
     return new Promise(res=>{
       const img=new Image(); img.crossOrigin='anonymous';
-      img.onload=()=>res(img); img.onerror=()=>res(null);
+      const t=setTimeout(()=>res(null),8000);
+      img.onload=()=>{ clearTimeout(t); res(img); };
+      img.onerror=()=>{ clearTimeout(t); res(null); };
       img.src=url+'?_cb='+Date.now();
     });
   }
@@ -7230,6 +7234,11 @@ async function gerarCardPNG(id) {
   link.href=canvas.toDataURL('image/png');
   link.click();
   showToast('✓ RG gerado! ID: '+RG_ID,'success');
+
+  } catch(err) {
+    console.error('gerarCardPNG erro:', err);
+    showToast('❌ Erro ao gerar card: '+err.message, 'error');
+  }
 }
 
 // ===== RESET FICHA =====
