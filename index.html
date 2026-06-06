@@ -6966,8 +6966,12 @@ async function gerarCardPNG(id) {
     });
   }
 
-  // ── CANVAS 960×680 (mais alto para caber dados de emissão abaixo das perícias) ──
-  const W=960, H=680;
+  // ── CANVAS — altura dinâmica ──
+  const W=960;
+  const nSkillsEst=c.skills?Math.min(c.skills.length,8):0;
+  const leftColH=68+14+218+34+18+140+28+26+24;
+  const rightColH=68+14+54+17+102+15+24+70+24+(Math.ceil(nSkillsEst/4)*32+16)+60+24;
+  const H=Math.max(leftColH,rightColH)+20;
   const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
@@ -7048,29 +7052,42 @@ async function gerarCardPNG(id) {
   ctx.fillText(gsLabel,FOTO_X+FOTO_SIZE/2,BADGE_Y+19);
   ctx.textAlign='left';
 
-  // ── SELO DA FEDERAÇÃO — canto inferior esquerdo da coluna da foto ──
+  // ── SELO DA FEDERAÇÃO — grande, centralizado na coluna esquerda ──
   const fedLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/FederationID.png');
-  const SELO_SIZE=72;
-  const SELO_X=FOTO_X+8;           // canto esquerdo
-  const SELO_Y=BADGE_Y+28+12;      // logo abaixo do badge de status
+  const SELO_SIZE=140;
+  const SELO_CX = FOTO_X + FOTO_SIZE/2;  // centro horizontal da coluna da foto
+  const SELO_Y = BADGE_Y + 28 + 18;      // abaixo do badge
+  const SELO_R = SELO_SIZE/2;
 
   if(fedLogo){
+    // anel externo decorativo
     ctx.save();
     ctx.beginPath();
-    ctx.arc(SELO_X+SELO_SIZE/2, SELO_Y+SELO_SIZE/2, SELO_SIZE/2, 0, Math.PI*2);
-    ctx.clip();
-    ctx.fillStyle='rgba(10,10,10,0.5)';
+    ctx.arc(SELO_CX, SELO_Y+SELO_R, SELO_R+8, 0, Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.10)'; ctx.lineWidth=1.5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(SELO_CX, SELO_Y+SELO_R, SELO_R+14, 0, Math.PI*2);
+    ctx.strokeStyle='rgba(139,0,0,0.25)'; ctx.lineWidth=1;
+    ctx.stroke();
+    // clip circular
+    ctx.beginPath();
+    ctx.arc(SELO_CX, SELO_Y+SELO_R, SELO_R, 0, Math.PI*2);
+    ctx.fillStyle='rgba(10,10,20,0.55)';
     ctx.fill();
-    ctx.globalAlpha=0.80;
+    ctx.clip();
+    ctx.globalAlpha=0.92;
     ctx.filter='invert(1)';
-    ctx.drawImage(fedLogo, SELO_X, SELO_Y, SELO_SIZE, SELO_SIZE);
+    ctx.drawImage(fedLogo, SELO_CX-SELO_R, SELO_Y, SELO_SIZE, SELO_SIZE);
     ctx.filter='none';
     ctx.restore();
+    // texto abaixo do selo
+    ctx.textAlign='center';
+    ctx.font='bold 9px "Share Tech Mono", monospace';
+    ctx.fillStyle='rgba(200,200,200,0.65)';
+    ctx.fillText('THE FEDERATION', SELO_CX, SELO_Y+SELO_SIZE+14);
+    ctx.fillText('OFFICIAL SEAL',  SELO_CX, SELO_Y+SELO_SIZE+26);
     ctx.textAlign='left';
-    ctx.font='bold 7px "Share Tech Mono", monospace';
-    ctx.fillStyle='rgba(180,180,180,0.55)';
-    ctx.fillText('THE FEDERATION', SELO_X, SELO_Y+SELO_SIZE+11);
-    ctx.fillText('OFFICIAL SEAL',  SELO_X, SELO_Y+SELO_SIZE+21);
   }
 
   // ── MARCA D'ÁGUA — centralizada no card inteiro ──
