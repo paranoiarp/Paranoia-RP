@@ -5651,7 +5651,7 @@ function renderFiliacaoTags() {
   if(!container) return;
   const ids = window._admFiliacaoIds || new Set();
   if(ids.size === 0) {
-    container.innerHTML = '<span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px">Nenhum responsável vinculado.</span>';
+    container.innerHTML = `<span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px">Nenhum responsável vinculado.</span>`;
     return;
   }
   container.innerHTML = [...ids].map(id => {
