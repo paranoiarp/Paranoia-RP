@@ -2971,7 +2971,7 @@
     <div style="display:flex;flex-direction:column;gap:0.8rem;width:100%;max-width:400px">
       <input type="text" class="secret-input" id="adminUser" placeholder="USUÁRIO" style="border-right:1px solid var(--red)">
       <div class="secret-input-group">
-        <input type="password" class="secret-input" id="adminPass" placeholder="SENHA" onkeydown="if(event.key===&#39;Enter&#39;)checkAdmin()">
+        <input type="password" class="secret-input" id="adminPass" placeholder="SENHA" onkeydown="if(event.key==='Enter')checkAdmin()" oninput="this.value=this.value.toUpperCase()" style="text-transform:uppercase">
         <button class="secret-btn" onclick="checkAdmin()">ENTRAR</button>
       </div>
     </div>
@@ -3897,7 +3897,7 @@ function updateAdminNotify() {
 
 async function checkAdmin() {
   const u = document.getElementById('adminUser').value.trim();
-  const p = document.getElementById('adminPass').value;
+  const p = document.getElementById('adminPass').value.toUpperCase();
   const errEl = document.getElementById('adminError');
   const btn = document.querySelector('#admin-gate .secret-btn');
   if(!u || !p) { errEl.style.display = 'block'; return; }
@@ -5486,6 +5486,7 @@ function adminEditarFicha(fichaDocId) {
         <h3>INFORMAÇÕES BÁSICAS</h3>
         <div class="form-grid">
           <div class="form-group"><label>Foto (Imgur URL)</label><input type="text" id="adm_imageUrl" value="${ficha.imageUrl||''}" placeholder="https://i.imgur.com/..."></div>
+          <div class="form-group"><label>ID do RG (ex: POR-1234) — deixe vazio para gerar automático</label><input type="text" id="adm_rgId" value="${ficha.rgId||''}" placeholder="POR-1234" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
           <div class="form-group"><label>Nome do Player</label><input type="text" id="adm_player" value="${ficha.player||''}"></div>
           <div class="form-group"><label>Data de Nasc. Personagem</label><input type="text" id="adm_nascimento" value="${ficha.nascimento||''}"></div>
           <div class="form-group"><label>Idade Personagem</label><input type="text" id="adm_idade" value="${ficha.idade||''}"></div>
@@ -5555,6 +5556,7 @@ async function salvarAdminEdit(fichaDocId) {
   if(!ficha) return;
   const updates = {
     imageUrl: document.getElementById('adm_imageUrl')?.value.trim() || ficha.imageUrl || '',
+    rgId: document.getElementById('adm_rgId')?.value.trim().toUpperCase() || ficha.rgId || '',
     player: document.getElementById('adm_player')?.value.trim() || ficha.player || '',
     nascimento: document.getElementById('adm_nascimento')?.value.trim() || '',
     idade: document.getElementById('adm_idade')?.value.trim() || '',
@@ -6670,28 +6672,20 @@ async function gerarCardPNG(id) {
 
   showToast('⏳ Gerando RG...', 'info');
 
-  // ── IDENTIFICADOR ÚNICO: sigla + número determinístico do docId ──
-  const LANG_SIGLAS = {ingles:'ING',espanhol:'ESP',portugues:'POR',frances:'FRA',coreano:'KOR',cucurucho:'FED',custom:'PRN'};
+  // ── IDENTIFICADOR: usa rgId customizado salvo, ou gera automático ──
+  const LANG_SIGLAS = {ingles:'ING',espanhol:'ESP',portugues:'POR',frances:'FRA',coreano:'KOR',cucurucho:'FED',huevito:'HUE'};
   const sigla = LANG_SIGLAS[c.lang] || 'PRN';
-  // Gera número de 4 dígitos baseado no ID do documento (estável para sempre)
   const docId = c.id || c.charId || 'X';
   let hash = 0;
   for(let i=0;i<docId.length;i++) hash = ((hash<<5)-hash)+docId.charCodeAt(i), hash|=0;
-  const num = String(Math.abs(hash) % 9000 + 1000); // 1000–9999
-  const RG_ID = sigla + '-' + num;
+  const autoNum = String(Math.abs(hash) % 9000 + 1000);
+  const RG_ID = c.rgId || (sigla + '-' + autoNum);
 
   const prePhoto = window._charPhotos && window._charPhotos[id];
   const fotoUrl = c.imageUrl || prePhoto || null;
   const gs = c.gameStatus || 'vivo';
   const gsLabel = {vivo:'VIVO',morto:'MORTO',desaparecido:'DESAPARECIDO',contido:'CONTIDO',classified:'CLASSIFIED'}[gs]||gs.toUpperCase();
-  const gsColor = {vivo:'#4caf50',morto:'#cc2200',desaparecido:'#ff9800',contido:'#cc2200',classified:'#cc2200'}[gs]||'#888';
-  const age = calcAge(c.nascimento)||c.idade||'';
-
-  // ── CANVAS: 900×560 paisagem (proporção cédula) ──
-  const W=900, H=560;
-  const canvas=document.createElement('canvas');
-  canvas.width=W; canvas.height=H;
-  const ctx=canvas.getContext('2d');
+  const gsColor = {vivo:'#4caf50',morto:'#cc2200',desaparecido:'#ff9800',contido:'#cc2200',classified:'#444'}[gs]||'#888';
 
   function loadImg(url) {
     return new Promise(res=>{
@@ -6701,273 +6695,245 @@ async function gerarCardPNG(id) {
     });
   }
 
-  // ── 1. FUNDO BASE escuro texturizado ──
-  ctx.fillStyle='#070c12';
+  // ── CANVAS 900×560 ──
+  const W=900, H=560;
+  const canvas=document.createElement('canvas');
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+
+  // ── 1. FUNDO ──
+  ctx.fillStyle='#07090e';
   ctx.fillRect(0,0,W,H);
+  // Grade sutil
+  ctx.strokeStyle='rgba(139,0,0,0.05)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=24){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
 
-  // Gradiente diagonal sutil
-  const bgGrad=ctx.createLinearGradient(0,0,W,H);
-  bgGrad.addColorStop(0,'rgba(12,0,0,0.6)');
-  bgGrad.addColorStop(0.5,'rgba(0,0,0,0)');
-  bgGrad.addColorStop(1,'rgba(0,12,24,0.4)');
-  ctx.fillStyle=bgGrad;
-  ctx.fillRect(0,0,W,H);
-
-  // Micrograde sutil
-  ctx.strokeStyle='rgba(139,0,0,0.04)';
-  ctx.lineWidth=1;
-  for(let x=0;x<W;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-
-  // ── 2. MARCA D'ÁGUA: logo da Federação centralizada ──
-  const fedLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png');
-  if(fedLogo) {
-    const mwSize=320;
-    const mwX=(W-mwSize)/2, mwY=(H-mwSize)/2;
-    ctx.save();
-    ctx.globalAlpha=0.055;
-    ctx.filter='brightness(10) saturate(0)'; // branca
-    ctx.drawImage(fedLogo,mwX,mwY,mwSize,mwSize);
-    ctx.filter='none';
-    ctx.restore();
-  }
-
-  // ── 3. FAIXAS DECORATIVAS ──
-  // Topo: barra vermelha grossa
-  ctx.fillStyle='#8b0000';
-  ctx.fillRect(0,0,W,6);
-  // Linha fina dourada/cobre logo abaixo
-  ctx.fillStyle='#3a1a00';
-  ctx.fillRect(0,6,W,2);
-  // Base
-  ctx.fillStyle='#8b0000';
-  ctx.fillRect(0,H-6,W,6);
-  ctx.fillStyle='#3a1a00';
-  ctx.fillRect(0,H-8,W,2);
-
-  // Borda externa
-  ctx.strokeStyle='#1e0505';
-  ctx.lineWidth=3;
+  // ── 2. BORDA GERAL ──
+  ctx.strokeStyle='#5a0000'; ctx.lineWidth=2;
   ctx.strokeRect(1,1,W-2,H-2);
 
-  // ── 4. COLUNA ESQUERDA: FOTO ──
-  const FOTO_W=230, FOTO_PAD=22;
-  const fotoX=FOTO_PAD, fotoY=46, fotoH=H-46-FOTO_PAD-44;
+  // ── 3. TOPO: faixa de cabeçalho ──
+  const HEADER_H = 58;
+  // Fundo do header
+  ctx.fillStyle='#0d0000';
+  ctx.fillRect(0,0,W,HEADER_H);
+  // Linha vermelha inferior do header
+  ctx.fillStyle='#8b0000'; ctx.fillRect(0,HEADER_H-2,W,2);
+  // Linha fina dourada
+  ctx.fillStyle='#2a0800'; ctx.fillRect(0,HEADER_H,W,1);
 
-  // Moldura da foto
-  ctx.strokeStyle='#8b0000';
-  ctx.lineWidth=2;
-  ctx.strokeRect(fotoX-2,fotoY-2,FOTO_W+4,fotoH+4);
-  ctx.fillStyle='#0d0d0d';
-  ctx.fillRect(fotoX,fotoY,FOTO_W,fotoH);
+  // Logo Paranoia no header esquerdo
+  const parLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png');
+  if(parLogo){
+    ctx.save(); ctx.globalAlpha=0.9;
+    ctx.drawImage(parLogo, 18, 7, 44, 44);
+    ctx.restore();
+  }
+  // Textos do header
+  ctx.textAlign='left';
+  ctx.font='bold 18px "Orbitron", monospace';
+  ctx.fillStyle='#ffffff';
+  ctx.fillText('ILHA QUESADILLA', 72, 28);
+  ctx.font='8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#8b0000';
+  ctx.fillText('DOCUMENTO DE IDENTIFICAÇÃO OFICIAL  //  THE FEDERATION', 73, 44);
+
+  // Número RG no header direito
+  ctx.textAlign='right';
+  ctx.font='bold 13px "Orbitron", monospace';
+  ctx.fillStyle='#cc2200';
+  ctx.fillText('Nº ' + RG_ID, W-18, 30);
+  ctx.font='7px "Share Tech Mono", monospace';
+  ctx.fillStyle='#444';
+  ctx.fillText('IDENTIFICADOR ÚNICO // THE FEDERATION', W-18, 44);
+  ctx.textAlign='left';
+
+  // ── 4. COLUNA ESQUERDA: FOTO quadrada ──
+  const FOTO_X=18, FOTO_Y=HEADER_H+14;
+  const FOTO_SIZE=210; // quadrada
+  // Moldura
+  ctx.strokeStyle='#8b0000'; ctx.lineWidth=2;
+  ctx.strokeRect(FOTO_X-2, FOTO_Y-2, FOTO_SIZE+4, FOTO_SIZE+4);
+  ctx.fillStyle='#111';
+  ctx.fillRect(FOTO_X, FOTO_Y, FOTO_SIZE, FOTO_SIZE);
 
   if(fotoUrl){
-    const foto=await loadImg(fotoUrl);
+    const foto = await loadImg(fotoUrl);
     if(foto){
-      const sc=Math.max(FOTO_W/foto.naturalWidth,fotoH/foto.naturalHeight);
-      const sw=FOTO_W/sc,sh=fotoH/sc;
-      const sx=(foto.naturalWidth-sw)/2,sy=(foto.naturalHeight-sh)/2;
-      ctx.drawImage(foto,sx,sy,sw,sh,fotoX,fotoY,FOTO_W,fotoH);
-      // Vinheta nas bordas da foto
-      const vg=ctx.createLinearGradient(fotoX,0,fotoX+FOTO_W,0);
-      vg.addColorStop(0,'rgba(7,12,18,0.15)');
-      vg.addColorStop(0.85,'rgba(7,12,18,0)');
-      vg.addColorStop(1,'rgba(7,12,18,0.5)');
-      ctx.fillStyle=vg;
-      ctx.fillRect(fotoX,fotoY,FOTO_W,fotoH);
+      // Encaixa sem cortar — cabe inteira dentro do quadrado com letterbox
+      const scale = Math.min(FOTO_SIZE/foto.naturalWidth, FOTO_SIZE/foto.naturalHeight);
+      const dw = foto.naturalWidth*scale, dh = foto.naturalHeight*scale;
+      const dx = FOTO_X+(FOTO_SIZE-dw)/2, dy = FOTO_Y+(FOTO_SIZE-dh)/2;
+      ctx.drawImage(foto, dx, dy, dw, dh);
     }
   } else {
     ctx.fillStyle='#1a1a1a';
-    ctx.font='64px serif';
-    ctx.textAlign='center';
-    ctx.fillText('👤',fotoX+FOTO_W/2,fotoY+fotoH/2+22);
-  }
-
-  // ── 5. CABEÇALHO: "THE FEDERATION" + "DOCUMENTO DE IDENTIFICAÇÃO" ──
-  const RX=FOTO_W+FOTO_PAD*2+8;
-  const RW=W-RX-FOTO_PAD;
-
-  ctx.textAlign='left';
-  // Label instituição
-  ctx.font='bold 9px "Share Tech Mono", monospace';
-  ctx.fillStyle='#8b0000';
-  ctx.fillText('THE FEDERATION  //  ILHA QUESADILLA', RX, 26);
-  // Título do documento
-  ctx.font='bold 8px "Share Tech Mono", monospace';
-  ctx.fillStyle='#333';
-  ctx.fillText('DOCUMENTO DE IDENTIFICAÇÃO OFICIAL', RX, 38);
-
-  // Linha separadora cabeçalho
-  ctx.fillStyle='#8b0000';
-  ctx.fillRect(RX,42,RW,1);
-
-  // ── 6. NOME DO PERSONAGEM ──
-  let curY=68;
-  // Label pequeno
-  ctx.font='8px "Share Tech Mono", monospace';
-  ctx.fillStyle='#555';
-  ctx.fillText('NOME COMPLETO', RX, curY-10);
-
-  ctx.font='bold 26px Orbitron, monospace';
-  ctx.fillStyle='#ffffff';
-  let nomeFit=(c.name||'?').toUpperCase();
-  while(ctx.measureText(nomeFit).width>RW-10 && nomeFit.length>3) nomeFit=nomeFit.slice(0,-1);
-  if(nomeFit.length<(c.name||'?').length) nomeFit+='…';
-  ctx.fillText(nomeFit,RX,curY);
-
-  if(c.cucuruchoNome){
-    curY+=16;
-    ctx.font='10px "Share Tech Mono", monospace';
-    ctx.fillStyle='#666';
-    ctx.fillText('CUCURUCHO: '+c.cucuruchoNome.toUpperCase(),RX,curY);
-  }
-
-  curY+=16;
-  ctx.fillStyle='#1a1a1a';
-  ctx.fillRect(RX,curY,RW,1);
-  curY+=14;
-
-  // ── 7. DADOS EM GRID 2×2 ──
-  const dadosCells=[
-    ['PLAYER',      (c.player||'—').toUpperCase()],
-    ['CONTA',       (c.playerAccount||'—').toUpperCase()],
-    ['IDIOMA',      (c.lang||'—').toUpperCase()],
-    ['NASCIMENTO',  c.nascimento||(c.nascimento_player||'—')],
-    age?['IDADE', age+' ANOS']:['STATUS VITAL', gsLabel],
-    ['CLASSIFICAÇÃO',(c.status||'ocupado').toUpperCase()],
-  ];
-
-  const colsCount=2;
-  const cellW=RW/colsCount, cellH=42;
-  dadosCells.forEach(([label,val],i)=>{
-    const cx=RX+(i%colsCount)*cellW;
-    const cy=curY+Math.floor(i/colsCount)*cellH;
-    ctx.font='8px "Share Tech Mono", monospace';
-    ctx.fillStyle='#444';
-    ctx.fillText(label,cx,cy+10);
-    ctx.font='bold 12px "Share Tech Mono", monospace';
-    ctx.fillStyle= label==='IDADE'||label==='STATUS VITAL' ? gsColor : '#d8d8d8';
-    ctx.fillText(val,cx,cy+26);
-    // Linha divisória entre células
-    if(i%colsCount===0 && i>0){
-      ctx.fillStyle='#151515';
-      ctx.fillRect(RX,cy,RW,1);
-    }
-  });
-
-  curY+=Math.ceil(dadosCells.length/colsCount)*cellH+8;
-  ctx.fillStyle='#1a1a1a';
-  ctx.fillRect(RX,curY,RW,1);
-  curY+=12;
-
-  // ── 8. ATRIBUTOS ──
-  ctx.font='8px "Share Tech Mono", monospace';
-  ctx.fillStyle='#8b0000';
-  ctx.fillText('ATRIBUTOS',RX,curY);
-  curY+=8;
-
-  if(c.attrs){
-    const attrs=Object.entries(c.attrs);
-    const boxW=RW/attrs.length;
-    attrs.forEach(([k,v],i)=>{
-      const bx=RX+i*boxW;
-      const bH=44;
-      // Fundo caixa
-      ctx.fillStyle='#0d1017';
-      ctx.fillRect(bx+2,curY,boxW-4,bH);
-      ctx.strokeStyle='#1e1e2a';
-      ctx.lineWidth=1;
-      ctx.strokeRect(bx+2,curY,boxW-4,bH);
-      // Acento vermelho no topo da caixa
-      ctx.fillStyle='#8b0000';
-      ctx.fillRect(bx+2,curY,boxW-4,2);
-      // Label
-      ctx.font='bold 8px "Share Tech Mono", monospace';
-      ctx.fillStyle='#cc2200';
-      ctx.textAlign='center';
-      ctx.fillText(k,bx+boxW/2,curY+14);
-      // Valor
-      ctx.font='bold 18px Orbitron, monospace';
-      ctx.fillStyle='#e8e8e8';
-      ctx.fillText(String(v||0),bx+boxW/2,curY+36);
-    });
+    ctx.font='72px serif'; ctx.textAlign='center';
+    ctx.fillText('👤', FOTO_X+FOTO_SIZE/2, FOTO_Y+FOTO_SIZE/2+26);
     ctx.textAlign='left';
   }
-  curY+=56;
 
-  // ── 9. PERÍCIAS (compacto) ──
-  if(c.skills && c.skills.length){
-    ctx.font='8px "Share Tech Mono", monospace';
-    ctx.fillStyle='#8b0000';
-    ctx.fillText('PERÍCIAS',RX,curY);
-    curY+=10;
-    let px=RX, py=curY;
-    ctx.font='8px "Share Tech Mono", monospace';
-    const maxLines=2;
-    let lines=0;
+  // Badge de status abaixo da foto
+  const BADGE_Y = FOTO_Y+FOTO_SIZE+6;
+  ctx.fillStyle=gsColor+'22';
+  ctx.strokeStyle=gsColor; ctx.lineWidth=1;
+  ctx.fillRect(FOTO_X, BADGE_Y, FOTO_SIZE, 24);
+  ctx.strokeRect(FOTO_X, BADGE_Y, FOTO_SIZE, 24);
+  ctx.font='bold 11px "Share Tech Mono", monospace';
+  ctx.fillStyle=gsColor;
+  ctx.textAlign='center';
+  ctx.fillText(gsLabel, FOTO_X+FOTO_SIZE/2, BADGE_Y+16);
+  ctx.textAlign='left';
+
+  // ── 5. COLUNA DIREITA: DADOS ──
+  const RX = FOTO_X+FOTO_SIZE+22;
+  const RW = W-RX-18;
+  let CY = HEADER_H+14;
+
+  // MARCA D'ÁGUA: logo federação no centro da coluna direita
+  const fedLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png');
+  if(fedLogo){
+    const mwSize = 220;
+    const mwX = RX+(RW-mwSize)/2;
+    const mwY = CY+20;
+    ctx.save();
+    ctx.globalAlpha = 0.06;
+    ctx.filter = 'brightness(100) saturate(0)';
+    ctx.drawImage(fedLogo, mwX, mwY, mwSize, mwSize);
+    ctx.filter = 'none';
+    ctx.restore();
+  }
+
+  // NOME DO PERSONAGEM
+  ctx.font='bold 32px "Orbitron", monospace';
+  ctx.fillStyle='#ffffff';
+  let nomeFit=(c.name||'?').toUpperCase();
+  while(ctx.measureText(nomeFit).width>RW-8 && nomeFit.length>2) nomeFit=nomeFit.slice(0,-1);
+  if(nomeFit.length<(c.name||'').length) nomeFit+='…';
+  ctx.fillText(nomeFit, RX, CY+30);
+  CY+=44;
+
+  // Linha separadora
+  ctx.fillStyle='#8b0000'; ctx.fillRect(RX,CY,RW,1); CY+=12;
+
+  // GRID DE DADOS 2 colunas
+  const dados=[
+    ['PLAYER',     (c.player||'—').toUpperCase()],
+    ['NASCIMENTO', c.nascimento||'—'],
+    ['IDIOMA',     (c.lang||'—').toUpperCase()],
+    ['STATUS',     gsLabel],
+  ];
+  const colW=RW/2, cellH=38;
+  dados.forEach(([label,val],i)=>{
+    const cx=RX+(i%2)*colW, cy=CY+Math.floor(i/2)*cellH;
+    ctx.font='bold 8px "Share Tech Mono", monospace';
+    ctx.fillStyle='#555'; ctx.fillText(label, cx, cy+10);
+    ctx.font='bold 13px "Share Tech Mono", monospace';
+    ctx.fillStyle = label==='STATUS' ? gsColor : '#d8d8d8';
+    ctx.fillText(val, cx, cy+27);
+  });
+  CY += Math.ceil(dados.length/2)*cellH+6;
+
+  // Linha
+  ctx.fillStyle='#1e1e1e'; ctx.fillRect(RX,CY,RW,1); CY+=12;
+
+  // ATRIBUTOS
+  ctx.font='bold 8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#8b0000'; ctx.fillText('ATRIBUTOS', RX, CY); CY+=8;
+
+  if(c.attrs){
+    const attrList=Object.entries(c.attrs);
+    const boxW=Math.floor(RW/attrList.length)-3;
+    attrList.forEach(([k,v],i)=>{
+      const bx=RX+i*(boxW+3);
+      // Caixa
+      ctx.fillStyle='#0d1017';
+      ctx.fillRect(bx,CY,boxW,48);
+      ctx.strokeStyle='#1e2030'; ctx.lineWidth=1;
+      ctx.strokeRect(bx,CY,boxW,48);
+      // Acento vermelho topo
+      ctx.fillStyle='#8b0000'; ctx.fillRect(bx,CY,boxW,3);
+      // Label
+      ctx.font='bold 9px "Share Tech Mono", monospace';
+      ctx.fillStyle='#cc2200'; ctx.textAlign='center';
+      ctx.fillText(k, bx+boxW/2, CY+17);
+      // Valor
+      ctx.font='bold 20px "Orbitron", monospace';
+      ctx.fillStyle='#e8e8e8';
+      ctx.fillText(String(v||0), bx+boxW/2, CY+40);
+      ctx.textAlign='left';
+    });
+    CY+=60;
+  }
+
+  // PERÍCIAS
+  if(c.skills&&c.skills.length){
+    ctx.font='bold 8px "Share Tech Mono", monospace';
+    ctx.fillStyle='#8b0000'; ctx.fillText('PERÍCIAS', RX, CY); CY+=10;
+    ctx.font='bold 10px "Share Tech Mono", monospace';
+    let px=RX, py=CY, lineCount=0;
     for(const s of c.skills){
-      const sw=ctx.measureText(s).width+12;
-      if(px+sw>RX+RW){px=RX;py+=16;lines++;if(lines>=maxLines)break;}
-      ctx.fillStyle='#111';
-      ctx.fillRect(px,py-9,sw,14);
-      ctx.strokeStyle='#222';
-      ctx.lineWidth=1;
-      ctx.strokeRect(px,py-9,sw,14);
-      ctx.fillStyle='#aaa';
-      ctx.fillText(s,px+6,py);
+      const sw=ctx.measureText(s).width+14;
+      if(px+sw>RX+RW){ px=RX; py+=20; lineCount++; if(lineCount>=3) break; }
+      ctx.fillStyle='rgba(0,80,0,0.3)';
+      ctx.strokeStyle='#2a5a2a'; ctx.lineWidth=1;
+      ctx.fillRect(px,py-12,sw,17);
+      ctx.strokeRect(px,py-12,sw,17);
+      ctx.fillStyle='#66bb6a';
+      ctx.fillText(s, px+7, py);
       px+=sw+4;
     }
   }
 
-  // ── 10. RODAPÉ: logo Paranoia + ID + data ──
-  const FOOT_Y=H-42;
-  ctx.fillStyle='rgba(0,0,0,0.5)';
-  ctx.fillRect(0,FOOT_Y,W,42);
-  ctx.fillStyle='#1a0000';
-  ctx.fillRect(0,FOOT_Y,W,1);
-
-  // Logo Paranoia pequena
-  const parLogo=await loadImg('https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png');
-  if(parLogo){
-    ctx.globalAlpha=0.7;
-    ctx.drawImage(parLogo,FOTO_PAD,FOOT_Y+5,28,28);
-    ctx.globalAlpha=1;
-  }
-  ctx.font='bold 11px Orbitron, monospace';
-  ctx.fillStyle='#aaaaaa';
+  // ── 6. RODAPÉ ──
+  const FOOT_Y=H-36;
+  ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(0,FOOT_Y,W,36);
+  ctx.fillStyle='#1a0000'; ctx.fillRect(0,FOOT_Y,W,1);
+  // Data emissão
   ctx.textAlign='left';
-  ctx.fillText('PARANOIA',FOTO_PAD+34,FOOT_Y+18);
-  ctx.font='7px "Share Tech Mono", monospace';
-  ctx.fillStyle='#333';
-  ctx.fillText('paranoiarp.github.io',FOTO_PAD+34,FOOT_Y+30);
-
-  // ID DO PERSONAGEM — centralizado e destaque
-  ctx.font='bold 14px Orbitron, monospace';
-  ctx.fillStyle='#cc2200';
-  ctx.textAlign='center';
-  ctx.fillText('Nº '+RG_ID, W/2, FOOT_Y+20);
-  ctx.font='7px "Share Tech Mono", monospace';
-  ctx.fillStyle='#333';
-  ctx.fillText('IDENTIFICADOR ÚNICO // THE FEDERATION',W/2,FOOT_Y+32);
-
-  // Data direita
-  ctx.textAlign='right';
   ctx.font='8px "Share Tech Mono", monospace';
-  ctx.fillStyle='#333';
-  ctx.fillText('EMITIDO EM '+new Date().toLocaleDateString('pt-BR'),W-FOTO_PAD,FOOT_Y+20);
-  ctx.font='7px "Share Tech Mono", monospace';
-  ctx.fillStyle='#222';
-  ctx.fillText('DOCUMENTO OFICIAL',W-FOTO_PAD,FOOT_Y+31);
-  ctx.textAlign='left';
+  ctx.fillStyle='#444';
+  ctx.fillText('EMITIDO EM '+new Date().toLocaleDateString('pt-BR'), 18, FOOT_Y+14);
+  ctx.fillText('DOCUMENTO OFICIAL // PARANOIA RP', 18, FOOT_Y+26);
 
-  // ── 11. BADGE STATUS (canto superior direito da foto) ──
-  const badgeX=fotoX+FOTO_W-2, badgeY=fotoY+fotoH-30;
-  ctx.fillStyle=gsColor+'cc';
-  ctx.fillRect(fotoX,badgeY,FOTO_W,28);
-  ctx.font='bold 11px "Share Tech Mono", monospace';
-  ctx.fillStyle='#000';
+  // Site centralizado
   ctx.textAlign='center';
-  ctx.fillText(gsLabel,fotoX+FOTO_W/2,badgeY+18);
+  ctx.font='7px "Share Tech Mono", monospace';
+  ctx.fillStyle='#333';
+  ctx.fillText('paranoiarp.github.io/Paranoia-RP', W/2, FOOT_Y+22);
+
+  // ── 7. SELO DA FEDERAÇÃO (canto inferior direito) ──
+  if(fedLogo){
+    const SELO_SIZE=80;
+    const SELO_X=W-SELO_SIZE-18, SELO_Y=FOOT_Y-SELO_SIZE-6;
+    // Círculo de fundo do selo
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(SELO_X+SELO_SIZE/2, SELO_Y+SELO_SIZE/2, SELO_SIZE/2+4, 0, Math.PI*2);
+    ctx.fillStyle='rgba(139,0,0,0.12)';
+    ctx.fill();
+    ctx.strokeStyle='rgba(139,0,0,0.5)'; ctx.lineWidth=1.5;
+    ctx.stroke();
+    // Segundo anel
+    ctx.beginPath();
+    ctx.arc(SELO_X+SELO_SIZE/2, SELO_Y+SELO_SIZE/2, SELO_SIZE/2+9, 0, Math.PI*2);
+    ctx.strokeStyle='rgba(139,0,0,0.2)'; ctx.lineWidth=1;
+    ctx.stroke();
+    // Logo
+    ctx.globalAlpha=0.85;
+    ctx.filter='brightness(100) saturate(0)';
+    ctx.drawImage(fedLogo, SELO_X, SELO_Y, SELO_SIZE, SELO_SIZE);
+    ctx.filter='none';
+    ctx.restore();
+    // Texto "OFFICIAL SEAL" abaixo do selo
+    ctx.textAlign='center';
+    ctx.font='bold 6px "Share Tech Mono", monospace';
+    ctx.fillStyle='rgba(139,0,0,0.6)';
+    ctx.fillText('THE FEDERATION', SELO_X+SELO_SIZE/2, SELO_Y+SELO_SIZE+16);
+    ctx.fillText('OFFICIAL SEAL', SELO_X+SELO_SIZE/2, SELO_Y+SELO_SIZE+24);
+  }
+
   ctx.textAlign='left';
 
   // ── DOWNLOAD ──
@@ -6977,7 +6943,6 @@ async function gerarCardPNG(id) {
   link.click();
   showToast('✓ RG gerado! ID: '+RG_ID,'success');
 }
-
 // ===== RESET FICHA =====
 function resetFichaForm() {
   // Reseta campos de texto
