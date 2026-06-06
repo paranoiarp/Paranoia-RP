@@ -2541,7 +2541,10 @@
 
 <!-- CHAR PROFILE -->
 <div id="char-profile" class="page">
-  <div class="profile-back"><button class="back-btn" onclick="showPage(&#39;personagens&#39;)">← VOLTAR</button></div>
+  <div class="profile-back" style="display:flex;justify-content:space-between;align-items:center">
+    <button class="back-btn" onclick="showPage('personagens')">← VOLTAR</button>
+    <button class="back-btn" id="btnPdfPerfil" onclick="gerarFichaPDF(window._currentProfileId)" style="border-color:var(--red);color:var(--red-bright)">⬇ BAIXAR FICHA PDF</button>
+  </div>
   <div class="profile-layout" id="profileContent"></div>
 </div>
 
@@ -3582,6 +3585,10 @@ function showCharProfile(id) {
       </div>
     </div>`;
   showPage('char-profile');
+  window._currentProfileId = id;
+  // Mostrar/ocultar botão PDF dependendo de ser classified e não ser admin
+  const btnPdf = document.getElementById('btnPdfPerfil');
+  if(btnPdf) btnPdf.style.display = (isClassified && !window._adminLogado) ? 'none' : 'block';
 }
 
 // ===== ATRIBUTOS =====
@@ -5057,6 +5064,7 @@ async function loadPlayerPanel() {
             <div class="pending-actions">
               <button class="btn-approve" onclick="showCharProfile('${f.charId||f.id}')">👁 VER</button>
               <button class="btn-approve" onclick="playerEditarFicha('${f.id}')">✎ EDITAR</button>
+              <button class="btn-approve" onclick="gerarFichaPDF('${f.charId||f.id}')" style="border-color:var(--red);color:var(--red-bright)">⬇ PDF</button>
             </div>
           </div>`;
         }).join('')}
@@ -5284,6 +5292,7 @@ function renderAdminOwnChars() {
       <div class="pending-actions">
         <button class="btn-approve" onclick="showCharProfile('${f.charId||f.id}')">👁 VER FICHA</button>
         <button class="btn-approve" onclick="adminEditarFicha('${f.id}')">✎ EDITAR SEM LIMITE</button>
+        <button class="btn-approve" onclick="gerarFichaPDF('${f.charId||f.id}')" style="border-color:var(--red);color:var(--red-bright)">⬇ PDF</button>
       </div>
     </div>`;
   }).join('');
@@ -6280,6 +6289,306 @@ function showClassifiedModal() {
     </div>`;
   modal.addEventListener('click', () => modal.remove());
   document.body.appendChild(modal);
+}
+
+// ===== GERAR FICHA PDF =====
+function gerarFichaPDF(id) {
+  let c = approvedChars.find(x => x.charId === id || x.id === id);
+  if(!c) c = CHARS_DATA.find(x => x.id === id);
+  if(!c) { showToast('⚠ Personagem não encontrado.', 'error'); return; }
+
+  const prePhoto = window._charPhotos && window._charPhotos[id];
+  const fotoUrl = c.imageUrl || prePhoto || '';
+  const gs = c.gameStatus || 'vivo';
+  const gsLabel = {vivo:'VIVO', morto:'MORTO', desaparecido:'DESAPARECIDO', contido:'CONTIDO', classified:'CLASSIFIED'}[gs] || gs.toUpperCase();
+  const gsColor = {vivo:'#4caf50', morto:'#cc0000', desaparecido:'#ff9800', contido:'#cc0000', classified:'#cc0000'}[gs] || '#888';
+  const age = calcAge(c.nascimento) || c.idade || '';
+
+  const attrsHtml = c.attrs
+    ? Object.entries(c.attrs).map(([k,v]) => `
+        <div style="background:#1a1a1a;border:1px solid #2a2a2a;padding:0.8rem 0.4rem;text-align:center;min-width:70px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#cc0000;letter-spacing:1px;margin-bottom:0.3rem">${k}</div>
+          <div style="font-family:'Orbitron',monospace;font-size:1.4rem;color:#d0d0d0;font-weight:700">${v||0}</div>
+        </div>`).join('')
+    : '<div style="color:#666;font-size:0.85rem">Não definidos.</div>';
+
+  const skillsHtml = (c.skills && c.skills.length)
+    ? c.skills.map(s => `<div style="padding:0.35rem 0.7rem;background:#1a1a1a;border:1px solid #2a2a2a;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:#c8c8c8">${s}</div>`).join('')
+    : '<div style="color:#666;font-size:0.85rem">Nenhuma perícia definida.</div>';
+
+  const traumasHtml = (c.traumas && c.traumas.length)
+    ? `<div style="margin-top:1.5rem">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#cc0000;letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid #2a2a2a">TRAUMAS</div>
+        ${c.traumas.map(t => `<div style="margin-bottom:0.8rem;padding:0.8rem;background:rgba(139,0,0,0.1);border-left:2px solid #cc0000">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#cc0000;margin-bottom:0.3rem">${t.name||'TRAUMA'}${t.severity?' — '+t.severity.toUpperCase():''}</div>
+          <div style="font-size:0.85rem;color:#c8c8c8;line-height:1.6">${t.description||''}</div>
+          ${t.date?`<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#666;margin-top:0.3rem">${t.date}</div>`:''}
+        </div>`).join('')}
+      </div>` : '';
+
+  const conditionsHtml = (c.conditions && c.conditions.length)
+    ? `<div style="margin-top:1.5rem">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#d4a017;letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid #2a2a2a">CONDIÇÕES PERMANENTES</div>
+        ${c.conditions.map(cd => `<div style="margin-bottom:0.8rem;padding:0.8rem;background:rgba(80,50,0,0.2);border-left:2px solid #d4a017">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#d4a017;margin-bottom:0.3rem">${cd.name||'CONDIÇÃO'}${cd.severity?' — '+cd.severity.toUpperCase():''}</div>
+          <div style="font-size:0.85rem;color:#c8c8c8;line-height:1.6">${cd.description||''}</div>
+          ${cd.date?`<div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#666;margin-top:0.3rem">${cd.date}</div>`:''}
+        </div>`).join('')}
+      </div>` : '';
+
+  const historicoHtml = (c.history && c.history.length)
+    ? `<div style="margin-top:1.5rem">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#a0a0a0;letter-spacing:3px;margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid #2a2a2a">HISTÓRICO NARRATIVO</div>
+        ${c.history.map(h => `<div style="padding-left:1rem;border-left:2px solid #2a2a2a;margin-bottom:0.8rem;position:relative">
+          <div style="position:absolute;left:-5px;top:0.4rem;width:8px;height:8px;border-radius:50%;background:#8b0000"></div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#cc0000;margin-bottom:0.2rem">${h.date||''}${h.title?' — '+h.title:''}</div>
+          <div style="font-size:0.85rem;color:#a0a0a0;line-height:1.6">${h.desc||h.description||''}</div>
+        </div>`).join('')}
+      </div>` : '';
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>FICHA — ${c.name.toUpperCase()}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0a0a0a; color:#c8c8c8; font-family:'Inter',sans-serif; padding:2rem; min-height:100vh; }
+
+  @media print {
+    body { padding:0; background:#0a0a0a !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .no-print { display:none !important; }
+    .page-wrap { box-shadow:none; }
+  }
+
+  .no-print {
+    position:fixed; top:1rem; right:1rem; z-index:999;
+    display:flex; gap:0.5rem;
+  }
+  .btn-print {
+    padding:0.6rem 1.4rem;
+    background:#8b0000; border:1px solid #cc0000; color:#fff;
+    font-family:'Share Tech Mono',monospace; font-size:0.75rem; letter-spacing:2px;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .btn-print:hover { background:#cc0000; }
+  .btn-close {
+    padding:0.6rem 1rem;
+    background:none; border:1px solid #2a2a2a; color:#666;
+    font-family:'Share Tech Mono',monospace; font-size:0.75rem; letter-spacing:1px;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .btn-close:hover { border-color:#666; color:#c8c8c8; }
+
+  .page-wrap {
+    max-width:900px; margin:0 auto;
+    background:#0d0d0d; border:1px solid #2a2a2a;
+    box-shadow:0 0 60px rgba(139,0,0,0.15);
+  }
+
+  /* HEADER */
+  .pdf-header {
+    background:#0a0a0a;
+    border-bottom:2px solid #8b0000;
+    padding:2rem 2.5rem;
+    display:flex; align-items:center; gap:2rem;
+    position:relative; overflow:hidden;
+  }
+  .pdf-header::before {
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at top left, rgba(139,0,0,0.12) 0%, transparent 60%);
+  }
+  .pdf-header-logo {
+    width:60px; height:60px; border-radius:50%; object-fit:cover;
+    filter:drop-shadow(0 0 12px rgba(139,0,0,0.7));
+    flex-shrink:0;
+  }
+  .pdf-header-title { position:relative; z-index:1; }
+  .pdf-header-label {
+    font-family:'Share Tech Mono',monospace; font-size:0.6rem;
+    color:#cc0000; letter-spacing:4px; margin-bottom:0.3rem;
+  }
+  .pdf-header-name {
+    font-family:'Orbitron',monospace; font-size:2rem; font-weight:900;
+    color:#fff; letter-spacing:6px;
+    text-shadow:0 0 30px rgba(139,0,0,0.6);
+  }
+  .pdf-header-sub {
+    font-family:'Share Tech Mono',monospace; font-size:0.7rem;
+    color:#666; letter-spacing:2px; margin-top:0.3rem;
+  }
+  .pdf-status-badge {
+    margin-left:auto; position:relative; z-index:1;
+    font-family:'Share Tech Mono',monospace; font-size:0.75rem;
+    letter-spacing:3px; padding:0.5rem 1.2rem;
+    border:1px solid; text-align:center;
+  }
+
+  /* BODY */
+  .pdf-body { display:grid; grid-template-columns:220px 1fr; }
+
+  /* SIDEBAR */
+  .pdf-sidebar {
+    background:#0a0a0a; border-right:1px solid #2a2a2a;
+    padding:1.5rem;
+  }
+  .pdf-photo {
+    width:100%; aspect-ratio:1; object-fit:cover;
+    border:1px solid #2a2a2a; display:block; margin-bottom:1.2rem;
+    image-rendering:pixelated;
+  }
+  .pdf-photo-placeholder {
+    width:100%; aspect-ratio:1;
+    background:#111; border:1px solid #2a2a2a;
+    display:flex; align-items:center; justify-content:center;
+    font-size:3rem; margin-bottom:1.2rem; color:#333;
+  }
+  .pdf-info-label {
+    font-family:'Share Tech Mono',monospace; font-size:0.55rem;
+    color:#555; letter-spacing:2px; display:block; margin-bottom:0.15rem;
+  }
+  .pdf-info-value {
+    font-size:0.85rem; color:#d0d0d0; font-weight:500;
+    border-bottom:1px solid #1a1a1a; padding-bottom:0.6rem; margin-bottom:0.6rem;
+    display:block;
+  }
+  .pdf-section-divider {
+    font-family:'Share Tech Mono',monospace; font-size:0.6rem;
+    color:#cc0000; letter-spacing:3px;
+    padding:0.8rem 0 0.5rem; margin-bottom:0.5rem;
+    border-bottom:1px solid #1a1a1a;
+  }
+
+  /* MAIN */
+  .pdf-main { padding:1.5rem 2rem; }
+  .pdf-section { margin-bottom:1.5rem; }
+  .pdf-section-title {
+    font-family:'Share Tech Mono',monospace; font-size:0.6rem;
+    color:#cc0000; letter-spacing:4px;
+    padding-bottom:0.5rem; margin-bottom:0.8rem;
+    border-bottom:1px solid #2a2a2a;
+  }
+  .pdf-text {
+    font-size:0.88rem; line-height:1.8; color:#c8c8c8;
+  }
+  .pdf-text strong { color:#a0a0a0; }
+
+  /* ATRIBUTOS */
+  .attrs-row { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+
+  /* PERÍCIAS */
+  .skills-wrap { display:flex; gap:0.4rem; flex-wrap:wrap; }
+
+  /* FOOTER */
+  .pdf-footer {
+    border-top:1px solid #2a2a2a; padding:1rem 2rem;
+    display:flex; justify-content:space-between; align-items:center;
+    background:#0a0a0a;
+  }
+  .pdf-footer-left {
+    font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:#333; letter-spacing:2px;
+  }
+  .pdf-footer-right {
+    font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:#333; letter-spacing:1px;
+  }
+  .pdf-grid-overlay {
+    position:absolute; inset:0; pointer-events:none;
+    background-image:linear-gradient(rgba(139,0,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(139,0,0,0.03) 1px,transparent 1px);
+    background-size:30px 30px;
+  }
+</style>
+</head>
+<body>
+<div class="no-print">
+  <button class="btn-print" onclick="window.print()">⬇ SALVAR PDF</button>
+  <button class="btn-close" onclick="window.close()">✕ FECHAR</button>
+</div>
+
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="pdf-header">
+    <div class="pdf-grid-overlay"></div>
+    <img src="https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png" class="pdf-header-logo" onerror="this.style.display='none'">
+    <div class="pdf-header-title">
+      <div class="pdf-header-label">// FICHA DE PERSONAGEM — PARANOIA RP //</div>
+      <div class="pdf-header-name">${c.name.toUpperCase()}</div>
+      <div class="pdf-header-sub">Player: ${c.playerAccount||c.player||'—'} &nbsp;|&nbsp; ${c.lang==='cucurucho'?'QSMP CENSUS BUREAU':(c.lang||'').toUpperCase()}</div>
+    </div>
+    <div class="pdf-status-badge" style="color:${gsColor};border-color:${gsColor};background:${gsColor}18">
+      ${gsLabel}
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="pdf-body">
+
+    <!-- SIDEBAR -->
+    <div class="pdf-sidebar">
+      ${fotoUrl
+        ? `<img src="${fotoUrl}" class="pdf-photo" alt="${c.name}">`
+        : `<div class="pdf-photo-placeholder">👤</div>`
+      }
+      <div class="pdf-section-divider">// DADOS //</div>
+      ${c.nascimento ? `<span class="pdf-info-label">NASC. PERSONAGEM</span><span class="pdf-info-value">${c.nascimento}</span>` : ''}
+      ${age ? `<span class="pdf-info-label">IDADE</span><span class="pdf-info-value">${age} anos</span>` : ''}
+      <span class="pdf-info-label">STATUS</span>
+      <span class="pdf-info-value" style="color:${gsColor}">${gsLabel}</span>
+      ${c.classificacao ? `<span class="pdf-info-label">CLASSIFICAÇÃO</span><span class="pdf-info-value" style="color:#ff9800">${c.classificacao.toUpperCase()}</span>` : ''}
+
+      <div class="pdf-section-divider" style="margin-top:0.8rem">// ATRIBUTOS //</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.4rem;margin-bottom:1rem">
+        ${c.attrs ? Object.entries(c.attrs).map(([k,v]) => `
+          <div style="background:#111;border:1px solid #222;padding:0.5rem 0.3rem;text-align:center">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:#cc0000;letter-spacing:1px">${k}</div>
+            <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:#d0d0d0;font-weight:700">${v||0}</div>
+          </div>`).join('') : '<div style="color:#666;font-size:0.75rem">—</div>'}
+      </div>
+
+      <div class="pdf-section-divider">// PERÍCIAS //</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.3rem">
+        ${(c.skills && c.skills.length)
+          ? c.skills.map(s => `<div style="padding:0.25rem 0.5rem;background:#111;border:1px solid #222;font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#c8c8c8">${s}</div>`).join('')
+          : '<div style="color:#555;font-size:0.75rem">Nenhuma.</div>'}
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="pdf-main">
+
+      ${(c.fisico||c.personalidade) ? `
+      <div class="pdf-section">
+        <div class="pdf-section-title">CARACTERÍSTICAS</div>
+        ${c.fisico ? `<p class="pdf-text" style="margin-bottom:0.8rem"><strong>Físico:</strong><br>${c.fisico}</p>` : ''}
+        ${c.personalidade ? `<p class="pdf-text"><strong>Personalidade:</strong><br>${c.personalidade}</p>` : ''}
+      </div>` : ''}
+
+      ${c.backstory ? `
+      <div class="pdf-section">
+        <div class="pdf-section-title">HISTÓRIA</div>
+        <p class="pdf-text">${c.backstory}</p>
+      </div>` : ''}
+
+      ${traumasHtml}
+      ${conditionsHtml}
+      ${historicoHtml}
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="pdf-footer">
+    <div class="pdf-footer-left">PARANOIA RP — ILHA QUESADILLA &nbsp;|&nbsp; DOCUMENTO GERADO EM ${new Date().toLocaleDateString('pt-BR')}</div>
+    <div class="pdf-footer-right">paranoiarp.github.io/Paranoia-RP</div>
+  </div>
+
+</div>
+</body></html>`);
+  win.document.close();
 }
 
 // ===== RESET FICHA =====
