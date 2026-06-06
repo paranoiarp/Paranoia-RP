@@ -2971,7 +2971,7 @@
     <div style="display:flex;flex-direction:column;gap:0.8rem;width:100%;max-width:400px">
       <input type="text" class="secret-input" id="adminUser" placeholder="USUÁRIO" style="border-right:1px solid var(--red)">
       <div class="secret-input-group">
-        <input type="password" class="secret-input" id="adminPass" placeholder="SENHA" onkeydown="if(event.key==='Enter')checkAdmin()" oninput="this.value=this.value.toUpperCase()" style="text-transform:uppercase">
+        <input type="password" class="secret-input" id="adminPass" placeholder="SENHA" onkeydown="if(event.key==='Enter')checkAdmin()">
         <button class="secret-btn" onclick="checkAdmin()">ENTRAR</button>
       </div>
     </div>
@@ -3897,7 +3897,7 @@ function updateAdminNotify() {
 
 async function checkAdmin() {
   const u = document.getElementById('adminUser').value.trim();
-  const p = document.getElementById('adminPass').value.toUpperCase();
+  const p = document.getElementById('adminPass').value;
   const errEl = document.getElementById('adminError');
   const btn = document.querySelector('#admin-gate .secret-btn');
   if(!u || !p) { errEl.style.display = 'block'; return; }
