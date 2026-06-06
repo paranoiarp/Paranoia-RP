@@ -3294,7 +3294,10 @@ function initImages() {
 // ===== NAV =====
 function showLorePage(slug) { showPage('lore-' + slug); }
 
-function showPage(id) {
+// Páginas que não devem ir para o histórico do navegador (painéis internos, auth)
+const NO_HISTORY_PAGES = new Set(['admin-gate','admin-panel','player-panel','char-profile','fed-secret']);
+
+function showPage(id, opts = {}) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById(id);
   if(p) p.classList.add('active');
@@ -3303,6 +3306,28 @@ function showPage(id) {
   if(nav) nav.classList.add('active');
   document.getElementById('navLinks').classList.remove('open');
   setTimeout(() => window.scrollTo({top:0, behavior:'instant'}), 0);
+
+  // ── History API ──
+  if(!opts._fromPopstate) {
+    const skip = NO_HISTORY_PAGES.has(id);
+    if(!skip) {
+      // monta a URL: char-profile usa ?p=char&id=charId
+      let url;
+      if(id === 'char-profile' && window._currentProfileId) {
+        url = '?p=char&id=' + encodeURIComponent(window._currentProfileId);
+      } else if(id === 'home') {
+        url = window.location.pathname; // limpa a query
+      } else {
+        url = '?p=' + encodeURIComponent(id);
+      }
+      // pushState só se a URL for diferente
+      const current = window.location.search + window.location.pathname;
+      if(window.location.href !== window.location.origin + window.location.pathname + (url.startsWith('?') ? url : '')) {
+        history.pushState({pageId: id, charId: window._currentProfileId||null}, '', url);
+      }
+    }
+  }
+
   if(id==='players') renderPlayersPublic();
   if(id==='personagens') renderChars('all');
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
@@ -3311,25 +3336,21 @@ function showPage(id) {
   if(id==='minha-area' && window._playerLogado) { showPage('player-panel'); return; }
   if(id==='ficha') {
     if(!window._playerLogado) { showPage('minha-area'); return; }
-    // Atualiza aviso de login do player
     const notice = document.getElementById('fichaPlayerNotice');
     const nomeEl = document.getElementById('fichaPlayerNome');
     if(notice && nomeEl) {
       if(window._playerLogado) { nomeEl.textContent = window._playerUser.toUpperCase(); notice.style.display='block'; }
       else notice.style.display='none';
     }
-    // Preenche nome do player automaticamente se logado
     if(window._playerLogado && !window._editingFichaId) {
       const fPlayer = document.getElementById('f_player');
       if(fPlayer && !fPlayer.value) fPlayer.value = window._playerUser;
     }
-    // Se a tela de sucesso estava aberta, reseta o form
     if(document.getElementById('fichaSuccess').style.display === 'block' && !window._editingFichaId) {
       document.getElementById('fichaForm').style.display = 'block';
       document.getElementById('fichaSuccess').style.display = 'none';
     }
     buildAttrsForm(); buildSkillsForm(); initDateMasks();
-    // Hook progress bar
     setTimeout(() => {
       document.querySelectorAll('#fichaForm input, #fichaForm textarea').forEach(el => {
         el.addEventListener('input', updateFichaProgress);
@@ -3339,6 +3360,40 @@ function showPage(id) {
     }, 100);
   }
 }
+
+// ── Listener: botão Voltar/Avançar do navegador ──
+window.addEventListener('popstate', (e) => {
+  const params = new URLSearchParams(window.location.search);
+  const p = params.get('p');
+  const charId = params.get('id');
+  if(p === 'char' && charId) {
+    showCharProfile(decodeURIComponent(charId), {_fromPopstate: true});
+  } else if(p) {
+    showPage(decodeURIComponent(p), {_fromPopstate: true});
+  } else {
+    showPage('home', {_fromPopstate: true});
+  }
+});
+
+// ── Ao carregar a página: respeitar a URL atual ──
+(function initFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const p = params.get('p');
+  const charId = params.get('id');
+  if(p === 'char' && charId) {
+    // espera os dados do Firestore carregarem antes de abrir o perfil
+    const tryOpen = (tries) => {
+      if(approvedChars.length || tries > 20) {
+        showCharProfile(decodeURIComponent(charId), {_fromPopstate: true});
+      } else {
+        setTimeout(() => tryOpen(tries+1), 300);
+      }
+    };
+    tryOpen(0);
+  } else if(p && document.getElementById(p)) {
+    showPage(decodeURIComponent(p), {_fromPopstate: true});
+  }
+})();
 
 function toggleNav() { document.getElementById('navLinks').classList.toggle('open'); }
 
@@ -3445,7 +3500,7 @@ function filterChars(f, btn) {
   renderChars(f);
 }
 
-function showCharProfile(id) {
+function showCharProfile(id, opts = {}) {
   // Busca primeiro em approvedChars pelo charId original, depois por doc id
   let c = approvedChars.find(x => x.charId === id || x.id === id);
   // Fallback: busca no estático
@@ -3584,8 +3639,12 @@ function showCharProfile(id) {
       ${!isClassified && isOwnChar ? `<button onclick="playerSubmitHistorico('${id}')" style="margin-top:1rem;padding:0.6rem 1.2rem;background:none;border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(139,0,0,0.15)'" onmouseout="this.style.background='none'">+ SUBMETER ENTRADA NARRATIVA</button>` : ''}
       </div>
     </div>`;
-  showPage('char-profile');
+  showPage('char-profile', opts);
   window._currentProfileId = id;
+  // Atualizar URL para o perfil específico
+  if(!opts._fromPopstate) {
+    history.pushState({pageId:'char-profile', charId:id}, '', '?p=char&id=' + encodeURIComponent(id));
+  }
   // Mostrar/ocultar botão PDF dependendo de ser classified e não ser admin
   const btnPdf = document.getElementById('btnPdfPerfil');
   if(btnPdf) btnPdf.style.display = (isClassified && !window._adminLogado) ? 'none' : 'block';
