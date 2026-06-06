@@ -7173,6 +7173,7 @@ async function gerarCardPNG(id) {
     CY+=12;
     ctx.font='bold 16px "Share Tech Mono", monospace';
     ctx.fillStyle='#8b0000'; ctx.fillText('PERÍCIAS',RX,CY); CY+=22;
+    const COLS=4;
     const skillW=Math.floor(RW/COLS)-4;
     const skillH=28;
     const skills=c.skills.slice(0,8);
