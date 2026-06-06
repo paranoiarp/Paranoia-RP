@@ -4588,8 +4588,8 @@ function adminEditarRgId(fichaDocId, charName, currentRgId) {
       <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.5rem">// EDITAR ID DO RG //</div>
       <h3 style="font-family:'Orbitron',monospace;color:#fff;margin-bottom:1.2rem;font-size:1rem">${charName.toUpperCase()}</h3>
       <div style="margin-bottom:1rem">
-        <label style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px;display:block;margin-bottom:0.4rem">ID DO RG (ex: POR-1234) — deixe vazio para gerar automático</label>
-        <input type="text" id="editRgIdInput" value="${currentRgId||''}" placeholder="POR-1234"
+        <label style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px;display:block;margin-bottom:0.4rem">ID DO RG (ex: POR-123) — 3 letras, hífen, 3 dígitos — deixe vazio para gerar automático</label>
+        <input type="text" id="editRgIdInput" value="${currentRgId||''}" placeholder="POR-123" maxlength="7"
           style="width:100%;background:var(--bg3);border:1px solid var(--border);color:#fff;padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.9rem;text-transform:uppercase;outline:none;letter-spacing:2px"
           oninput="this.value=this.value.toUpperCase()"
           onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
@@ -4616,6 +4616,11 @@ async function confirmEditRgId(fichaDocId) {
   const input = document.getElementById('editRgIdInput');
   const errEl = document.getElementById('editRgIdErr');
   const newId = input?.value.trim().toUpperCase() || '';
+  // Validar formato XXX-000 (3 letras, hífen, 3 dígitos) se não estiver vazio
+  if(newId && !/^[A-Z]{3}-[0-9]{3}$/.test(newId)) {
+    if(errEl) { errEl.textContent = '✗ Formato inválido. Use 3 letras, hífen, 3 dígitos. Ex: POR-123'; errEl.style.display='block'; }
+    return;
+  }
   try {
     const { doc, updateDoc } = window._fbModules;
     await updateDoc(doc(window._db, 'approvedChars', fichaDocId), { rgId: newId });
@@ -5549,7 +5554,7 @@ function adminEditarFicha(fichaDocId) {
         <h3>INFORMAÇÕES BÁSICAS</h3>
         <div class="form-grid">
           <div class="form-group"><label>Foto (Imgur URL)</label><input type="text" id="adm_imageUrl" value="${ficha.imageUrl||''}" placeholder="https://i.imgur.com/..."></div>
-          <div class="form-group"><label>ID do RG (ex: POR-1234) — deixe vazio para gerar automático</label><input type="text" id="adm_rgId" value="${ficha.rgId||''}" placeholder="POR-1234" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+          <div class="form-group"><label>ID do RG (ex: POR-123) — 3 letras, hífen, 3 dígitos — deixe vazio para gerar automático</label><input type="text" id="adm_rgId" value="${ficha.rgId||''}" placeholder="POR-123" maxlength="7" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
           ${ficha.lang==='huevito'?`<div class="form-group full"><label>🥚 FILIAÇÃO (Pais / Responsáveis) — exclusivo Huevitos</label><input type="text" id="adm_filiacao" value="${ficha.filiacao||''}" placeholder="Ex: Roier e Jaiden"></div>`:'<input type="hidden" id="adm_filiacao" value="">'}
           <div class="form-group"><label>Nome do Player</label><input type="text" id="adm_player" value="${ficha.player||''}"></div>
           <div class="form-group"><label>Data de Nasc. Personagem</label><input type="text" id="adm_nascimento" value="${ficha.nascimento||''}"></div>
@@ -5620,7 +5625,11 @@ async function salvarAdminEdit(fichaDocId) {
   if(!ficha) return;
   const updates = {
     imageUrl: document.getElementById('adm_imageUrl')?.value.trim() || ficha.imageUrl || '',
-    rgId: document.getElementById('adm_rgId')?.value.trim().toUpperCase() || ficha.rgId || '',
+    rgId: (() => {
+      const v = document.getElementById('adm_rgId')?.value.trim().toUpperCase() || '';
+      if(v && !/^[A-Z]{3}-[0-9]{3}$/.test(v)) { showToast('✗ ID inválido. Use 3 letras, hífen, 3 dígitos. Ex: POR-123', 'error'); throw new Error('invalid_id'); }
+      return v || ficha.rgId || '';
+    })(),
     filiacao: document.getElementById('adm_filiacao')?.value.trim() || ficha.filiacao || '',
     player: document.getElementById('adm_player')?.value.trim() || ficha.player || '',
     nascimento: document.getElementById('adm_nascimento')?.value.trim() || '',
@@ -6757,7 +6766,7 @@ async function gerarCardPNG(id) {
   const docId = c.id || c.charId || 'X';
   let hash = 0;
   for(let i=0;i<docId.length;i++) hash = ((hash<<5)-hash)+docId.charCodeAt(i), hash|=0;
-  const autoNum = String(Math.abs(hash) % 9000 + 1000);
+  const autoNum = String(Math.abs(hash) % 900 + 100);
   const RG_ID = c.rgId || (sigla + '-' + autoNum);
 
   const prePhoto = window._charPhotos && window._charPhotos[id];
@@ -6864,13 +6873,13 @@ async function gerarCardPNG(id) {
   // Carregar logo da federação
   const fedLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/FederationID.png');
 
-  // MARCA D'ÁGUA — logo da federação igual ao site (branca, centralizada, mais visível)
+  // MARCA D'ÁGUA — logo da federação (maior, centralizada, mais visível)
   if(fedLogo){
-    const mwSize=260;
+    const mwSize=340;
     const mwX=RX+(RW-mwSize)/2;
-    const mwY=CY+40;
+    const mwY=HEADER_H+10;
     ctx.save();
-    ctx.globalAlpha=0.12;
+    ctx.globalAlpha=0.18;
     ctx.filter='invert(1)';
     ctx.drawImage(fedLogo,mwX,mwY,mwSize,mwSize);
     ctx.filter='none';
