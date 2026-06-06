@@ -2543,7 +2543,8 @@
 <div id="char-profile" class="page">
   <div class="profile-back" style="display:flex;justify-content:space-between;align-items:center">
     <button class="back-btn" onclick="showPage('personagens')">← VOLTAR</button>
-    <button class="back-btn" id="btnPdfPerfil" onclick="gerarFichaPDF(window._currentProfileId)" style="border-color:var(--red);color:var(--red-bright)">⬇ BAIXAR FICHA PDF</button>
+    <button class="back-btn" id="btnPdfPerfil" onclick="gerarFichaPDF(window._currentProfileId)" style="border-color:var(--red);color:var(--red-bright)">⬇ PDF COMPLETO</button>
+    <button class="back-btn" id="btnCardPerfil" onclick="gerarCardPNG(window._currentProfileId)" style="border-color:var(--red);color:var(--red-bright)">🪪 CARD PNG</button>
   </div>
   <div class="profile-layout" id="profileContent"></div>
 </div>
@@ -5133,6 +5134,7 @@ async function loadPlayerPanel() {
               <button class="btn-approve" onclick="showCharProfile('${f.charId||f.id}')">👁 VER</button>
               <button class="btn-approve" onclick="playerEditarFicha('${f.id}')">✎ EDITAR</button>
               <button class="btn-approve" onclick="gerarFichaPDF('${f.charId||f.id}')" style="border-color:var(--red);color:var(--red-bright)">⬇ PDF</button>
+              <button class="btn-approve" onclick="gerarCardPNG('${f.charId||f.id}')" style="border-color:var(--red);color:var(--red-bright)">🪪 CARD</button>
             </div>
           </div>`;
         }).join('')}
@@ -5361,6 +5363,7 @@ function renderAdminOwnChars() {
         <button class="btn-approve" onclick="showCharProfile('${f.charId||f.id}')">👁 VER FICHA</button>
         <button class="btn-approve" onclick="adminEditarFicha('${f.id}')">✎ EDITAR SEM LIMITE</button>
         <button class="btn-approve" onclick="gerarFichaPDF('${f.charId||f.id}')" style="border-color:var(--red);color:var(--red-bright)">⬇ PDF</button>
+        <button class="btn-approve" onclick="gerarCardPNG('${f.charId||f.id}')" style="border-color:var(--red);color:var(--red-bright)">🪪 CARD</button>
       </div>
     </div>`;
   }).join('');
@@ -6657,6 +6660,246 @@ function gerarFichaPDF(id) {
 </div>
 </body></html>`);
   win.document.close();
+}
+
+// ===== GERAR CARD PNG =====
+async function gerarCardPNG(id) {
+  let c = approvedChars.find(x => x.charId === id || x.id === id);
+  if(!c) c = CHARS_DATA.find(x => x.id === id);
+  if(!c) { showToast('⚠ Personagem não encontrado.', 'error'); return; }
+
+  showToast('⏳ Gerando card...', 'info');
+
+  const prePhoto = window._charPhotos && window._charPhotos[id];
+  const fotoUrl = c.imageUrl || prePhoto || null;
+  const gs = c.gameStatus || 'vivo';
+  const gsLabel = {vivo:'VIVO', morto:'MORTO', desaparecido:'DESAPARECIDO', contido:'CONTIDO', classified:'CLASSIFIED'}[gs] || gs.toUpperCase();
+  const gsColor = {vivo:'#4caf50', morto:'#cc0000', desaparecido:'#ff9800', contido:'#cc0000', classified:'#cc0000'}[gs] || '#888';
+  const age = calcAge(c.nascimento) || c.idade || '';
+
+  // Dimensões do card
+  const W = 480, H = 720;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Helper: carregar imagem com CORS
+  function loadImg(url) {
+    return new Promise(res => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => res(img);
+      img.onerror = () => res(null);
+      img.src = url;
+    });
+  }
+
+  // Helper: texto com quebra de linha
+  function wrapText(ctx, text, x, y, maxW, lineH) {
+    const words = text.split(' ');
+    let line = '';
+    for(const w of words) {
+      const test = line + w + ' ';
+      if(ctx.measureText(test).width > maxW && line !== '') {
+        ctx.fillText(line.trim(), x, y);
+        line = w + ' ';
+        y += lineH;
+      } else { line = test; }
+    }
+    ctx.fillText(line.trim(), x, y);
+    return y;
+  }
+
+  // ── FUNDO ──
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid sutil
+  ctx.strokeStyle = 'rgba(139,0,0,0.06)';
+  ctx.lineWidth = 1;
+  for(let x = 0; x < W; x += 30) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y = 0; y < H; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Borda externa
+  ctx.strokeStyle = '#2a2a2a';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0, 0, W, H);
+
+  // Faixa topo vermelha
+  ctx.fillStyle = '#8b0000';
+  ctx.fillRect(0, 0, W, 4);
+
+  // ── FOTO DO PERSONAGEM ──
+  const FOTO_Y = 24, FOTO_H = 200;
+  if(fotoUrl) {
+    const foto = await loadImg(fotoUrl);
+    if(foto) {
+      // Crop quadrado centralizado
+      const size = Math.min(foto.naturalWidth, foto.naturalHeight);
+      const sx = (foto.naturalWidth - size) / 2;
+      const sy = (foto.naturalHeight - size) / 2;
+      ctx.drawImage(foto, sx, sy, size, size, 0, FOTO_Y, W, FOTO_H);
+      // Gradiente sobre a foto (fade para baixo)
+      const grad = ctx.createLinearGradient(0, FOTO_Y + FOTO_H * 0.4, 0, FOTO_Y + FOTO_H);
+      grad.addColorStop(0, 'rgba(10,10,10,0)');
+      grad.addColorStop(1, 'rgba(10,10,10,0.98)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, FOTO_Y, W, FOTO_H);
+    }
+  } else {
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, FOTO_Y, W, FOTO_H);
+    ctx.fillStyle = '#333';
+    ctx.font = '80px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('👤', W/2, FOTO_Y + FOTO_H/2 + 28);
+  }
+
+  // ── NOME DO PERSONAGEM (sobre a foto) ──
+  const nameY = FOTO_Y + FOTO_H - 16;
+  ctx.textAlign = 'left';
+  ctx.fillStyle = 'rgba(10,10,10,0.5)';
+  ctx.fillRect(0, nameY - 36, W, 52);
+  ctx.font = 'bold 28px Orbitron, monospace';
+  ctx.fillStyle = '#ffffff';
+  ctx.letterSpacing = '4px';
+  ctx.fillText(c.name.toUpperCase(), 20, nameY);
+  ctx.letterSpacing = '0px';
+
+  // ── LINHA SEPARADORA ──
+  const SEP_Y = FOTO_Y + FOTO_H + 10;
+  ctx.fillStyle = '#8b0000';
+  ctx.fillRect(20, SEP_Y, W - 40, 1);
+
+  // ── DADOS BÁSICOS ──
+  let curY = SEP_Y + 20;
+  ctx.font = '10px "Share Tech Mono", monospace';
+  ctx.fillStyle = '#555';
+  ctx.fillText('PLAYER', 20, curY);
+  ctx.font = '13px "Share Tech Mono", monospace';
+  ctx.fillStyle = '#d0d0d0';
+  ctx.fillText((c.playerAccount || c.player || '—').toUpperCase(), 20, curY + 14);
+
+  if(age) {
+    ctx.font = '10px "Share Tech Mono", monospace';
+    ctx.fillStyle = '#555';
+    ctx.fillText('IDADE', 200, curY);
+    ctx.font = '13px "Share Tech Mono", monospace';
+    ctx.fillStyle = '#d0d0d0';
+    ctx.fillText(age + ' ANOS', 200, curY + 14);
+  }
+
+  // Status badge
+  ctx.font = '10px "Share Tech Mono", monospace';
+  ctx.fillStyle = '#555';
+  ctx.fillText('STATUS', W - 120, curY);
+  ctx.font = 'bold 12px "Share Tech Mono", monospace';
+  ctx.fillStyle = gsColor;
+  ctx.fillText(gsLabel, W - 120, curY + 14);
+
+  curY += 40;
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fillRect(20, curY, W - 40, 1);
+  curY += 14;
+
+  // ── ATRIBUTOS ──
+  ctx.font = '9px "Share Tech Mono", monospace';
+  ctx.fillStyle = '#cc0000';
+  ctx.fillText('// ATRIBUTOS //', 20, curY);
+  curY += 14;
+
+  if(c.attrs) {
+    const attrs = Object.entries(c.attrs);
+    const boxW = (W - 40) / attrs.length;
+    attrs.forEach(([k, v], i) => {
+      const bx = 20 + i * boxW;
+      // Caixa
+      ctx.fillStyle = '#111';
+      ctx.fillRect(bx + 2, curY, boxW - 4, 46);
+      ctx.strokeStyle = '#2a2a2a';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(bx + 2, curY, boxW - 4, 46);
+      // Label
+      ctx.font = '9px "Share Tech Mono", monospace';
+      ctx.fillStyle = '#cc0000';
+      ctx.textAlign = 'center';
+      ctx.fillText(k, bx + boxW/2, curY + 13);
+      // Valor
+      ctx.font = 'bold 20px Orbitron, monospace';
+      ctx.fillStyle = '#d0d0d0';
+      ctx.fillText(String(v || 0), bx + boxW/2, curY + 38);
+    });
+    ctx.textAlign = 'left';
+  }
+  curY += 60;
+
+  // ── PERÍCIAS ──
+  ctx.font = '9px "Share Tech Mono", monospace';
+  ctx.fillStyle = '#cc0000';
+  ctx.fillText('// PERÍCIAS //', 20, curY);
+  curY += 12;
+
+  if(c.skills && c.skills.length) {
+    let px = 20, py = curY;
+    ctx.font = '9px "Share Tech Mono", monospace';
+    for(const s of c.skills) {
+      const sw = ctx.measureText(s).width + 14;
+      if(px + sw > W - 20) { px = 20; py += 20; }
+      // Pill
+      ctx.fillStyle = '#111';
+      ctx.fillRect(px, py - 11, sw, 16);
+      ctx.strokeStyle = '#2a2a2a';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(px, py - 11, sw, 16);
+      ctx.fillStyle = '#c8c8c8';
+      ctx.fillText(s, px + 7, py);
+      px += sw + 6;
+    }
+    curY = py + 22;
+  } else { curY += 20; }
+
+  // ── RODAPÉ COM LOGO ──
+  const FOOTER_Y = H - 70;
+  ctx.fillStyle = '#0d0d0d';
+  ctx.fillRect(0, FOOTER_Y, W, 70);
+  ctx.fillStyle = '#8b0000';
+  ctx.fillRect(0, FOOTER_Y, W, 1);
+
+  // Logo PARANOIA
+  const logo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png');
+  if(logo) {
+    ctx.globalAlpha = 0.9;
+    ctx.drawImage(logo, 16, FOOTER_Y + 10, 44, 44);
+    ctx.globalAlpha = 1;
+  }
+
+  // Texto PARANOIA
+  ctx.font = 'bold 18px Orbitron, monospace';
+  ctx.fillStyle = '#ffffff';
+  ctx.letterSpacing = '8px';
+  ctx.fillText('PARANOIA', 72, FOOTER_Y + 30);
+  ctx.letterSpacing = '0px';
+  ctx.font = '9px "Share Tech Mono", monospace';
+  ctx.fillStyle = '#555';
+  ctx.fillText('ILHA QUESADILLA — paranoiarp.github.io', 72, FOOTER_Y + 48);
+
+  // Data
+  ctx.textAlign = 'right';
+  ctx.font = '8px "Share Tech Mono", monospace';
+  ctx.fillStyle = '#333';
+  ctx.fillText(new Date().toLocaleDateString('pt-BR'), W - 16, FOOTER_Y + 62);
+  ctx.textAlign = 'left';
+
+  // Faixa vermelha base
+  ctx.fillStyle = '#8b0000';
+  ctx.fillRect(0, H - 4, W, 4);
+
+  // ── DOWNLOAD ──
+  const link = document.createElement('a');
+  link.download = `paranoia-card-${c.name.toLowerCase().replace(/\s+/g,'-')}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('✓ Card baixado!', 'success');
 }
 
 // ===== RESET FICHA =====
