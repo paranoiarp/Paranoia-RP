@@ -7051,23 +7051,33 @@ async function gerarCardPNG(id) {
   // ── 5. COLUNA DIREITA ──
   const RX=FOTO_X+FOTO_SIZE+22;
   const RW=W-RX-18;
-  let CY=HEADER_H+14;
 
   // Carregar logo da federação
   const fedLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/FederationID.png');
 
-  // MARCA D'ÁGUA — logo da federação (maior, centralizada, mais visível)
+  // MARCA D'ÁGUA — centralizada no card inteiro, maior
   if(fedLogo){
-    const mwSize=340;
-    const mwX=RX+(RW-mwSize)/2;
-    const mwY=HEADER_H+10;
+    const mwSize=420;
+    const mwX=(W-mwSize)/2;
+    const mwY=HEADER_H+(H-HEADER_H-42-mwSize)/2;
     ctx.save();
-    ctx.globalAlpha=0.18;
+    ctx.globalAlpha=0.13;
     ctx.filter='invert(1)';
     ctx.drawImage(fedLogo,mwX,mwY,mwSize,mwSize);
     ctx.filter='none';
     ctx.restore();
   }
+
+  // ── Calcular altura total do conteúdo para centralizar verticalmente ──
+  const FOOT_Y=H-42;
+  const CONTENT_H = FOOT_Y - HEADER_H - 14; // altura disponível na coluna direita
+  // Estimar altura do bloco: nome(50) + sep(14) + dados(2*42+8) + sep(12) + label(19) + attrs(62) + label(19) + skills
+  const nSkills = c.skills ? Math.min(c.skills.length,8) : 0;
+  const nSkillRows = Math.ceil(nSkills/4);
+  const hasAttrs = !!c.attrs;
+  const estimatedH = 50 + 14 + (2*42+8) + 12 + (hasAttrs?10+62:0) + (nSkills>0?10+nSkillRows*28:0);
+  const startOffset = Math.max(0, Math.floor((CONTENT_H - estimatedH) / 2));
+  let CY = HEADER_H + 14 + startOffset;
 
   // NOME
   ctx.font='bold 34px "Orbitron", monospace';
@@ -7137,29 +7147,22 @@ async function gerarCardPNG(id) {
     const COLS=4;
     const skillW=Math.floor(RW/COLS)-4;
     const skillH=24;
-    const skills=c.skills.slice(0,8); // máx 8 = 2 linhas de 4
+    const skills=c.skills.slice(0,8);
 
     skills.forEach((s,i)=>{
       const col=i%COLS;
       const row=Math.floor(i/COLS);
       const bx=RX+col*(skillW+4);
       const by=CY+row*(skillH+4);
-
-      // fundo
       ctx.fillStyle='rgba(0,60,0,0.35)';
       ctx.strokeStyle='#2a6a2a'; ctx.lineWidth=1;
       ctx.fillRect(bx,by,skillW,skillH);
       ctx.strokeRect(bx,by,skillW,skillH);
-
-      // checkmark
       ctx.font='bold 10px "Share Tech Mono", monospace';
       ctx.fillStyle='#66bb6a';
       ctx.fillText('✓',bx+6,by+16);
-
-      // texto — cabe no espaço
       ctx.font='bold 10px "Share Tech Mono", monospace';
       ctx.fillStyle='#88dd88';
-      // truncar se necessário
       let txt=s;
       while(ctx.measureText(txt).width>skillW-28&&txt.length>2) txt=txt.slice(0,-1);
       if(txt.length<s.length) txt+='…';
@@ -7170,47 +7173,16 @@ async function gerarCardPNG(id) {
   }
 
   // ── 6. RODAPÉ ──
-  const FOOT_Y=H-42;
   ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,FOOT_Y,W,42);
   ctx.fillStyle='#1a0000'; ctx.fillRect(0,FOOT_Y,W,1);
 
-  // Esquerda — info legível
-  ctx.textAlign='left';
-  ctx.font='bold 10px "Share Tech Mono", monospace';
-  ctx.fillStyle='#888888';
-  ctx.fillText('EMITIDO EM '+new Date().toLocaleDateString('pt-BR'), 18, FOOT_Y+16);
-  ctx.font='bold 9px "Share Tech Mono", monospace';
-  ctx.fillStyle='#666666';
-  const tipoDoc = isHuevito ? 'DOCUMENTO DE ADOÇÃO // PARANOIA RP' : 'DOCUMENTO OFICIAL // PARANOIA RP';
-  ctx.fillText(tipoDoc, 18, FOOT_Y+30);
+  // ── 7. SELO DA FEDERAÇÃO — lado esquerdo, sobre o rodapé ──
+  const SELO_SIZE=90;
+  const SELO_CX=FOTO_X+FOTO_SIZE/2; // centralizado sobre a foto
+  const SELO_CY=FOOT_Y-SELO_SIZE/2-14;
 
-  // Centro
-  ctx.textAlign='center';
-  ctx.font='8px "Share Tech Mono", monospace';
-  ctx.fillStyle='#444444';
-  ctx.fillText('paranoiarp.github.io/Paranoia-RP', W/2, FOOT_Y+22);
-
-  // Direita — RESIDENTE (deslocado para não colidir com o selo)
-  const SELO_OFFSET = 90 + 22 + 12; // SELO_SIZE + margem + gap
-  ctx.textAlign='right';
-  ctx.font='bold 10px "Share Tech Mono", monospace';
-  ctx.fillStyle='#888888';
-  const tipoResidente = isHuevito ? 'RESIDENTE // MENOR' : 'RESIDENTE // ILHA QUESADILLA';
-  ctx.fillText(tipoResidente, W-SELO_OFFSET, FOOT_Y+16);
-  ctx.font='8px "Share Tech Mono", monospace';
-  ctx.fillStyle='#555555';
-  ctx.fillText('THE FEDERATION REGISTRY', W-SELO_OFFSET, FOOT_Y+30);
-  ctx.textAlign='left';
-
-  // ── 7. SELO DA FEDERAÇÃO ──
   if(fedLogo){
-    const SELO_SIZE=90;
-    const SELO_CX=W-SELO_SIZE/2-22;
-    const SELO_CY=FOOT_Y-SELO_SIZE/2-14;
-
     ctx.save();
-
-    // Anéis decorativos
     ctx.beginPath();
     ctx.arc(SELO_CX,SELO_CY,SELO_SIZE/2+10,0,Math.PI*2);
     ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1.5;
@@ -7219,31 +7191,51 @@ async function gerarCardPNG(id) {
     ctx.arc(SELO_CX,SELO_CY,SELO_SIZE/2+16,0,Math.PI*2);
     ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
     ctx.stroke();
-
-    // Clip circular para cortar o fundo da imagem
     ctx.beginPath();
     ctx.arc(SELO_CX,SELO_CY,SELO_SIZE/2,0,Math.PI*2);
     ctx.clip();
-
-    // Fundo escuro dentro do círculo
     ctx.fillStyle='rgba(10,10,10,0.5)';
     ctx.fill();
-
-    // Logo invertida dentro do clip
     ctx.globalAlpha=0.88;
     ctx.filter='invert(1)';
     ctx.drawImage(fedLogo,SELO_CX-SELO_SIZE/2,SELO_CY-SELO_SIZE/2,SELO_SIZE,SELO_SIZE);
     ctx.filter='none';
-
     ctx.restore();
 
-    // Texto abaixo do selo (fora do clip)
     ctx.textAlign='center';
     ctx.font='bold 7px "Share Tech Mono", monospace';
     ctx.fillStyle='rgba(200,200,200,0.6)';
     ctx.fillText('THE FEDERATION',SELO_CX,SELO_CY+SELO_SIZE/2+13);
     ctx.fillText('OFFICIAL SEAL',SELO_CX,SELO_CY+SELO_SIZE/2+23);
   }
+
+  // Rodapé — textos
+  // Esquerda (após espaço do selo) — info do doc
+  const ESQUERDA_X = FOTO_X + FOTO_SIZE + 22;
+  ctx.textAlign='left';
+  ctx.font='bold 10px "Share Tech Mono", monospace';
+  ctx.fillStyle='#888888';
+  ctx.fillText('EMITIDO EM '+new Date().toLocaleDateString('pt-BR'), ESQUERDA_X, FOOT_Y+16);
+  ctx.font='bold 9px "Share Tech Mono", monospace';
+  ctx.fillStyle='#666666';
+  const tipoDoc = isHuevito ? 'DOCUMENTO DE ADOÇÃO // PARANOIA RP' : 'DOCUMENTO OFICIAL // PARANOIA RP';
+  ctx.fillText(tipoDoc, ESQUERDA_X, FOOT_Y+30);
+
+  // Centro
+  ctx.textAlign='center';
+  ctx.font='8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#444444';
+  ctx.fillText('paranoiarp.github.io/Paranoia-RP', W/2, FOOT_Y+22);
+
+  // Direita — RESIDENTE
+  ctx.textAlign='right';
+  ctx.font='bold 10px "Share Tech Mono", monospace';
+  ctx.fillStyle='#888888';
+  const tipoResidente = isHuevito ? 'RESIDENTE // MENOR' : 'RESIDENTE // ILHA QUESADILLA';
+  ctx.fillText(tipoResidente, W-18, FOOT_Y+16);
+  ctx.font='8px "Share Tech Mono", monospace';
+  ctx.fillStyle='#555555';
+  ctx.fillText('THE FEDERATION REGISTRY', W-18, FOOT_Y+30);
 
   ctx.textAlign='left';
 
