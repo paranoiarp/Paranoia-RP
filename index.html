@@ -6759,7 +6759,7 @@ async function gerarCardPNG(id) {
   // Nº RG — direita, branco, legível
   ctx.textAlign='right';
   ctx.font='bold 16px "Orbitron", monospace';
-  ctx.fillStyle='#ffffff';
+  ctx.fillStyle='#cc0000';
   ctx.fillText('Nº ' + RG_ID, W-18, 34);
   ctx.font='bold 9px "Share Tech Mono", monospace';
   ctx.fillStyle='#aaaaaa';
@@ -6805,7 +6805,7 @@ async function gerarCardPNG(id) {
   let CY=HEADER_H+14;
 
   // Carregar logo da federação
-  const fedLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/FederationBookletLogo.png');
+  const fedLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/FederationID.png');
 
   // MARCA D'ÁGUA — logo da federação igual ao site (branca, centralizada, mais visível)
   if(fedLogo){
@@ -6813,8 +6813,8 @@ async function gerarCardPNG(id) {
     const mwX=RX+(RW-mwSize)/2;
     const mwY=CY+40;
     ctx.save();
-    ctx.globalAlpha=0.10;
-    ctx.filter='brightness(1000) saturate(0) invert(0)';
+    ctx.globalAlpha=0.12;
+    ctx.filter='invert(1)';
     ctx.drawImage(fedLogo,mwX,mwY,mwSize,mwSize);
     ctx.filter='none';
     ctx.restore();
@@ -6971,7 +6971,7 @@ async function gerarCardPNG(id) {
 
     // Logo nítida e branca como no site
     ctx.globalAlpha=0.92;
-    ctx.filter='brightness(1000) saturate(0)';
+    ctx.filter='invert(1)';
     ctx.drawImage(fedLogo,SELO_X,SELO_Y,SELO_SIZE,SELO_SIZE);
     ctx.filter='none';
     ctx.restore();
