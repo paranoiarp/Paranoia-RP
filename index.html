@@ -7005,6 +7005,23 @@ async function gerarCardPNG(id) {
     });
   }
 
+  // Inverte imagem via pixel manipulation (compatível com mobile/Safari)
+  function invertImg(img, w, h) {
+    const oc = document.createElement('canvas');
+    oc.width = w; oc.height = h;
+    const ox = oc.getContext('2d');
+    ox.drawImage(img, 0, 0, w, h);
+    const id = ox.getImageData(0, 0, w, h);
+    const d = id.data;
+    for(let i = 0; i < d.length; i += 4) {
+      d[i]   = 255 - d[i];
+      d[i+1] = 255 - d[i+1];
+      d[i+2] = 255 - d[i+2];
+    }
+    ox.putImageData(id, 0, 0);
+    return oc;
+  }
+
   // ── CANVAS — altura dinâmica ──
   const W=960;
   const nSkillsEst=c.skills?Math.min(c.skills.length,8):0;
@@ -7116,9 +7133,7 @@ async function gerarCardPNG(id) {
     ctx.fill();
     ctx.clip();
     ctx.globalAlpha=0.92;
-    ctx.filter='invert(1)';
-    ctx.drawImage(fedLogo, SELO_CX-SELO_R, SELO_Y, SELO_SIZE, SELO_SIZE);
-    ctx.filter='none';
+    ctx.drawImage(invertImg(fedLogo, SELO_SIZE, SELO_SIZE), SELO_CX-SELO_R, SELO_Y, SELO_SIZE, SELO_SIZE);
     ctx.restore();
     // texto abaixo do selo
     ctx.textAlign='center';
@@ -7136,9 +7151,7 @@ async function gerarCardPNG(id) {
     const mwY=HEADER_H+(H-HEADER_H-mwSize)/2;
     ctx.save();
     ctx.globalAlpha=0.13;
-    ctx.filter='invert(1)';
-    ctx.drawImage(fedLogo,mwX,mwY,mwSize,mwSize);
-    ctx.filter='none';
+    ctx.drawImage(invertImg(fedLogo, mwSize, mwSize), mwX, mwY, mwSize, mwSize);
     ctx.restore();
   }
 
