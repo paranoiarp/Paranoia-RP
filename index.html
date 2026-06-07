@@ -4831,6 +4831,36 @@ async function deleteApprovedChar(id, name) {
 window._playerLogado = false;
 window._playerUser = '';
 
+// ── Restaurar sessão salva ──
+(function() {
+  try {
+    const saved = localStorage.getItem('prp_session');
+    if(saved) {
+      const s = JSON.parse(saved);
+      if(s && s.user) {
+        window._playerLogado = true;
+        window._playerUser = s.user;
+        if(s.isAdmin) {
+          window._adminLogado = true;
+          window._adminUser = s.user;
+        }
+        // Atualizar nav assim que o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+          const navFicha = document.getElementById('nav-ficha-li');
+          if(navFicha) navFicha.style.display = 'block';
+          const title = document.getElementById('playerPanelTitle');
+          if(title) title.textContent = s.user.toUpperCase();
+          if(s.isAdmin && typeof updateAdminNotify === 'function') updateAdminNotify();
+          if(s.isAdmin) {
+            const secao = document.getElementById('secaoGerenciarAdmins');
+            if(secao) secao.style.display = ['ryu','twik'].includes(s.user) ? 'block' : 'none';
+          }
+        });
+      }
+    }
+  } catch(e) { localStorage.removeItem('prp_session'); }
+})();
+
 function switchPlayerTab(tab) {
   const loginForm = document.getElementById('playerLoginForm');
   const cadForm = document.getElementById('playerCadastroForm');
@@ -4873,9 +4903,12 @@ async function doPlayerLogin() {
       if(isAdminLogin) {
         window._adminLogado = true;
         window._adminUser = u;
+        localStorage.setItem('prp_session', JSON.stringify({ user: u, isAdmin: true }));
         updateAdminNotify();
         const secao = document.getElementById('secaoGerenciarAdmins');
         if(secao) secao.style.display = ['ryu','twik'].includes(u) ? 'block' : 'none';
+      } else {
+        localStorage.setItem('prp_session', JSON.stringify({ user: u, isAdmin: false }));
       }
       document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
       document.getElementById('nav-ficha-li').style.display = 'block';
@@ -4910,6 +4943,7 @@ async function doPlayerCadastro() {
     await window._registerPlayerFirebase(u, p);
     window._playerLogado = true;
     window._playerUser = u;
+    localStorage.setItem('prp_session', JSON.stringify({ user: u, isAdmin: false }));
     document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
     document.getElementById('nav-ficha-li').style.display = 'block';
     showToast('✓ Conta criada! Bem-vindo, ' + u, 'success');
@@ -4932,6 +4966,7 @@ function playerLogout() {
   window._playerUser = '';
   window._adminLogado = false;
   window._adminUser = '';
+  localStorage.removeItem('prp_session');
   document.getElementById('nav-ficha-li').style.display = 'none';
   showPage('minha-area');
   const lu = document.getElementById('playerLoginUser');
