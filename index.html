@@ -4225,6 +4225,8 @@ function openCharPopup() {
 
 function closeCharPopup() {
   document.getElementById('charSelectPopup').style.display = 'none';
+  // Limpa callback do admin para não vazar para a ficha normal
+  window._charPopupCallback = null;
 }
 
 function getCharStatus(charId) {
