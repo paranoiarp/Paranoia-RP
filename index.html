@@ -2117,6 +2117,7 @@
       <button class="admin-tab" onclick="showAdminTab('players-admin',this);renderPlayersAdmin()">👥 PLAYERS</button>
       <button class="admin-tab" onclick="showAdminTab('fotos-admin',this);renderFotosAdmin()">🖼 FOTOS</button>
       <button class="admin-tab" onclick="showAdminTab('admin-meus-chars',this);renderAdminOwnChars()">👤 MEUS PERSONAGENS</button>
+      <button class="admin-tab" onclick="showAdminTab('calendario-admin',this);renderCalAdmin()">📅 CALENDÁRIO</button>
       <button class="admin-tab" onclick="showAdminTab('fed-admin',this)">FEDERAÇÃO</button>
       <button class="admin-tab" onclick="showAdminTab('config',this)">CONFIGURAÇÕES</button>
       <button class="admin-tab" onclick="showAdminTab('senha-admin',this)">🔐 MINHA SENHA</button>
@@ -2168,6 +2169,30 @@
     </div>
 
     <div id="fed-admin" class="admin-content"><div class="empty-state">GERENCIAMENTO DA FEDERAÇÃO — EM BREVE</div></div>
+
+    <!-- ABA CALENDÁRIO -->
+    <div id="calendario-admin" class="admin-content">
+      <div class="form-section">
+        <h3>GERENCIAR EVENTOS DO CALENDÁRIO</h3>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.73rem;color:var(--text-dim);letter-spacing:1px;line-height:1.8;margin-bottom:1.5rem">
+          Veja todos os eventos cadastrados (oficiais e de players) e exclua qualquer um deles.<br>
+          Para adicionar um evento oficial, use o botão "+ NOVO EVENTO" na página pública do Calendário enquanto logado como admin.
+        </p>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center">
+          <button class="submit-btn" style="width:auto;margin:0;padding:0.6rem 1.2rem" onclick="showPage('calendario');calOpenNewEvent()">+ NOVO EVENTO OFICIAL</button>
+          <div class="form-group" style="flex:1;min-width:200px;margin:0">
+            <input type="text" id="calAdminSearchInput" placeholder="Filtrar por título ou autor..." oninput="renderCalAdmin()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.6rem 1rem;font-family:'Inter',sans-serif;font-size:0.9rem;outline:none;width:100%">
+          </div>
+          <select id="calAdminTypeFilter" onchange="renderCalAdmin()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.6rem 1rem;font-family:'Inter',sans-serif;font-size:0.9rem;outline:none">
+            <option value="">TODOS OS TIPOS</option>
+            <option value="admin">SÓ OFICIAIS</option>
+            <option value="player">SÓ DE PLAYERS</option>
+          </select>
+        </div>
+        <div id="calAdminList"><div class="empty-state">CARREGANDO...</div></div>
+      </div>
+    </div>
+
     <div id="config" class="admin-content">
       <div class="form-section">
         <h3>CONFIGURAÇÕES DO SITE</h3>
@@ -4397,6 +4422,60 @@ function calRenderHomePreview() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ===== ADMIN: GERENCIAR CALENDÁRIO =====
+function renderCalAdmin() {
+  const el = document.getElementById('calAdminList');
+  if(!el) return;
+  const search = (document.getElementById('calAdminSearchInput')?.value || '').toLowerCase();
+  const typeFilter = document.getElementById('calAdminTypeFilter')?.value || '';
+
+  let list = [...calEvents].sort((a,b) => b.date.localeCompare(a.date) || (b.time||'').localeCompare(a.time||''));
+
+  if(search) {
+    list = list.filter(e =>
+      (e.title||'').toLowerCase().includes(search) ||
+      (e.authorName||e.author||'').toLowerCase().includes(search)
+    );
+  }
+  if(typeFilter) list = list.filter(e => e.type === typeFilter);
+
+  if(!list.length) { el.innerHTML = '<div class="empty-state">NENHUM EVENTO ENCONTRADO</div>'; return; }
+
+  el.innerHTML = list.map(e => {
+    const [y,m,d] = e.date.split('-').map(Number);
+    const dateLabel = `${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`;
+    const cor = e.type === 'admin' ? 'var(--red-bright)' : 'var(--silver)';
+    const badge = e.type === 'admin' ? 'OFICIAL' : 'PLAYER';
+    return `<div class="pending-card">
+      <div class="pending-info">
+        <h4 style="color:${cor}">${e.title}</h4>
+        <p>// ${dateLabel}${e.time?' às '+e.time:''} // ${e.type==='admin'?'Evento oficial':'Postado por '+(e.authorName||e.author||'?')} // <span class="admin-tab-badge" style="background:${e.type==='admin'?'var(--red)':'var(--bg3)'};color:${e.type==='admin'?'#fff':'var(--silver)'}">${badge}</span></p>
+        ${e.description?`<p style="margin-top:0.4rem;color:var(--text);font-family:'Inter',sans-serif;font-size:0.85rem">${e.description}</p>`:''}
+      </div>
+      <div class="pending-actions">
+        <button class="btn-reject" onclick="calDeleteEventAdmin('${e.id}')">🗑 EXCLUIR</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function calDeleteEventAdmin(eventId) {
+  confirmarAcao('Excluir este evento do calendário? Esta ação não pode ser desfeita.', async () => {
+    try {
+      await window._deleteCalendarEvent(eventId);
+      if(window._logAcaoAdmin) {
+        const ev = calEvents.find(e => e.id === eventId);
+        await window._logAcaoAdmin('EXCLUSÃO EVENTO', ev?.title||'?', ev?.authorName||ev?.author||'?', window._adminUser||'?');
+      }
+      showToast('✓ Evento excluído.', 'success');
+      renderCalAdmin();
+    } catch(e) {
+      showToast('✗ Erro ao excluir. Tente novamente.', 'error');
+      console.error(e);
+    }
+  });
 }
 
 // ===== INIT =====
