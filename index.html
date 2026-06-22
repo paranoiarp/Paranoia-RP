@@ -3337,13 +3337,26 @@ function renderApprovedAdmin() {
   list.innerHTML = approvedChars.map(f => {
     const gs = f.gameStatus || 'vivo';
     const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
+    const clickId = f.charId || f.id;
+    const prePhoto = window._charPhotos && window._charPhotos[clickId];
+    const imgHtml = f.imageUrl
+      ? `<img src="${f.imageUrl}" alt="${f.name}">`
+      : prePhoto
+      ? `<img src="${prePhoto}" alt="${f.name}">`
+      : f.minecraft
+      ? `<img loading="lazy" src="https://mc-heads.net/body/${f.minecraft}/60" alt="${f.name}">`
+      : `<span>👤</span>`;
     return `
     <div class="pending-card" id="apc_${f.id}">
-      <div class="pending-info">
-        <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' — '+f.cucuruchoNome:''}</h4>
-        <p>// Player: ${f.player||'?'} // Status: <span style="color:${gsColor}">${gs.toUpperCase()}</span> // Conta: ${f.playerAccount||'—'}</p>
+      <div style="display:flex;gap:1rem;flex:1;min-width:200px">
+        <div class="char-avatar" style="width:60px;height:60px;margin:0;flex-shrink:0">${imgHtml}</div>
+        <div class="pending-info">
+          <h4>${(f.name||'?').toUpperCase()}${f.cucuruchoNome?' — '+f.cucuruchoNome:''}</h4>
+          <p>// Player: ${f.player||'?'} // Status: <span style="color:${gsColor}">${gs.toUpperCase()}</span> // Conta: ${f.playerAccount||'—'}</p>
+        </div>
       </div>
       <div class="pending-actions" style="flex-wrap:wrap;gap:0.4rem">
+        <button class="btn-approve" onclick="showCharProfile('${clickId}')">👁 VER FICHA</button>
         <button class="btn-approve" onclick="adminEditarFicha('${f.id}')">✎ EDITAR</button>
         <button class="btn-approve" onclick="adminChangeStatus('${f.id}','${(f.name||'').replace(/'/g,"\\'")}','${(f.player||'').replace(/'/g,"\\'")}')">⚡ STATUS</button>
         <button class="btn-approve" onclick="adminGerenciarTraumas('${f.id}')">😰 TRAUMAS</button>
