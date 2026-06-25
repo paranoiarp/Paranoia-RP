@@ -3853,11 +3853,12 @@ function showCharProfile(id, opts = {}) {
   // Admin: qualquer aprovado | Player: só o próprio personagem aprovado
   const isApproved = approvedChars.some(x => x.charId === id || x.id === id);
   const canGenerate = isApproved && (window._adminLogado || isOwnChar);
+  const canGenerateCard = isApproved; // card sempre disponível pra qualquer um — sai censurado se classified
   const btnPdf  = document.getElementById('btnPdfPerfil');
   const btnCard = document.getElementById('btnCardPerfil');
   const canShowBtn = canGenerate && !(isClassified && !window._adminLogado);
   if(btnPdf)  btnPdf.style.display  = canShowBtn ? 'inline-block' : 'none';
-  if(btnCard) btnCard.style.display = canGenerate ? 'inline-block' : 'none'; // classified gera card censurado
+  if(btnCard) btnCard.style.display = canGenerateCard ? 'inline-block' : 'none'; // classified gera card censurado
 }
 
 // ===== ATRIBUTOS =====
@@ -7139,13 +7140,7 @@ async function gerarCardPNG(id) {
   // Só gera card de fichas aprovadas
   let c = approvedChars.find(x => x.charId === id || x.id === id);
   if(!c) { showToast('⚠ Card disponível apenas para fichas aprovadas.', 'error'); return; }
-  // Player só pode gerar do próprio personagem
-  if(!window._adminLogado) {
-    const isOwn = window._playerLogado && window._playerUser && c.player &&
-      c.player.toLowerCase() === window._playerUser.toLowerCase();
-    if(!isOwn) { showToast('⚠ Você só pode gerar card do seu próprio personagem.', 'error'); return; }
-
-  }
+  // Qualquer pessoa pode gerar o card — se o personagem estiver classified, sai censurado automaticamente
 
   showToast('⏳ Gerando RG...', 'info');
 
@@ -7581,13 +7576,6 @@ function buildNavPersonagensMenu() {
       const st = getCharStatus(c.id);
       const color = st === 'disponivel' ? '#4caf50' : st === 'reservado' ? '#f5a623' : '#cc0000';
       if(isCucurucho) {
-        const approvedEntry = (window.approvedChars||[]).find(a => (a.charId||a.id) === c.id);
-        const isCharClassified = (approvedEntry?.gameStatus || '') === 'classified';
-        if(isCharClassified && !window._adminLogado) {
-          return `<a href="javascript:void(0)" onclick="showClassifiedModal();event.stopPropagation()">
-            <span class="nav-submenu-status" style="background:${color}"></span><span style="color:var(--red-bright);letter-spacing:1px;font-size:0.75rem">🔒 CLASSIFIED</span>
-          </a>`;
-        }
         return `<a href="javascript:void(0)" onclick="showPage('personagens');showCharProfile('${c.id}');event.stopPropagation()">
           <span class="nav-submenu-status" style="background:${color}"></span>${c.name}
         </a>`;
