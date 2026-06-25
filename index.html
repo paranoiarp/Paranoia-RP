@@ -6495,6 +6495,13 @@ async function renderPlayersPublic() {
     const snap = await getDocs(collection(window._db, 'playerAuth'));
     const players = snap.docs.map(d => ({id: d.id, ...d.data()}));
 
+    // Garante que players que têm personagem mas não têm doc em playerAuth (ex: admins) também apareçam
+    const knownUsernames = new Set(players.map(p => (p.username||p.id).toLowerCase()));
+    const extraUsernames = [...new Set(
+      approvedChars.map(c => c.playerAccount).filter(Boolean).map(u => u.toLowerCase())
+    )].filter(u => !knownUsernames.has(u));
+    extraUsernames.forEach(u => players.push({id: u, username: u}));
+
     // Filtra só players que têm personagens aprovados
     const playersComChars = players
       .map(p => ({
