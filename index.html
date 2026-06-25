@@ -3691,11 +3691,14 @@ function renderChars(filter) {
   }
 
   let bodyHtml;
+  let skipClassifiedBlock = false;
   if(filter === 'ocupado') {
-    // Agrupa por player só na visão de OCUPADOS (mantém personagens sem player no topo, sem grupo)
+    // Na visão de OCUPADOS, mostra também os Cucuruchos agrupados junto do player (admin) dele
+    const listaParaAgrupar = [...otherList, ...cucuruchoList];
+    skipClassifiedBlock = true;
     const groups = {};
     const noPlayerList = [];
-    otherList.forEach(c => {
+    listaParaAgrupar.forEach(c => {
       const pname = (c.player || c.playerAccount || '').trim();
       if(!pname) { noPlayerList.push(c); return; }
       const key = pname.toLowerCase();
@@ -3717,7 +3720,7 @@ function renderChars(filter) {
     bodyHtml = otherList.map(renderCard).join('');
   }
 
-  grid.innerHTML = legenda + bodyHtml + classifiedBlock;
+  grid.innerHTML = legenda + bodyHtml + (skipClassifiedBlock ? '' : classifiedBlock);
 }
 
 function filterChars(f, btn) {
