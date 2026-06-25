@@ -1901,6 +1901,8 @@
     <li><a href="javascript:void(0)" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
   <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+    <span id="nav-user-badge" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:2px;padding:0.3rem 0.6rem;border:1px solid var(--red);cursor:default"></span>
+    <button id="nav-logout-btn" onclick="playerLogout()" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;padding:0.3rem 0.7rem;background:none;border:1px solid var(--border);color:var(--text-dim);cursor:pointer" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red-bright)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">SAIR</button>
     <button id="theme-toggle" onclick="toggleTheme()" title="Alternar tema"><span class="theme-icon" id="themeIcon">☀️</span></button>
     <button class="nav-mobile-btn" onclick="toggleNav()">☰</button>
   </div>
@@ -4189,6 +4191,7 @@ async function checkAdmin() {
       // Mostrar seção de gerenciar admins só para ryu e twik
       const secao = document.getElementById('secaoGerenciarAdmins');
       if(secao) secao.style.display = ['ryu','twik'].includes(u.toLowerCase()) ? 'block' : 'none';
+      updateNavSession();
       showPage('admin-panel'); renderPending(); renderApprovedAdmin();
     } else {
       errEl.textContent = '⚠ CREDENCIAIS INVÁLIDAS';
@@ -5142,7 +5145,14 @@ window._playerUser = '';
           if(s.isAdmin) {
             const secao = document.getElementById('secaoGerenciarAdmins');
             if(secao) secao.style.display = ['ryu','twik'].includes(s.user) ? 'block' : 'none';
+            // Redirecionar direto para o painel admin se estiver na página inicial ou minha-area
+            const activePage = document.querySelector('.page.active');
+            const activeId = activePage ? activePage.id : '';
+            if(!activeId || activeId === 'minha-area' || activeId === 'admin-gate') {
+              if(typeof showPage === 'function') showPage('admin-panel');
+            }
           }
+          if(typeof updateNavSession === 'function') updateNavSession();
         });
       }
     }
@@ -5192,11 +5202,13 @@ async function doPlayerLogin() {
         window._adminLogado = true;
         window._adminUser = u;
         localStorage.setItem('prp_session', JSON.stringify({ user: u, isAdmin: true }));
+        updateNavSession();
         updateAdminNotify();
         const secao = document.getElementById('secaoGerenciarAdmins');
         if(secao) secao.style.display = ['ryu','twik'].includes(u) ? 'block' : 'none';
       } else {
         localStorage.setItem('prp_session', JSON.stringify({ user: u, isAdmin: false }));
+        updateNavSession();
       }
       document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
       document.getElementById('nav-ficha-li').style.display = 'block';
@@ -5232,6 +5244,7 @@ async function doPlayerCadastro() {
     window._playerLogado = true;
     window._playerUser = u;
     localStorage.setItem('prp_session', JSON.stringify({ user: u, isAdmin: false }));
+        updateNavSession();
     document.getElementById('playerPanelTitle').textContent = u.toUpperCase();
     document.getElementById('nav-ficha-li').style.display = 'block';
     showToast('✓ Conta criada! Bem-vindo, ' + u, 'success');
@@ -5249,6 +5262,24 @@ async function doPlayerCadastro() {
   }
 }
 
+function updateNavSession() {
+  const badge = document.getElementById('nav-user-badge');
+  const logoutBtn = document.getElementById('nav-logout-btn');
+  if(!badge || !logoutBtn) return;
+  if(window._playerLogado || window._adminLogado) {
+    const user = window._adminUser || window._playerUser || '';
+    const label = window._adminLogado ? '★ ' + user.toUpperCase() : user.toUpperCase();
+    badge.textContent = label;
+    badge.style.display = 'inline-block';
+    badge.style.color = window._adminLogado ? 'var(--red-bright)' : 'var(--silver-bright)';
+    badge.style.borderColor = window._adminLogado ? 'var(--red)' : 'var(--border)';
+    logoutBtn.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+    logoutBtn.style.display = 'none';
+  }
+}
+
 function playerLogout() {
   window._playerLogado = false;
   window._playerUser = '';
@@ -5256,6 +5287,7 @@ function playerLogout() {
   window._adminUser = '';
   localStorage.removeItem('prp_session');
   document.getElementById('nav-ficha-li').style.display = 'none';
+  updateNavSession();
   showPage('minha-area');
   const lu = document.getElementById('playerLoginUser');
   const lp = document.getElementById('playerLoginPass');
