@@ -7160,7 +7160,7 @@ async function gerarCardPNG(id) {
   const RG_ID = isClassifiedCard ? '███-███' : (c.rgId || (sigla + '-' + autoNum));
 
   const prePhoto = window._charPhotos && window._charPhotos[id];
-  const fotoUrl = isClassifiedCard ? null : (c.imageUrl || prePhoto || null);
+  const fotoUrl = c.imageUrl || prePhoto || null;
   const gs = c.gameStatus || 'vivo';
   const gsLabel = isClassifiedCard ? 'CLASSIFIED' : ({vivo:'VIVO',morto:'MORTO',desaparecido:'DESAPARECIDO',contido:'CONTIDO',classified:'CLASSIFIED'}[gs]||gs.toUpperCase());
   const gsColor = isClassifiedCard ? '#cc0000' : ({vivo:'#4caf50',morto:'#cc2200',desaparecido:'#ff9800',contido:'#cc2200',classified:'#444'}[gs]||'#888');
