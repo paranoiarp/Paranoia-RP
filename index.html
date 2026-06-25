@@ -2716,7 +2716,7 @@
     <div onclick="showClassifiedModal()" style="grid-column:1/-1;cursor:pointer;padding:3rem 2rem;background:rgba(139,0,0,0.06);border:1px solid rgba(139,0,0,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;transition:border-color 0.2s" onmouseover="this.style.borderColor=&#39;var(--red-bright)&#39;" onmouseout="this.style.borderColor=&#39;rgba(139,0,0,0.25)&#39;">
       <div style="font-size:4rem;filter:drop-shadow(0 0 15px rgba(139,0,0,0.6))">🔒</div>
       <div style="font-family:&#39;Orbitron&#39;,monospace;font-size:clamp(1.2rem,3vw,2rem);color:var(--red-bright);letter-spacing:6px;font-weight:900;text-shadow:0 0 20px rgba(139,0,0,0.7)">██ CLASSIFIED ██</div>
-      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:3px">4 ARQUIVOS RESTRITOS — THE FEDERATION</div>
+      <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:3px">ARQUIVOS RESTRITOS — THE FEDERATION</div>
     </div></div>
   </div>
 </div>
@@ -3480,9 +3480,16 @@ function initImages() {
 function showLorePage(slug) { showPage('lore-' + slug); }
 
 // Páginas que não devem ir para o histórico do navegador (painéis internos, auth)
+// Fecha modal classified ao navegar
+function closeClassifiedModal() {
+  const m = document.getElementById('classifiedModal');
+  if(m) m.remove();
+}
+
 const NO_HISTORY_PAGES = new Set(['admin-gate','admin-panel','player-panel','char-profile','fed-secret']);
 
 function showPage(id, opts = {}) {
+  closeClassifiedModal();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById(id);
   if(p) p.classList.add('active');
@@ -3640,7 +3647,7 @@ function renderChars(filter) {
     <div onclick="showClassifiedModal()" style="grid-column:1/-1;cursor:pointer;padding:3rem 2rem;background:rgba(139,0,0,0.06);border:1px solid rgba(139,0,0,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--red-bright)'" onmouseout="this.style.borderColor='rgba(139,0,0,0.25)'">
       <div style="font-size:4rem;filter:drop-shadow(0 0 15px rgba(139,0,0,0.6))">🔒</div>
       <div style="font-family:'Orbitron',monospace;font-size:clamp(1.2rem,3vw,2rem);color:var(--red-bright);letter-spacing:6px;font-weight:900;text-shadow:0 0 20px rgba(139,0,0,0.7)">██ CLASSIFIED ██</div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:3px">${cucuruchoList.length} ARQUIVO${cucuruchoList.length>1?'S':''} RESTRITO${cucuruchoList.length>1?'S':''} — THE FEDERATION</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:3px">ARQUIVOS RESTRITOS — THE FEDERATION</div>
     </div>` : (window._adminLogado ? cucuruchoList.map(c => {
       const clickId = c.charId || c.id;
       const prePhoto = window._charPhotos && window._charPhotos[clickId];
@@ -6845,6 +6852,11 @@ function showClassifiedModal() {
       <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:3px;opacity:0.5">CLIQUE EM QUALQUER LUGAR PARA FECHAR</div>
     </div>`;
   modal.addEventListener('click', () => modal.remove());
+  // Fallback: fecha também via evento global (cobre casos de stopPropagation nos filhos)
+  setTimeout(() => {
+    const handler = (e) => { if(document.getElementById('classifiedModal')) modal.remove(); document.removeEventListener('click', handler); };
+    document.addEventListener('click', handler);
+  }, 100);
   document.body.appendChild(modal);
 }
 
@@ -7596,18 +7608,36 @@ function buildNavPersonagensMenu() {
     if(!el) return;
     const chars = CHARS_DATA.filter(c => c.lang === lang).slice().sort((a,b) => a.name.localeCompare(b.name));
     const isCucurucho = lang === 'cucurucho';
-    el.innerHTML = chars.map(c => {
+    const CLASSIFIED_PLACEHOLDER_COUNT = 4;
+    let cucuruchoLinks = chars.map(c => {
       const st = getCharStatus(c.id);
       const color = st === 'disponivel' ? '#4caf50' : st === 'reservado' ? '#f5a623' : '#cc0000';
-      if(isCucurucho && !window._adminLogado) {
-        return `<a href="javascript:void(0)" onclick="showClassifiedModal();event.stopPropagation()">
-          <span class="nav-submenu-status" style="background:${color}"></span><span style="color:var(--red-bright);letter-spacing:1px">██ CLASSIFIED ██</span>
+      if(isCucurucho) {
+        const approvedEntry = (window.approvedChars||[]).find(a => (a.charId||a.id) === c.id);
+        const isCharClassified = (approvedEntry?.gameStatus || '') === 'classified';
+        if(isCharClassified && !window._adminLogado) {
+          return `<a href="javascript:void(0)" onclick="showClassifiedModal();event.stopPropagation()">
+            <span class="nav-submenu-status" style="background:${color}"></span><span style="color:var(--red-bright);letter-spacing:1px;font-size:0.75rem">🔒 CLASSIFIED</span>
+          </a>`;
+        }
+        return `<a href="javascript:void(0)" onclick="showPage('personagens');showCharProfile('${c.id}');event.stopPropagation()">
+          <span class="nav-submenu-status" style="background:${color}"></span>${c.name}
         </a>`;
       }
       return `<a href="javascript:void(0)" onclick="showPage('personagens');showCharProfile('${c.id}');event.stopPropagation()">
         <span class="nav-submenu-status" style="background:${color}"></span>${c.name}
       </a>`;
-    }).join('');
+    });
+    // Adiciona 4 entradas CLASSIFIED fixas ao final do dropdown de cucuruchos (sem ficha)
+    if(isCucurucho) {
+      const placeholders = Array.from({length: CLASSIFIED_PLACEHOLDER_COUNT}, () =>
+        `<a href="javascript:void(0)" onclick="showClassifiedModal();event.stopPropagation()" style="opacity:0.7">
+          <span class="nav-submenu-status" style="background:#440000"></span><span style="color:#882222;letter-spacing:1px;font-size:0.72rem">🔒 CLASSIFIED</span>
+        </a>`
+      );
+      cucuruchoLinks = cucuruchoLinks.concat(placeholders);
+    }
+    el.innerHTML = cucuruchoLinks.join('');
   });
 }
 
@@ -8110,7 +8140,7 @@ function updateCalHomeCard() {
 
 // Fecha popup de dia com ESC
 document.addEventListener('keydown', e => {
-  if(e.key === 'Escape') { closeCalDayPopup(); closeCalModal(); }
+  if(e.key === 'Escape') { closeCalDayPopup(); closeCalModal(); closeClassifiedModal(); }
 });
 
 
