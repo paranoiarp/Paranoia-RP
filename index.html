@@ -3880,8 +3880,9 @@ function showCharProfile(id, opts = {}) {
   const canGenerate = isApproved && (window._adminLogado || isOwnChar);
   const btnPdf  = document.getElementById('btnPdfPerfil');
   const btnCard = document.getElementById('btnCardPerfil');
-  if(btnPdf)  btnPdf.style.display  = (canGenerate && !(isClassified && !window._adminLogado)) ? 'inline-block' : 'none';
-  if(btnCard) btnCard.style.display = canGenerate ? 'inline-block' : 'none';
+  const canShowBtn = canGenerate && !(isClassified && !window._adminLogado);
+  if(btnPdf)  btnPdf.style.display  = canShowBtn ? 'inline-block' : 'none';
+  if(btnCard) btnCard.style.display = canGenerate ? 'inline-block' : 'none'; // classified gera card censurado
 }
 
 // ===== ATRIBUTOS =====
@@ -7163,6 +7164,7 @@ async function gerarCardPNG(id) {
     const isOwn = window._playerLogado && window._playerUser && c.player &&
       c.player.toLowerCase() === window._playerUser.toLowerCase();
     if(!isOwn) { showToast('⚠ Você só pode gerar card do seu próprio personagem.', 'error'); return; }
+
   }
 
   showToast('⏳ Gerando RG...', 'info');
@@ -7170,6 +7172,8 @@ async function gerarCardPNG(id) {
   try {
 
   const isHuevito = c.lang === 'huevito';
+  // Card censurado para classified quando não-admin
+  const isClassifiedCard = !window._adminLogado && (c.gameStatus || c.status || '') === 'classified';
 
   // ── IDENTIFICADOR ──
   const LANG_SIGLAS = {ingles:'ING',espanhol:'ESP',portugues:'POR',frances:'FRA',coreano:'KOR',cucurucho:'FED',huevito:'HUE'};
@@ -7178,13 +7182,13 @@ async function gerarCardPNG(id) {
   let hash = 0;
   for(let i=0;i<docId.length;i++) hash = ((hash<<5)-hash)+docId.charCodeAt(i), hash|=0;
   const autoNum = String(Math.abs(hash) % 900 + 100);
-  const RG_ID = c.rgId || (sigla + '-' + autoNum);
+  const RG_ID = isClassifiedCard ? '███-███' : (c.rgId || (sigla + '-' + autoNum));
 
   const prePhoto = window._charPhotos && window._charPhotos[id];
-  const fotoUrl = c.imageUrl || prePhoto || null;
+  const fotoUrl = isClassifiedCard ? null : (c.imageUrl || prePhoto || null);
   const gs = c.gameStatus || 'vivo';
-  const gsLabel = {vivo:'VIVO',morto:'MORTO',desaparecido:'DESAPARECIDO',contido:'CONTIDO',classified:'CLASSIFIED'}[gs]||gs.toUpperCase();
-  const gsColor = {vivo:'#4caf50',morto:'#cc2200',desaparecido:'#ff9800',contido:'#cc2200',classified:'#444'}[gs]||'#888';
+  const gsLabel = isClassifiedCard ? 'CLASSIFIED' : ({vivo:'VIVO',morto:'MORTO',desaparecido:'DESAPARECIDO',contido:'CONTIDO',classified:'CLASSIFIED'}[gs]||gs.toUpperCase());
+  const gsColor = isClassifiedCard ? '#cc0000' : ({vivo:'#4caf50',morto:'#cc2200',desaparecido:'#ff9800',contido:'#cc2200',classified:'#444'}[gs]||'#888');
 
   function loadImg(url) {
     return new Promise(res=>{
@@ -7353,17 +7357,21 @@ async function gerarCardPNG(id) {
 
   // NOME — colado ao topo
   ctx.font='bold 38px "Orbitron", monospace';
-  ctx.fillStyle='#ffffff';
-  let nomeFit=(c.name||'?').toUpperCase();
-  while(ctx.measureText(nomeFit).width>RW-8&&nomeFit.length>2) nomeFit=nomeFit.slice(0,-1);
-  if(nomeFit.length<(c.name||'').length) nomeFit+='…';
+  ctx.fillStyle= isClassifiedCard ? '#cc0000' : '#ffffff';
+  let nomeFit= isClassifiedCard ? '██████████' : (c.name||'?').toUpperCase();
+  if(!isClassifiedCard){ while(ctx.measureText(nomeFit).width>RW-8&&nomeFit.length>2) nomeFit=nomeFit.slice(0,-1); if(nomeFit.length<(c.name||'').length) nomeFit+='…'; }
   ctx.fillText(nomeFit,RX,CY+38);
   CY+=54;
 
   ctx.fillStyle='#8b0000'; ctx.fillRect(RX,CY,RW,1); CY+=16;
 
   // DADOS: player, nascimento, idioma, status
-  const dados = isHuevito ? [
+  const dados = isClassifiedCard ? [
+    ['PLAYER',     '████████'],
+    ['NASCIMENTO', '██/██/████'],
+    ['IDIOMA',     '████'],
+    ['STATUS',     'CLASSIFIED'],
+  ] : isHuevito ? [
     ['PLAYER',     (c.player||'—').toUpperCase()],
     ['NASCIMENTO', c.nascimento||'—'],
     ['FILIAÇÃO',   (c.filiacao||'—').toUpperCase()],
@@ -7392,7 +7400,7 @@ async function gerarCardPNG(id) {
   ctx.font='bold 16px "Share Tech Mono", monospace';
   ctx.fillStyle='#8b0000'; ctx.fillText('ATRIBUTOS',RX,CY); CY+=22;
 
-  if(c.attrs){
+  if(c.attrs && !isClassifiedCard){
     const attrList=Object.entries(c.attrs);
     const boxW=Math.floor(RW/attrList.length)-3;
     attrList.forEach(([k,v],i)=>{
@@ -7412,7 +7420,7 @@ async function gerarCardPNG(id) {
   }
 
   // PERÍCIAS
-  if(c.skills&&c.skills.length){
+  if(c.skills&&c.skills.length && !isClassifiedCard){
     CY+=12;
     ctx.font='bold 16px "Share Tech Mono", monospace';
     ctx.fillStyle='#8b0000'; ctx.fillText('PERÍCIAS',RX,CY); CY+=22;
@@ -7441,6 +7449,33 @@ async function gerarCardPNG(id) {
     });
 
     CY+=Math.ceil(skills.length/COLS)*(skillH+4)+16;
+  }
+
+  // ── BLOCO CLASSIFIED — substitui atributos/perícias ──
+  if(isClassifiedCard) {
+    CY += 10;
+    const bW = RW, bH = 110;
+    ctx.fillStyle = 'rgba(100,0,0,0.18)';
+    ctx.strokeStyle = '#cc0000'; ctx.lineWidth = 1.5;
+    ctx.fillRect(RX, CY, bW, bH);
+    ctx.strokeRect(RX, CY, bW, bH);
+    ctx.font = 'bold 13px "Share Tech Mono", monospace';
+    ctx.fillStyle = '#cc0000'; ctx.textAlign = 'center';
+    ctx.fillText('██ ACESSO RESTRITO ██', RX + bW/2, CY + 28);
+    ctx.font = 'bold 10px "Share Tech Mono", monospace';
+    ctx.fillStyle = '#884444';
+    ctx.fillText('INFORMAÇÕES SIGILOSAS — THE FEDERATION', RX + bW/2, CY + 50);
+    ctx.fillText('NÍVEL DE AUTORIZAÇÃO INSUFICIENTE', RX + bW/2, CY + 68);
+    ctx.font = 'bold 9px "Share Tech Mono", monospace';
+    ctx.fillStyle = '#553333';
+    ctx.fillText('DOC. Nº ███-███  //  EMITIDO POR: THE FEDERATION', RX + bW/2, CY + 88);
+    ctx.textAlign = 'left';
+    // Selo de cadeado (🔒) textual
+    ctx.font = '32px serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = '#cc0000';
+    ctx.fillText('🔒', RX + bW/2, CY + bH + 36);
+    ctx.textAlign = 'left';
+    CY += bH + 56;
   }
 
   // ── DADOS DE EMISSÃO — abaixo das perícias, na coluna direita ──
