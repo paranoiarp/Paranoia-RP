@@ -3735,8 +3735,32 @@ function renderChars(filter) {
         const g = groups[key];
         return playerHeader(g.label, g.chars.length) + g.chars.map(renderCard).join('');
       }).join('');
+  } else if(filter === 'all' || ['ingles','espanhol','portugues','frances','coreano','huevito'].includes(filter)) {
+    // Agrupa por idioma: huevitos primeiro, depois por idioma com headers
+    const langOrder = ['huevito','ingles','espanhol','portugues','frances','coreano'];
+    const langLabels = {
+      huevito: '🥚 HUEVITOS',
+      ingles: '🇺🇸 INGLÊS',
+      espanhol: '🇪🇸 ESPANHOL',
+      portugues: '🇧🇷 PORTUGUÊS',
+      frances: '🇫🇷 FRANCÊS',
+      coreano: '🇰🇷 COREANO',
+    };
+    const grupos = {};
+    langOrder.forEach(l => grupos[l] = []);
+    otherList.forEach(c => {
+      if(grupos[c.lang]) grupos[c.lang].push(c);
+    });
+    const sectionHeader = (label) => `<div style="grid-column:1/-1;display:flex;align-items:center;gap:0.8rem;margin:1.6rem 0 0.4rem;padding-bottom:0.4rem;border-bottom:2px solid var(--border)">
+      <span style="font-family:'Orbitron',monospace;font-size:0.9rem;letter-spacing:3px;color:var(--silver-bright)">${label}</span>
+    </div>`;
+    bodyHtml = langOrder.map(lang => {
+      const chars = grupos[lang];
+      if(!chars || !chars.length) return '';
+      return sectionHeader(langLabels[lang]) + chars.map(renderCard).join('');
+    }).join('');
   } else {
-    // Organização original (sem agrupar por player)
+    // Outros filtros (status etc.) — organização original
     bodyHtml = otherList.map(renderCard).join('');
   }
 
