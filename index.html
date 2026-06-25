@@ -657,6 +657,31 @@
 
   .highlight-card p { font-size: 1rem; color: #999; line-height: 1.7; font-weight: 400; }
 
+  /* Card Calendário na home */
+  .highlight-card.cal-home-card { border-color: rgba(139,0,0,0.3); }
+  .cal-home-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(139,0,0,0.25); border: 1px solid var(--red);
+    color: var(--red-bright); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 1.5px; padding: 0.2rem 0.6rem;
+    margin-bottom: 0.7rem;
+  }
+  .cal-home-preview {
+    margin-top: 0.8rem; padding-top: 0.8rem;
+    border-top: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .cal-home-preview-label {
+    font-size: 0.55rem; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 0.3rem;
+  }
+  .cal-home-preview-title {
+    font-size: 0.75rem; color: var(--silver-bright); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .cal-home-preview-date { font-size: 0.6rem; color: var(--text-dim); margin-top: 0.15rem; }
+
+
+
   /* SECTION */
   .section-header {
     padding: 3rem 2rem 2rem;
@@ -1846,7 +1871,7 @@
     <li><a href="javascript:void(0)" onclick="showPage('federacao')" id="nav-federacao">The Federation</a></li>
     <li><a href="javascript:void(0)" onclick="showPage('registro')" id="nav-registro">Registro</a></li>
     <li id="nav-ficha-li" style="display:none"><a href="javascript:void(0)" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
-    <li><a href="javascript:void(0)" onclick="showPage('calendario')" id="nav-calendario">📅 Calendário</a></li>
+    <li><a href="javascript:void(0)" onclick="showPage('calendario')" id="nav-calendario">Calendário</a></li>
     <li><a href="javascript:void(0)" onclick="showPage('minha-area')" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
     <li><a href="javascript:void(0)" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
@@ -1950,25 +1975,31 @@
   </div>
 
   <div class="highlights">
-    <div class="highlight-card" onclick="showPage(&#39;historia&#39;)">
+    <div class="highlight-card" onclick="showPage('historia')">
       <div class="icon">📖</div>
       <h3>HISTÓRIA</h3>
       <p>Conheça o universo, os eventos que moldaram a ilha e os rastros deixados por quem passou por aqui.</p>
     </div>
-    <div class="highlight-card" onclick="showPage(&#39;personagens&#39;)">
+    <div class="highlight-card" onclick="showPage('personagens')">
       <div class="icon">👤</div>
       <h3>PERSONAGENS</h3>
       <p>Todos os habitantes registrados da Ilha Quesadilla. Seus rostos, suas histórias, seus status.</p>
     </div>
-    <div class="highlight-card" onclick="showPage(&#39;federacao&#39;)">
+    <div class="highlight-card" onclick="showPage('federacao')">
       <div class="icon">🏛️</div>
       <h3>THE FEDERATION</h3>
       <p>A organização que administra a ilha. O que se sabe, o que se suspeita, e o que permanece em silêncio.</p>
     </div>
-    <div class="highlight-card" onclick="showPage(&#39;registro&#39;)">
+    <div class="highlight-card" onclick="showPage('registro')">
       <div class="icon">📋</div>
       <h3>REGISTRO</h3>
       <p>Quer fazer parte da história? Veja como criar sua conta, enviar sua ficha e começar a jogar.</p>
+    </div>
+    <div class="highlight-card cal-home-card" onclick="showPage('calendario')" id="calHomeCard">
+      <div class="icon">🗓</div>
+      <h3>CALENDÁRIO</h3>
+      <p>Eventos, narrativas e histórias dos personagens da Ilha Quesadilla.</p>
+      <div id="calHomeBadgeWrap"></div>
     </div>
   </div>
 </div>
@@ -7738,6 +7769,7 @@ function initCalendario() {
   onSnapshot(query(collection(db, 'calendarEntries'), orderBy('dataReal','asc')), snap => {
     calEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
     renderCalendar();
+    updateCalHomeCard();
   });
 }
 
@@ -8014,6 +8046,31 @@ function formatDateBR(dateStr) {
 function escapeHtml(str) {
   if(!str) return '';
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+
+function updateCalHomeCard() {
+  const wrap = document.getElementById('calHomeBadgeWrap');
+  if(!wrap) return;
+  const now = new Date();
+  const monthStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  // Só eventos/narrativas da adm no mês atual
+  const admEntries = calEntries.filter(e =>
+    (e.tipo === 'evento' || e.tipo === 'narrativa') && (e.dataReal||'').startsWith(monthStr)
+  );
+  if(!admEntries.length) { wrap.innerHTML = ''; return; }
+  // Mais recente
+  const latest = admEntries[admEntries.length - 1];
+  const tipoLabel = latest.tipo === 'evento' ? '⭐ EVENTO' : '🔴 NARRATIVA';
+  const [y,m,d] = (latest.dataReal||'').split('-');
+  const dataFmt = d && m ? `${d}/${m}/${y}` : '';
+  wrap.innerHTML = `
+    <div class="cal-home-preview">
+      <div class="cal-home-badge">${tipoLabel} · ${admEntries.length} ESTE MÊS</div>
+      <div class="cal-home-preview-label">// MAIS RECENTE</div>
+      <div class="cal-home-preview-title">${latest.titulo}</div>
+      <div class="cal-home-preview-date">${dataFmt}${latest.dataIngame ? ' · ' + latest.dataIngame : ''}</div>
+    </div>`;
 }
 
 // Fecha popup de dia com ESC
