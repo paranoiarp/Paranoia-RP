@@ -3735,32 +3735,8 @@ function renderChars(filter) {
         const g = groups[key];
         return playerHeader(g.label, g.chars.length) + g.chars.map(renderCard).join('');
       }).join('');
-  } else if(filter === 'all' || ['ingles','espanhol','portugues','frances','coreano','huevito'].includes(filter)) {
-    // Agrupa por idioma: huevitos primeiro, depois por idioma com headers
-    const langOrder = ['huevito','ingles','espanhol','portugues','frances','coreano'];
-    const langLabels = {
-      huevito: '🥚 HUEVITOS',
-      ingles: '🇺🇸 INGLÊS',
-      espanhol: '🇪🇸 ESPANHOL',
-      portugues: '🇧🇷 PORTUGUÊS',
-      frances: '🇫🇷 FRANCÊS',
-      coreano: '🇰🇷 COREANO',
-    };
-    const grupos = {};
-    langOrder.forEach(l => grupos[l] = []);
-    otherList.forEach(c => {
-      if(grupos[c.lang]) grupos[c.lang].push(c);
-    });
-    const sectionHeader = (label) => `<div style="grid-column:1/-1;display:flex;align-items:center;gap:0.8rem;margin:1.6rem 0 0.4rem;padding-bottom:0.4rem;border-bottom:2px solid var(--border)">
-      <span style="font-family:'Orbitron',monospace;font-size:0.9rem;letter-spacing:3px;color:var(--silver-bright)">${label}</span>
-    </div>`;
-    bodyHtml = langOrder.map(lang => {
-      const chars = grupos[lang];
-      if(!chars || !chars.length) return '';
-      return sectionHeader(langLabels[lang]) + chars.map(renderCard).join('');
-    }).join('');
   } else {
-    // Outros filtros (status etc.) — organização original
+    // Organização original (sem agrupar por player)
     bodyHtml = otherList.map(renderCard).join('');
   }
 
@@ -4923,7 +4899,17 @@ function renderApprovedAdmin() {
   const list = document.getElementById('approvedList');
   if(!list) return;
   if(!approvedChars.length) { list.innerHTML = '<div class="empty-state">NENHUM PERSONAGEM APROVADO</div>'; return; }
-  list.innerHTML = approvedChars.map(f => {
+  const langOrder = ['huevito','ingles','espanhol','portugues','frances','coreano','cucurucho'];
+  const langLabels = {huevito:'🥚 HUEVITOS',ingles:'🇺🇸 INGLÊS',espanhol:'🇪🇸 ESPANHOL',portugues:'🇧🇷 PORTUGUÊS',frances:'🇫🇷 FRANCÊS',coreano:'🇰🇷 COREANO',cucurucho:'🎭 THE FEDERATION'};
+  const grupos = {};
+  langOrder.forEach(l => grupos[l] = []);
+  approvedChars.forEach(f => {
+    const lang = f.lang || 'outros';
+    if(grupos[lang]) grupos[lang].push(f);
+    else { if(!grupos['outros']) grupos['outros'] = []; grupos['outros'].push(f); }
+  });
+  const sectionHeader = (label, count) => `<div style="margin:1.4rem 0 0.5rem;padding:0.5rem 1rem;background:var(--bg3);border-left:3px solid var(--red);display:flex;align-items:center;gap:0.8rem"><span style="font-family:'Orbitron',monospace;font-size:0.82rem;letter-spacing:3px;color:var(--silver-bright)">${label}</span><span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px">${count} PERSONAGEM${count!==1?'NS':''}</span></div>`;
+  const renderCard = (f) => {
     const gs = f.gameStatus || 'vivo';
     const gsColor = gs==='vivo'?'#4caf50':gs==='morto'?'var(--red-bright)':gs==='desaparecido'?'#ff9800':'var(--silver)';
     const gsLabel = gs==='vivo'?'VIVO':gs==='morto'?'MORTO':gs==='desaparecido'?'DESAPARECIDO':gs.toUpperCase();
@@ -4965,6 +4951,13 @@ function renderApprovedAdmin() {
         <button class="btn-reject" style="margin-left:auto" onclick="deleteApprovedChar('${f.id}','${(f.name||'?').replace(/'/g,"\\'")}')">🗑 EXCLUIR</button>
       </div>
     </div>`;
+  };
+  const allLangs = [...langOrder, ...(grupos['outros']?.length ? ['outros'] : [])];
+  list.innerHTML = allLangs.map(lang => {
+    const chars = grupos[lang];
+    if(!chars || !chars.length) return '';
+    const label = langLabels[lang] || lang.toUpperCase();
+    return sectionHeader(label, chars.length) + chars.map(renderCard).join('');
   }).join('');
 }
 
