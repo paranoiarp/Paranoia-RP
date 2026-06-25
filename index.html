@@ -1548,6 +1548,26 @@
     await updateDoc(doc(db, 'approvedChars', charDocId), { [field]: existing });
   };
 
+  // ===== VIDA (CORAÇÕES) — HUEVITOS =====
+  window._updateVidaHuevito = async function(charDocId, novaVida, justificativa, adminUser) {
+    const { doc, updateDoc, getDoc } = window._fbModules;
+    const db = window._db;
+    const snap = await getDoc(doc(db, 'approvedChars', charDocId));
+    if(!snap.exists()) throw new Error('Personagem não encontrado');
+    const data = snap.data();
+    const vidaAnterior = (typeof data.vida === 'number') ? data.vida : 5;
+    const log = Array.isArray(data.vidaLog) ? data.vidaLog : [];
+    log.push({
+      de: vidaAnterior,
+      para: novaVida,
+      motivo: justificativa,
+      por: adminUser || '?',
+      em: new Date().toISOString()
+    });
+    await updateDoc(doc(db, 'approvedChars', charDocId), { vida: novaVida, vidaLog: log });
+    if(window._logAcaoAdmin) await window._logAcaoAdmin('VIDA: '+vidaAnterior+'♥ → '+novaVida+'♥', data.name||'?', data.player||'?', adminUser, justificativa);
+  };
+
   // ===== HISTÓRICO NARRATIVO =====
   window._addHistoryEntry = async function(charDocId, entry) {
     const { doc, updateDoc, getDoc } = window._fbModules;
@@ -3815,6 +3835,12 @@ function showCharProfile(id, opts = {}) {
         <div class="profile-info-item"><span class="label">${c.lang==='huevito'?'TIPO':'IDIOMA'}</span><span class="value">${c.lang==='huevito'?'HUEVITO':c.lang?.toUpperCase()||'—'}</span></div>
         ${(()=>{
           if(c.lang!=='huevito') return '';
+          const vida = (typeof c.vida === 'number') ? c.vida : 5;
+          const coracoes = Array.from({length:5}, (_,i) => i < vida ? '❤️' : '🖤').join(' ');
+          return `<div class="profile-info-item"><span class="label">VIDA</span><span class="value" style="font-size:0.95rem;letter-spacing:2px">${coracoes}</span></div>`;
+        })()}
+        ${(()=>{
+          if(c.lang!=='huevito') return '';
           // Monta chips de pais (filiacaoIds = array novo, filiacao = texto legado)
           const ids = Array.isArray(c.filiacaoIds) && c.filiacaoIds.length ? c.filiacaoIds : [];
           if(!ids.length && !c.filiacao) return '';
@@ -3829,6 +3855,7 @@ function showCharProfile(id, opts = {}) {
         ${c.classificacao?`<div class="profile-info-item"><span class="label">CLASSIFICAÇÃO</span><span class="value" style="color:#ff9800">${c.classificacao.toUpperCase()}</span></div>`:''} 
         ${(()=>{const st=getCharStatus(id);const cor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';const label=st==='ocupado'?'OCUPADA':st==='reservado'?'RESERVADO':'DISPONÍVEL';return `<div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${cor}">${label}</span></div>`;})()}
       </div>
+      ${(c.lang==='huevito' && isAdmin) ? `<button onclick="adminAlterarVida('${c.id||id}','${(c.name||'?').replace(/'/g,"\\'")}')" style="margin-top:0.8rem;width:100%;padding:0.6rem 1rem;background:rgba(139,0,0,0.1);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">❤ ALTERAR VIDA</button>` : ''}
     </div>
     <div class="profile-main">
       <div class="profile-section"><h3>CARACTERÍSTICAS</h3>
@@ -6205,7 +6232,57 @@ async function adminRemoveTC(fichaDocId, type, itemId) {
   }
 }
 
-// ===== ADMIN: HISTÓRICO NARRATIVO =====
+// ===== ADMIN: ALTERAR VIDA (CORAÇÕES) — HUEVITOS =====
+function adminAlterarVida(charDocId, charName) {
+  const ficha = approvedChars.find(c => c.id === charDocId || c.charId === charDocId);
+  const vidaAtual = (ficha && typeof ficha.vida === 'number') ? ficha.vida : 5;
+  const existing = document.getElementById('vidaModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'vidaModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;padding:2rem';
+  modal.innerHTML = `
+    <div style="max-width:420px;width:100%;background:var(--bg2);border:1px solid var(--red);padding:1.5rem">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// ALTERAR VIDA //</div>
+      <h2 style="font-family:'Orbitron',monospace;font-size:1.1rem;color:#fff;letter-spacing:3px;margin-bottom:1.2rem">${(charName||'?').toUpperCase()}</h2>
+      <div style="margin-bottom:1.2rem">
+        <label style="display:block;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px;margin-bottom:0.6rem">VIDA ATUAL: ${vidaAtual} ♥</label>
+        <div id="vidaHeartsPicker" style="display:flex;gap:0.5rem;font-size:1.8rem;cursor:pointer">
+          ${Array.from({length:5}, (_,i) => `<span data-v="${i+1}" onclick="window._vidaSelecionada=${i+1};document.querySelectorAll('#vidaHeartsPicker span').forEach((s,j)=>s.textContent = j < window._vidaSelecionada ? '❤️' : '🖤')" style="user-select:none">${i < vidaAtual ? '❤️' : '🖤'}</span>`).join('')}
+        </div>
+      </div>
+      <div class="form-group full" style="margin-bottom:1rem">
+        <label>Justificativa *</label>
+        <textarea id="vidaJustificativa" style="min-height:80px;width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem;font-family:inherit" placeholder="Explique o motivo da alteração (ex: tomou dano em sessão, foi curado, etc.)"></textarea>
+      </div>
+      <div style="display:flex;gap:0.6rem;justify-content:flex-end">
+        <button onclick="document.getElementById('vidaModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.6rem 1.2rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">CANCELAR</button>
+        <button onclick="adminConfirmarVida('${charDocId}')" style="background:rgba(139,0,0,0.15);border:1px solid var(--red);color:var(--red-bright);padding:0.6rem 1.2rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px">✓ SALVAR</button>
+      </div>
+    </div>`;
+  window._vidaSelecionada = vidaAtual;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function adminConfirmarVida(charDocId) {
+  const justificativa = document.getElementById('vidaJustificativa')?.value.trim();
+  if(!justificativa) { showToast('⚠ A justificativa é obrigatória.', 'error'); return; }
+  const novaVida = typeof window._vidaSelecionada === 'number' ? window._vidaSelecionada : 5;
+  try {
+    await window._updateVidaHuevito(charDocId, novaVida, justificativa, window._adminUser||'?');
+    showToast('✓ Vida atualizada!', 'success');
+    document.getElementById('vidaModal')?.remove();
+    // Atualiza a ficha aberta, se for a mesma
+    const ficha = approvedChars.find(c => c.id === charDocId || c.charId === charDocId);
+    if(ficha) showCharProfile(ficha.charId || ficha.id);
+  } catch(e) {
+    showToast('✗ Erro ao atualizar vida.', 'error');
+    console.error(e);
+  }
+}
+
+
 function adminGerenciarHistorico(fichaDocId) {
   const ficha = approvedChars.find(c => c.id === fichaDocId);
   if(!ficha) return;
