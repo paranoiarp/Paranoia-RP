@@ -3666,7 +3666,7 @@ function renderChars(filter) {
       </div>`;
     }).join('') : '');
 
-  grid.innerHTML = legenda + otherList.map(c => {
+  function renderCard(c) {
     const clickId = c.charId || c.id;
     const prePhoto = window._charPhotos && window._charPhotos[clickId];
     const img = c.imageUrl
@@ -3681,7 +3681,6 @@ function renderChars(filter) {
     const dotStyle = realStatus === 'reservado' ? 'style="background:#f5a623;box-shadow:0 0 6px #f5a623"' : '';
     const sc = c.gameStatus ? `status-${c.gameStatus}` : 'status-pendente';
     const sl = c.gameStatus || 'PENDENTE';
-    const isCucurucho = c.lang === 'cucurucho';
     return `<div class="char-card" onclick="showCharProfile('${clickId}')">
       <div class="char-available ${dotClass}" ${dotStyle}></div>
       <div class="char-avatar">${img}</div>
@@ -3689,7 +3688,36 @@ function renderChars(filter) {
       ${c.player?`<div class="char-player">${c.player}</div>`:''}
       <div class="status-badge ${sc}">${sl.toUpperCase()}</div>
     </div>`;
-  }).join('') + classifiedBlock;
+  }
+
+  let bodyHtml;
+  if(filter === 'ocupado') {
+    // Agrupa por player só na visão de OCUPADOS (mantém personagens sem player no topo, sem grupo)
+    const groups = {};
+    const noPlayerList = [];
+    otherList.forEach(c => {
+      const pname = (c.player || c.playerAccount || '').trim();
+      if(!pname) { noPlayerList.push(c); return; }
+      const key = pname.toLowerCase();
+      if(!groups[key]) groups[key] = { label: pname, chars: [] };
+      groups[key].chars.push(c);
+    });
+    const groupKeys = Object.keys(groups).sort((a,b) => groups[a].label.localeCompare(groups[b].label));
+    const playerHeader = (label, count) => `<div style="grid-column:1/-1;display:flex;align-items:center;gap:0.8rem;margin:1.2rem 0 0.2rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)">
+      <span style="font-family:'Orbitron',monospace;font-size:0.95rem;letter-spacing:2px;color:var(--silver-bright)">👤 ${label.toUpperCase()}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px">${count} PERSONAGEM${count>1?'NS':''}</span>
+    </div>`;
+    bodyHtml = (noPlayerList.length ? noPlayerList.map(renderCard).join('') : '') +
+      groupKeys.map(key => {
+        const g = groups[key];
+        return playerHeader(g.label, g.chars.length) + g.chars.map(renderCard).join('');
+      }).join('');
+  } else {
+    // Organização original (sem agrupar por player)
+    bodyHtml = otherList.map(renderCard).join('');
+  }
+
+  grid.innerHTML = legenda + bodyHtml + classifiedBlock;
 }
 
 function filterChars(f, btn) {
