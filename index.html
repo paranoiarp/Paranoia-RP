@@ -3766,39 +3766,7 @@ function showCharProfile(id, opts = {}) {
   const isAdmin = !!window._adminLogado;
   const clf = `<span style="font-family:'Share Tech Mono',monospace;color:var(--red-bright);letter-spacing:2px;font-size:0.8rem;background:rgba(139,0,0,0.12);padding:0.15rem 0.5rem;border:1px solid rgba(139,0,0,0.3)">██ CLASSIFIED ██</span>`;
 
-  document.getElementById('profileContent').innerHTML = (isCucurucho && !isAdmin) ? `
-    <div class="profile-sidebar">
-      <div class="profile-img-container">
-        <div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem">🎭</div>
-      </div>
-      <div class="profile-status-box">
-        <div class="profile-status-label">// STATUS ATUAL //</div>
-        ${gs === 'classified'
-          ? `<div style="display:inline-flex;align-items:center;gap:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:3px;color:var(--red-bright);border:1px solid var(--red);padding:0.4rem 1rem;background:rgba(139,0,0,0.15);animation:flicker 3s infinite">🔒 CLASSIFIED</div>`
-          : `<div class="status-badge ${sc}" style="font-size:0.75rem;padding:0.4rem 1rem">${sl.toUpperCase()}</div>`
-        }
-      </div>
-      <div class="profile-info-box">
-        <div class="profile-info-item"><span class="label">IDENTIDADE</span><span class="value">${clf}</span></div>
-        <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${clf}</span></div>
-        <div class="profile-info-item"><span class="label">CARGO</span><span class="value">QSMP Census Bureau</span></div>
-        ${(()=>{const st=getCharStatus(id);const cor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';const label=st==='ocupado'?'OCUPADA':st==='reservado'?'RESERVADO':'DISPONÍVEL';return `<div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${cor}">${label}</span></div>`;})()}
-      </div>
-    </div>
-    <div class="profile-main">
-      <div class="profile-section">
-        <h3>CUCURUCHO</h3>
-        <p style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-dim);line-height:2;letter-spacing:1px">
-          As informações deste agente são de acesso restrito. Apenas pessoal autorizado.<br><br>
-          Aproveitem a Ilha :]
-        </p>
-        <div style="margin-top:2rem;padding:2rem;background:rgba(139,0,0,0.06);border:1px solid rgba(139,0,0,0.2);text-align:center">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:3px;margin-bottom:1rem">ARQUIVO CLASSIFICADO</div>
-          <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red-bright);letter-spacing:2px">ACESSO NEGADO — THE FEDERATION</div>
-        </div>
-      </div>
-    </div>` : `
+  document.getElementById('profileContent').innerHTML = `
     <div class="profile-sidebar">
       <div class="profile-img-container">${imgHtml}</div>
       <div class="profile-status-box">
@@ -3812,7 +3780,7 @@ function showCharProfile(id, opts = {}) {
         <div class="profile-info-item"><span class="label">PERSONAGEM</span><span class="value">${c.name}</span></div>
         <div class="profile-info-item"><span class="label">PLAYER</span><span class="value">${c.playerAccount||c.player||'—'}</span></div>
         ${c.nascimento?`<div class="profile-info-item"><span class="label">NASC. PERSONAGEM</span><span class="value">${c.nascimento}</span></div>`:''}
-        ${(()=>{const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
+        ${(()=>{if(isCucurucho && !isAdmin){return `<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${clf}</span></div>`;}const age=calcAge(c.nascimento)||c.idade;return age?`<div class="profile-info-item"><span class="label">IDADE PERSONAGEM</span><span class="value">${age} anos</span></div>`:''})()}
         <div class="profile-info-item"><span class="label">${c.lang==='huevito'?'TIPO':'IDIOMA'}</span><span class="value">${c.lang==='huevito'?'HUEVITO':c.lang?.toUpperCase()||'—'}</span></div>
         ${(()=>{
           if(c.lang!=='huevito') return '';
