@@ -1564,8 +1564,13 @@
       por: adminUser || '?',
       em: new Date().toISOString()
     });
-    await updateDoc(doc(db, 'approvedChars', charDocId), { vida: novaVida, vidaLog: log });
-    if(window._logAcaoAdmin) await window._logAcaoAdmin('VIDA: '+vidaAnterior+'♥ → '+novaVida+'♥', data.name||'?', data.player||'?', adminUser, justificativa);
+    const updateData = { vida: novaVida, vidaLog: log };
+    if(novaVida === 0) updateData.gameStatus = 'morto';
+    await updateDoc(doc(db, 'approvedChars', charDocId), updateData);
+    // Atualiza localmente
+    const idx = window.approvedChars ? window.approvedChars.findIndex(c => c.id === charDocId) : -1;
+    if(idx !== -1) { window.approvedChars[idx].vida = novaVida; if(novaVida === 0) window.approvedChars[idx].gameStatus = 'morto'; }
+    if(window._logAcaoAdmin) await window._logAcaoAdmin('VIDA: '+vidaAnterior+'♥ → '+novaVida+'♥'+(novaVida===0?' → STATUS: MORTO':''), data.name||'?', data.player||'?', adminUser, justificativa);
   };
 
   // ===== HISTÓRICO NARRATIVO =====
@@ -6304,8 +6309,10 @@ function adminAlterarVida(charDocId, charName) {
       <h2 style="font-family:'Orbitron',monospace;font-size:1.1rem;color:#fff;letter-spacing:3px;margin-bottom:1.2rem">${(charName||'?').toUpperCase()}</h2>
       <div style="margin-bottom:1.2rem">
         <label style="display:block;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px;margin-bottom:0.6rem">VIDA ATUAL: ${vidaAtual} ♥</label>
-        <div id="vidaHeartsPicker" style="display:flex;gap:0.5rem;font-size:1.8rem;cursor:pointer">
-          ${Array.from({length:5}, (_,i) => `<span data-v="${i+1}" onclick="window._vidaSelecionada=${i+1};document.querySelectorAll('#vidaHeartsPicker span').forEach((s,j)=>s.textContent = j < window._vidaSelecionada ? '❤️' : '🖤')" style="user-select:none">${i < vidaAtual ? '❤️' : '🖤'}</span>`).join('')}
+        <div id="vidaHeartsPicker" style="display:flex;gap:0.5rem;font-size:1.8rem;cursor:pointer;align-items:center">
+          <span data-v="0" title="Zerar vida (morto)" onclick="window._vidaSelecionada=0;document.querySelectorAll('#vidaHeartsPicker span').forEach((s,j)=>s.textContent = j===0?'💀':(j-1 < 0 ? '🖤' : '🖤'))" style="user-select:none;font-size:1.3rem;opacity:0.6" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">☠️</span>
+          <span style="color:var(--border);font-size:1rem;margin:0 0.2rem">|</span>
+          ${Array.from({length:5}, (_,i) => `<span data-v="${i+1}" onclick="window._vidaSelecionada=${i+1};document.querySelectorAll('#vidaHeartsPicker span[data-v]').forEach((s)=>{const v=parseInt(s.dataset.v);if(v===0)s.textContent='☠️';else s.textContent = v <= ${i+1} ? '❤️' : '🖤'})" style="user-select:none">${i < vidaAtual ? '❤️' : '🖤'}</span>`).join('')}
         </div>
       </div>
       <div class="form-group full" style="margin-bottom:1rem">
