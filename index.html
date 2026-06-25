@@ -6310,9 +6310,8 @@ function adminAlterarVida(charDocId, charName) {
       <div style="margin-bottom:1.2rem">
         <label style="display:block;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:2px;margin-bottom:0.6rem">VIDA ATUAL: ${vidaAtual} ♥</label>
         <div id="vidaHeartsPicker" style="display:flex;gap:0.5rem;font-size:1.8rem;cursor:pointer;align-items:center">
-          <span data-v="0" title="Zerar vida (morto)" onclick="window._vidaSelecionada=0;document.querySelectorAll('#vidaHeartsPicker span').forEach((s,j)=>s.textContent = j===0?'💀':(j-1 < 0 ? '🖤' : '🖤'))" style="user-select:none;font-size:1.3rem;opacity:0.6" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">☠️</span>
-          <span style="color:var(--border);font-size:1rem;margin:0 0.2rem">|</span>
-          ${Array.from({length:5}, (_,i) => `<span data-v="${i+1}" onclick="window._vidaSelecionada=${i+1};document.querySelectorAll('#vidaHeartsPicker span[data-v]').forEach((s)=>{const v=parseInt(s.dataset.v);if(v===0)s.textContent='☠️';else s.textContent = v <= ${i+1} ? '❤️' : '🖤'})" style="user-select:none">${i < vidaAtual ? '❤️' : '🖤'}</span>`).join('')}
+
+          ${Array.from({length:5}, (_,i) => `<span data-v="${i+1}" onclick="const prev=window._vidaSelecionada;const next=(prev===${i+1}&&${i+1}===1)?0:${i+1};window._vidaSelecionada=next;document.querySelectorAll('#vidaHeartsPicker span[data-v]').forEach((s)=>{const v=parseInt(s.dataset.v);s.textContent = v <= next ? '❤️' : '☠️'})" style="user-select:none">${i < vidaAtual ? '❤️' : '☠️'}</span>`).join('')}
         </div>
       </div>
       <div class="form-group full" style="margin-bottom:1rem">
