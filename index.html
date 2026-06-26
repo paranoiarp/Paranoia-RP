@@ -3956,29 +3956,29 @@ function showCharProfile(id, opts = {}) {
         })()}
         ${(()=>{
           if(c.lang!=='huevito') return '';
-          // Monta chips de pais (filiacaoIds = array novo, filiacao = texto legado)
           const ids = Array.isArray(c.filiacaoIds) && c.filiacaoIds.length ? c.filiacaoIds : [];
           if(!ids.length && !c.filiacao) return '';
-          if(!ids.length) return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.3rem"><span class="label">FILIAÇÃO</span><span class="value">${c.filiacao}</span>${c.filiacaoClassified?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:2px">🔒 CLASSIFIED</span>':''}${c.filiacaoEmObservacao?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:#ff9800;letter-spacing:2px">👁 EM OBSERVAÇÃO</span>':''}</div>`;
-          const chips = ids.map(pid => {
+          const badges = `${c.filiacaoClassified?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:2px"> 🔒 CLASSIFIED</span>':''}${c.filiacaoEmObservacao?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:#ff9800;letter-spacing:2px"> 👁 EM OBSERVAÇÃO</span>':''}`;
+          if(!ids.length) return `<div class="profile-info-item"><span class="label">FILIAÇÃO</span><span class="value" style="color:#4fc3f7">${c.filiacao.toUpperCase()}</span>${badges}</div>`;
+          const texto = ids.map(pid => {
             const pc = [...approvedChars,...CHARS_DATA].find(x=>(x.charId||x.id)===pid);
             const pname = pc ? (pc.name||pid).toUpperCase() : pid.toUpperCase();
-            return `<span onclick="showCharProfile('${pid}')" style="cursor:pointer;display:inline-flex;align-items:center;padding:0.15rem 0.55rem;background:rgba(139,0,0,0.1);border:1px solid rgba(139,0,0,0.4);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver-bright);letter-spacing:1px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(139,0,0,0.4)';this.style.color='var(--silver-bright)'">${pname}</span>`;
-          }).join(' ');
-          return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.4rem"><span class="label">FILIAÇÃO</span><span class="value" style="display:flex;flex-wrap:wrap;gap:0.3rem">${chips}</span>${c.filiacaoClassified?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:2px">🔒 CLASSIFIED</span>':''}${c.filiacaoEmObservacao?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:#ff9800;letter-spacing:2px">👁 EM OBSERVAÇÃO</span>':''}</div>`;
+            return `<span onclick="showCharProfile('${pid}')" style="cursor:pointer;color:#4fc3f7;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#4fc3f7'">${pname}</span>`;
+          }).join('<span style="color:var(--text-dim)"> / </span>');
+          return `<div class="profile-info-item"><span class="label">FILIAÇÃO</span><span class="value">${texto}</span>${badges}</div>`;
         })()}
         ${(()=>{
           if(c.lang!=='huevito') return '';
           const ids = Array.isArray(c.tutoresIds) && c.tutoresIds.length ? c.tutoresIds : [];
           if(!ids.length && !c.tutores) return '';
-          const badges = `${c.tutoresClassified?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:2px">🔒 CLASSIFIED</span>':''}${c.tutoresEmObservacao?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:#ff9800;letter-spacing:2px">👁 EM OBSERVAÇÃO</span>':''}`;
-          if(!ids.length) return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.3rem"><span class="label">TUTOR(ES)</span><span class="value">${c.tutores}</span>${badges}</div>`;
-          const chips = ids.map(pid => {
+          const badges = `${c.tutoresClassified?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:2px"> 🔒 CLASSIFIED</span>':''}${c.tutoresEmObservacao?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:#ff9800;letter-spacing:2px"> 👁 EM OBSERVAÇÃO</span>':''}`;
+          if(!ids.length) return `<div class="profile-info-item"><span class="label">TUTOR(ES)</span><span class="value" style="color:#4fc3f7">${c.tutores.toUpperCase()}</span>${badges}</div>`;
+          const texto = ids.map(pid => {
             const pc = [...approvedChars,...CHARS_DATA].find(x=>(x.charId||x.id)===pid);
             const pname = pc ? (pc.name||pid).toUpperCase() : pid.toUpperCase();
-            return `<span onclick="showCharProfile('${pid}')" style="cursor:pointer;display:inline-flex;align-items:center;padding:0.15rem 0.55rem;background:rgba(79,195,247,0.08);border:1px solid rgba(79,195,247,0.4);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver-bright);letter-spacing:1px;transition:all 0.2s" onmouseover="this.style.borderColor='#4fc3f7';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(79,195,247,0.4)';this.style.color='var(--silver-bright)'">${pname}</span>`;
-          }).join(' ');
-          return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.4rem"><span class="label">TUTOR(ES)</span><span class="value" style="display:flex;flex-wrap:wrap;gap:0.3rem">${chips}</span>${badges}</div>`;
+            return `<span onclick="showCharProfile('${pid}')" style="cursor:pointer;color:#4fc3f7;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#4fc3f7'">${pname}</span>`;
+          }).join('<span style="color:var(--text-dim)"> / </span>');
+          return `<div class="profile-info-item"><span class="label">TUTOR(ES)</span><span class="value">${texto}</span>${badges}</div>`;
         })()}
         ${c.classificacao?`<div class="profile-info-item"><span class="label">CLASSIFICAÇÃO</span><span class="value" style="color:#ff9800">${c.classificacao.toUpperCase()}</span></div>`:''} 
         ${(()=>{const st=getCharStatus(id);const cor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';const label=st==='ocupado'?'OCUPADA':st==='reservado'?'RESERVADO':'DISPONÍVEL';return `<div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${cor}">${label}</span></div>`;})()}
