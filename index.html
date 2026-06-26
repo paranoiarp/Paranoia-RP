@@ -3991,8 +3991,8 @@ function showCharProfile(id, opts = {}) {
         if(c.lang==='huevito') return '';
         const filhos = approvedChars.filter(fc => {
           if(fc.lang!=='huevito') return false;
-          const fcid = fc.charId||fc.id;
-          if(Array.isArray(fc.filiacaoIds)) return fc.filiacaoIds.includes(id);
+          if(Array.isArray(fc.filiacaoIds) && fc.filiacaoIds.includes(id)) return true;
+          if(Array.isArray(fc.tutoresIds) && fc.tutoresIds.includes(id)) return true;
           return false;
         });
         if(!filhos.length) return '';
@@ -8149,6 +8149,21 @@ async function gerarCardPNG(id) {
     }
   }
 
+  // ── Para huevitos: resolver tutores (tutoresIds) para o card ──
+  let tutoresCardStr = '—';
+  if(isHuevito && !isClassifiedCard) {
+    const tIds = Array.isArray(c.tutoresIds) && c.tutoresIds.length ? c.tutoresIds : [];
+    if(tIds.length) {
+      const allCharsRef2 = [...CHARS_DATA, ...approvedChars];
+      tutoresCardStr = tIds.map(tid => {
+        const tc = allCharsRef2.find(x=>(x.charId||x.id)===tid);
+        return tc ? (tc.name||tid).toUpperCase() : tid.toUpperCase();
+      }).join(' / ');
+    } else if(c.tutores) {
+      tutoresCardStr = c.tutores.toUpperCase();
+    }
+  }
+
   // ── Para players: huevitos sob responsabilidade ──
   let tutoriadosStr = '—';
   if(!isHuevito && !isClassifiedCard) {
@@ -8190,6 +8205,20 @@ async function gerarCardPNG(id) {
     ctx.fillText(val,cx,cy+34);
   });
   CY+=Math.ceil(dados.length/2)*cellH+10;
+
+  // Linha extra: para huevitos, mostrar tutores
+  if(isHuevito && !isClassifiedCard && tutoresCardStr !== '—') {
+    ctx.fillStyle='#1e1e1e'; ctx.fillRect(RX,CY,RW,1); CY+=14;
+    ctx.font='bold 12px "Share Tech Mono", monospace';
+    ctx.fillStyle='#888'; ctx.fillText('TUTOR(ES)',RX,CY+13);
+    ctx.font='bold 14px "Share Tech Mono", monospace';
+    ctx.fillStyle='#4fc3f7';
+    let tutCardStr = tutoresCardStr;
+    while(ctx.measureText(tutCardStr).width > RW-8 && tutCardStr.length > 2) tutCardStr = tutCardStr.slice(0,-1);
+    if(tutCardStr.length < tutoresCardStr.length) tutCardStr += '…';
+    ctx.fillText(tutCardStr,RX,CY+30);
+    CY+=46;
+  }
 
   // Linha extra: para players, mostrar huevitos sob responsabilidade
   if(!isHuevito && !isClassifiedCard && tutoriadosStr !== '—') {
