@@ -8365,9 +8365,36 @@ async function gerarCardPNG(id) {
 
   // ── DADOS DE EMISSÃO — abaixo das perícias, na coluna direita ──
   ctx.fillStyle='#1a0000'; ctx.fillRect(RX,CY,RW,1); CY+=10;
+
+  // Gerar string de data com glitch no ano para players, classified para huevitos
+  function glitchYear() {
+    const glitchChars = ['█','▓','▒','░','?','#','@','X','!'];
+    const r = () => glitchChars[Math.floor(Math.random()*glitchChars.length)];
+    return r()+r()+r()+r();
+  }
+  const emissaoStr = isHuevito
+    ? '██/██/████'
+    : '01/05/'+glitchYear();
+
   ctx.font='bold 12px "Share Tech Mono", monospace';
   ctx.fillStyle='#888888';
-  ctx.fillText('EMITIDO EM '+new Date().toLocaleDateString('pt-BR'), RX, CY+12);
+
+  if(isHuevito) {
+    // Huevito: data classified em vermelho escuro
+    ctx.fillStyle='#666666';
+    ctx.fillText('EMITIDO EM ', RX, CY+12);
+    const wEmit = ctx.measureText('EMITIDO EM ').width;
+    ctx.fillStyle='#cc3333';
+    ctx.fillText('██/██/████', RX+wEmit, CY+12);
+  } else {
+    // Player: data com glitch no ano — parte fixa cinza, ano vermelho piscando
+    ctx.fillStyle='#888888';
+    ctx.fillText('EMITIDO EM 01/05/', RX, CY+12);
+    const wFixed = ctx.measureText('EMITIDO EM 01/05/').width;
+    ctx.fillStyle='#cc3333';
+    ctx.fillText(glitchYear(), RX+wFixed, CY+12);
+  }
+
   ctx.font='bold 11px "Share Tech Mono", monospace';
   ctx.fillStyle='#555555';
   const tipoDoc = isHuevito ? 'DOCUMENTO DE ADOÇÃO // PARANOIA RP' : 'DOCUMENTO OFICIAL // PARANOIA RP';
