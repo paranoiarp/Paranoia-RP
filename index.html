@@ -2045,6 +2045,10 @@
         <input type="text" id="calDataIngame" placeholder="Ex: Dia 12 — Inverno">
       </div>
     </div>
+    <div class="form-group" id="calHorarioGroup" style="display:none">
+      <label>HORÁRIO DO EVENTO</label>
+      <input type="time" id="calHorario">
+    </div>
     <div class="form-group">
       <label>PERSONAGEM ENVOLVIDO (opcional)</label>
       <input type="text" id="calPersonagem" placeholder="Nome do personagem...">
@@ -8341,7 +8345,7 @@ function renderCalList() {
     return `<div class="cal-entry-card tipo-${e.tipo}">
       <div class="cal-entry-meta">
         <span class="cal-entry-badge tipo-${e.tipo}">${e.tipo === 'narrativa' ? '🔴 NARRATIVA' : e.tipo === 'evento' ? '⭐ EVENTO' : '📖 HISTÓRIA'}</span>
-        <span class="cal-entry-dates">📅 ${formatDateBR(e.dataReal)}${e.dataIngame ? ' &nbsp;|&nbsp; 🗺 ' + e.dataIngame : ''}</span>
+        <span class="cal-entry-dates">📅 ${formatDateBR(e.dataReal)}${e.horario ? ' &nbsp;⏰ ' + e.horario : ''}${e.dataIngame ? ' &nbsp;|&nbsp; 🗺 ' + e.dataIngame : ''}</span>
       </div>
       <div class="cal-entry-title">${e.titulo}</div>
       <div class="cal-entry-body">${escapeHtml(e.conteudo)}</div>
@@ -8373,7 +8377,7 @@ function showDayPopup(evt, dateStr) {
     entriesEl.innerHTML = entries.map(e => {
       const canDelete = isAdmin || (e.autor && e.autor.toLowerCase() === user.toLowerCase());
       return `<div style="border-bottom:1px solid var(--border);padding:0.6rem 0;font-size:0.82rem;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:${e.tipo==='narrativa'?'var(--red-bright)':e.tipo==='evento'?'#e8c84a':'#7aadff'};margin-bottom:0.2rem">${e.tipo.toUpperCase()}${e.dataIngame?' · '+e.dataIngame:''}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:${e.tipo==='narrativa'?'var(--red-bright)':e.tipo==='evento'?'#e8c84a':'#7aadff'};margin-bottom:0.2rem">${e.tipo.toUpperCase()}${e.horario?' · ⏰ '+e.horario:''}${e.dataIngame?' · '+e.dataIngame:''}</div>
         <div style="color:var(--silver-bright);font-family:'Share Tech Mono',monospace;font-size:0.8rem;margin-bottom:0.2rem">${e.titulo}</div>
         <div style="color:var(--text);font-size:0.78rem;line-height:1.5;white-space:pre-wrap">${escapeHtml(e.conteudo.substring(0,180))}${e.conteudo.length>180?'…':''}</div>
         ${e.personagem?`<div style="font-size:0.65rem;color:var(--text-dim);margin-top:0.2rem">👤 ${e.personagem}</div>`:''}
@@ -8435,7 +8439,12 @@ function openCalModal(prefillDate) {
   document.getElementById('calConteudo').value = '';
   document.getElementById('calDataIngame').value = '';
   document.getElementById('calPersonagem').value = '';
+  document.getElementById('calHorario').value = '';
+  document.getElementById('calHorarioGroup').style.display = 'none';
   document.getElementById('calTipo').value = 'player';
+  document.getElementById('calTipo').onchange = function() {
+    document.getElementById('calHorarioGroup').style.display = this.value === 'evento' ? 'block' : 'none';
+  };
 
   document.getElementById('calModal').classList.add('open');
 }
@@ -8451,6 +8460,7 @@ async function submitCalEntry() {
   const dataIngame = document.getElementById('calDataIngame').value.trim();
   const personagem = document.getElementById('calPersonagem').value.trim();
   const tipo = document.getElementById('calTipo').value;
+  const horario = document.getElementById('calHorario').value.trim();
 
   if(!titulo || !conteudo || !dataReal) {
     showToast('⚠ Preencha título, conteúdo e data real.', 'error');
@@ -8473,6 +8483,7 @@ async function submitCalEntry() {
     dataIngame: dataIngame || '',
     personagem: personagem || '',
     tipo,
+    horario: tipo === 'evento' ? horario : '',
     autor,
     criadoEm: new Date().toISOString(),
   };
