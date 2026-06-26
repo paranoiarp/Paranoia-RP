@@ -5118,10 +5118,112 @@ function adminAbrirGerenciar(fichaDocId) {
       ${actionBtn('🔑','GERAR SENHA',`gerarSenhaEdicao('${fichaDocId}','${playerOuNomeEsc}');document.getElementById('gerenciarModal').remove()`,'Senha temporária de edição para o player')}
       ${actionBtn('🔗','VINCULAR PLAYER',`adminVincularPersonagem('${fichaDocId}','${nome}','${contaEsc}');document.getElementById('gerenciarModal').remove()`,'Transferir a ficha para outra conta')}
       ${actionBtn('🏷','CLASSIFICAÇÃO',`adminChangeClassificacao('${fichaDocId}','${nome}','${classifEsc}');document.getElementById('gerenciarModal').remove()`,'Editar a classificação/cargo do personagem')}
+      ${actionBtn('👨‍👩‍👧','FILIAÇÃO E TUTORIA',`adminEditarFiliacao('${fichaDocId}');document.getElementById('gerenciarModal').remove()`,'Definir pais/responsáveis ou huevitos tutelados')}
     </div>`;
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
+// ===== ADMIN: EDITAR FILIAÇÃO E TUTORIA =====
+async function adminEditarFiliacao(fichaDocId) {
+  const { doc, getDoc, updateDoc } = window._fbModules;
+  const snap = await getDoc(doc(window._db, 'fichas', fichaDocId));
+  if(!snap.exists()) return alert('Ficha não encontrada.');
+  const ficha = snap.data();
+  const isHuevito = ficha.lang === 'huevito';
+
+  // Init sets
+  let initFilIds = [];
+  if(Array.isArray(ficha.filiacaoIds) && ficha.filiacaoIds.length) {
+    initFilIds = ficha.filiacaoIds;
+  } else if(typeof ficha.filiacao === 'string' && ficha.filiacao.trim()) {
+    const legacyNames = ficha.filiacao.split(/[,e&\/]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+    initFilIds = legacyNames.map(n => {
+      const found = [...approvedChars, ...CHARS_DATA].find(x => (x.name||'').toLowerCase()===n);
+      return found ? (found.charId||found.id) : null;
+    }).filter(Boolean);
+  }
+  window._admFiliacaoIds = new Set(initFilIds);
+  window._admTutoresIds = new Set(Array.isArray(ficha.tutoresIds) ? ficha.tutoresIds : []);
+
+  const existing = document.getElementById('filiacaoTutoriaModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'filiacaoTutoriaModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:1rem';
+
+  const nomePers = (ficha.name||fichaDocId).toUpperCase();
+
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--red);width:100%;max-width:560px;max-height:90vh;overflow-y:auto">
+      <div style="padding:1.2rem 1.5rem;border-bottom:1px solid var(--red);display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.25rem">// FILIAÇÃO E TUTORIA //</div>
+          <div style="font-family:'Orbitron',monospace;font-size:1rem;color:#fff;letter-spacing:3px">${nomePers}</div>
+        </div>
+        <button onclick="document.getElementById('filiacaoTutoriaModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕</button>
+      </div>
+      <div style="padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:1.2rem">
+        ${isHuevito ? `
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver);letter-spacing:2px;margin-bottom:0.5rem">PAIS / RESPONSÁVEIS</div>
+          <div id="adm_filiacao_tags" style="display:flex;flex-wrap:wrap;gap:0.4rem;min-height:36px;padding:0.5rem;background:var(--bg3);border:1px solid var(--border);margin-bottom:0.5rem"></div>
+          <button type="button" onclick="openFiliacaoSelector()" style="padding:0.5rem 1.2rem;background:none;border:1px solid var(--red-bright);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(139,0,0,0.15)'" onmouseout="this.style.background='none'">+ VINCULAR PAI/MÃE</button>
+          <div style="display:flex;gap:1rem;margin-top:0.8rem">
+            <label style="display:flex;align-items:center;gap:0.5rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);cursor:pointer">
+              <input type="checkbox" id="adm_filiacao_classified" ${ficha.filiacaoClassified?'checked':''} style="accent-color:var(--red-bright)"> 🔒 CLASSIFIED
+            </label>
+            <label style="display:flex;align-items:center;gap:0.5rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);cursor:pointer">
+              <input type="checkbox" id="adm_filiacao_observacao" ${ficha.filiacaoEmObservacao?'checked':''} style="accent-color:#ff9800"> 👁 EM OBSERVAÇÃO
+            </label>
+          </div>
+        </div>` : ''}
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver);letter-spacing:2px;margin-bottom:0.5rem">${isHuevito?'TUTORES':'HUEVITOS SOB RESPONSABILIDADE'}</div>
+          <div id="adm_tutores_tags" style="display:flex;flex-wrap:wrap;gap:0.4rem;min-height:36px;padding:0.5rem;background:var(--bg3);border:1px solid var(--border);margin-bottom:0.5rem"></div>
+          <button type="button" onclick="openTutoresSelector()" style="padding:0.5rem 1.2rem;background:none;border:1px solid #4fc3f7;color:#4fc3f7;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(79,195,247,0.1)'" onmouseout="this.style.background='none'">+ ${isHuevito?'VINCULAR TUTOR':'VINCULAR HUEVITO'}</button>
+        </div>
+        <div style="display:flex;gap:0.8rem;justify-content:flex-end;padding-top:0.5rem;border-top:1px solid var(--border)">
+          <button onclick="document.getElementById('filiacaoTutoriaModal').remove()" style="padding:0.6rem 1.2rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
+          <button onclick="salvarFiliacaoTutoria('${fichaDocId}')" style="padding:0.6rem 1.5rem;background:var(--red);border:1px solid var(--red-bright);color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">✓ SALVAR</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  renderFiliacaoTags();
+  renderTutoresTags();
+}
+
+async function salvarFiliacaoTutoria(fichaDocId) {
+  const { doc, getDoc, updateDoc } = window._fbModules;
+  const snap = await getDoc(doc(window._db, 'fichas', fichaDocId));
+  if(!snap.exists()) return;
+  const ficha = snap.data();
+  const filiacaoIds = [...(window._admFiliacaoIds||new Set())];
+  const tutoresIds = [...(window._admTutoresIds||new Set())];
+  const allChars = [...CHARS_DATA, ...approvedChars];
+  const filiacaoStr = filiacaoIds.map(id => {
+    const ch = allChars.find(x=>(x.charId||x.id)===id);
+    return ch ? (ch.name||id) : id;
+  }).join(', ') || ficha.filiacao || '';
+  const updates = {
+    filiacaoIds,
+    filiacao: filiacaoStr,
+    tutoresIds,
+  };
+  if(ficha.lang==='huevito') {
+    updates.filiacaoClassified = document.getElementById('adm_filiacao_classified')?.checked || false;
+    updates.filiacaoEmObservacao = document.getElementById('adm_filiacao_observacao')?.checked || false;
+  }
+  try {
+    await updateDoc(doc(window._db, 'fichas', fichaDocId), updates);
+    document.getElementById('filiacaoTutoriaModal')?.remove();
+    alert('Filiação e tutoria salvos com sucesso!');
+  } catch(e) {
+    alert('Erro ao salvar: ' + e.message);
+  }
+}
+
 // ===== ADMIN: VINCULAR PERSONAGEM A OUTRO PLAYER =====
 async function adminVincularPersonagem(fichaDocId, charName, currentAccount) {
   const { collection, getDocs } = window._fbModules;
@@ -8031,6 +8133,35 @@ async function gerarCardPNG(id) {
 
   ctx.fillStyle='#8b0000'; ctx.fillRect(RX,CY,RW,1); CY+=16;
 
+  // ── Resolver filiação para o card ──
+  let filiacaoCardStr = '—';
+  if(isHuevito && !isClassifiedCard) {
+    const filIds = Array.isArray(c.filiacaoIds) && c.filiacaoIds.length ? c.filiacaoIds : [];
+    if(filIds.length) {
+      const allCharsRef = [...CHARS_DATA, ...approvedChars];
+      const nomes = filIds.map(fid => {
+        const fc = allCharsRef.find(x=>(x.charId||x.id)===fid);
+        return fc ? (fc.name||fid).toUpperCase() : fid.toUpperCase();
+      });
+      filiacaoCardStr = nomes.join(' / ');
+    } else if(c.filiacao) {
+      filiacaoCardStr = c.filiacao.toUpperCase();
+    }
+  }
+
+  // ── Para players: huevitos sob responsabilidade ──
+  let tutoriadosStr = '—';
+  if(!isHuevito && !isClassifiedCard) {
+    const myId = c.charId || c.id;
+    const allCharsRef = [...CHARS_DATA, ...approvedChars];
+    const meusTutelados = allCharsRef.filter(x => {
+      if(x.lang !== 'huevito') return false;
+      if(Array.isArray(x.tutoresIds) && x.tutoresIds.includes(myId)) return true;
+      return false;
+    });
+    if(meusTutelados.length) tutoriadosStr = meusTutelados.map(x=>(x.name||x.id).toUpperCase()).join(', ');
+  }
+
   // DADOS: player, nascimento, idioma, status
   const dados = isClassifiedCard ? [
     ['PLAYER',     '████████'],
@@ -8040,7 +8171,7 @@ async function gerarCardPNG(id) {
   ] : isHuevito ? [
     ['PLAYER',     (c.player||'—').toUpperCase()],
     ['NASCIMENTO', c.nascimento||'—'],
-    ['FILIAÇÃO',   (c.filiacao||'—').toUpperCase()],
+    ['FILIAÇÃO',   filiacaoCardStr],
     ['STATUS',     gsLabel],
   ] : [
     ['PLAYER',     (c.player||'—').toUpperCase()],
@@ -8059,6 +8190,21 @@ async function gerarCardPNG(id) {
     ctx.fillText(val,cx,cy+34);
   });
   CY+=Math.ceil(dados.length/2)*cellH+10;
+
+  // Linha extra: para players, mostrar huevitos sob responsabilidade
+  if(!isHuevito && !isClassifiedCard && tutoriadosStr !== '—') {
+    ctx.fillStyle='#1e1e1e'; ctx.fillRect(RX,CY,RW,1); CY+=14;
+    ctx.font='bold 12px "Share Tech Mono", monospace';
+    ctx.fillStyle='#888'; ctx.fillText('TUTELADOS',RX,CY+13);
+    ctx.font='bold 14px "Share Tech Mono", monospace';
+    ctx.fillStyle='#4fc3f7';
+    // truncar se necessário
+    let tutStr = tutoriadosStr;
+    while(ctx.measureText(tutStr).width > RW-8 && tutStr.length > 2) tutStr = tutStr.slice(0,-1);
+    if(tutStr.length < tutoriadosStr.length) tutStr += '…';
+    ctx.fillText(tutStr,RX,CY+30);
+    CY+=46;
+  }
 
   ctx.fillStyle='#1e1e1e'; ctx.fillRect(RX,CY,RW,1); CY+=20;
 
