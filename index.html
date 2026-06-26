@@ -5125,10 +5125,8 @@ function adminAbrirGerenciar(fichaDocId) {
 }
 // ===== ADMIN: EDITAR FILIAÇÃO E TUTORIA =====
 async function adminEditarFiliacao(fichaDocId) {
-  const { doc, getDoc, updateDoc } = window._fbModules;
-  const snap = await getDoc(doc(window._db, 'fichas', fichaDocId));
-  if(!snap.exists()) return alert('Ficha não encontrada.');
-  const ficha = snap.data();
+  const ficha = approvedChars.find(c => c.id === fichaDocId);
+  if(!ficha) { showToast('⚠ Ficha não encontrada.', 'error'); return; }
   const isHuevito = ficha.lang === 'huevito';
 
   // Init sets
@@ -5195,10 +5193,9 @@ async function adminEditarFiliacao(fichaDocId) {
 }
 
 async function salvarFiliacaoTutoria(fichaDocId) {
-  const { doc, getDoc, updateDoc } = window._fbModules;
-  const snap = await getDoc(doc(window._db, 'fichas', fichaDocId));
-  if(!snap.exists()) return;
-  const ficha = snap.data();
+  const { doc, updateDoc } = window._fbModules;
+  const ficha = approvedChars.find(c => c.id === fichaDocId);
+  if(!ficha) { showToast('⚠ Ficha não encontrada.', 'error'); return; }
   const filiacaoIds = [...(window._admFiliacaoIds||new Set())];
   const tutoresIds = [...(window._admTutoresIds||new Set())];
   const allChars = [...CHARS_DATA, ...approvedChars];
@@ -5216,9 +5213,12 @@ async function salvarFiliacaoTutoria(fichaDocId) {
     updates.filiacaoEmObservacao = document.getElementById('adm_filiacao_observacao')?.checked || false;
   }
   try {
-    await updateDoc(doc(window._db, 'fichas', fichaDocId), updates);
+    await updateDoc(doc(window._db, 'approvedChars', fichaDocId), updates);
+    // Atualiza memória local
+    const idx = approvedChars.findIndex(c => c.id === fichaDocId);
+    if(idx !== -1) Object.assign(approvedChars[idx], updates);
     document.getElementById('filiacaoTutoriaModal')?.remove();
-    alert('Filiação e tutoria salvos com sucesso!');
+    showToast('✓ Filiação e tutoria salvos!', 'success');
   } catch(e) {
     alert('Erro ao salvar: ' + e.message);
   }
