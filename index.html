@@ -8235,7 +8235,7 @@ const CAL_DAYS_PT = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
 // Carrega entradas do Firestore em tempo real
 function initCalendario() {
   const { onSnapshot, collection, query, orderBy } = window._fbModules;
-  onSnapshot(query(collection(db, 'calendarEntries'), orderBy('dataReal','asc')), snap => {
+  onSnapshot(query(collection(window._db, 'calendarEntries'), orderBy('dataReal','asc')), snap => {
     calEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
     renderCalendar();
     updateCalHomeCard();
@@ -8257,6 +8257,7 @@ function calChangeMonth(delta) {
 }
 
 function switchCalView(view, btn) {
+  if(typeof calView === 'undefined') return;
   calView = view;
   document.querySelectorAll('.cal-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
@@ -8266,6 +8267,7 @@ function switchCalView(view, btn) {
 }
 
 function renderCalendar() {
+  if(typeof CAL_MONTHS_PT === 'undefined' || typeof calMonth === 'undefined') return;
   document.getElementById('calMonthLabel').textContent = CAL_MONTHS_PT[calMonth] + ' ' + calYear;
   // Mostra botão de adicionar se logado
   const addBtn = document.getElementById('calAddBtn');
@@ -8512,7 +8514,7 @@ async function deleteCalEntry(id, evt) {
   if(!confirm('Remover esta entrada do calendário?')) return;
   try {
     const { doc, deleteDoc } = window._fbModules;
-    await deleteDoc(doc(db, 'calendarEntries', id));
+    await deleteDoc(doc(window._db, 'calendarEntries', id));
     showToast('✓ Entrada removida.', 'success');
     closeCalDayPopup();
   } catch(err) {
