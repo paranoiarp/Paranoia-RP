@@ -5111,64 +5111,123 @@ function adminAbrirGerenciar(fichaDocId) {
 }
 // ===== ADMIN: VINCULAR PERSONAGEM A OUTRO PLAYER =====
 async function adminVincularPersonagem(fichaDocId, charName, currentAccount) {
-  // Busca lista de players cadastrados
-  const { collection, getDocs, doc, updateDoc } = window._fbModules;
+  const { collection, getDocs } = window._fbModules;
   let players = [];
   try {
     const snap = await getDocs(collection(window._db, 'playerAuth'));
-    players = snap.docs.map(d => d.data().username || d.id).sort();
+    players = snap.docs.map(d => ({
+      username: d.data().username || d.id,
+      chars: d.data().chars || []
+    }));
   } catch(e) { players = []; }
 
-  // Também inclui admins como opção
   const admins = ADMIN_USERS;
-  const allAccounts = [...new Set([...admins, ...players])].sort();
+  // Build unified list: admins first, then players, deduped
+  const adminEntries = admins.map(u => ({ username: u, isAdmin: true, chars: [] }));
+  const playerEntries = players
+    .filter(p => !admins.includes(p.username))
+    .map(p => ({ ...p, isAdmin: false }));
+  const allAccounts = [...adminEntries, ...playerEntries].sort((a,b) => a.username.localeCompare(b.username));
+
+  // Count chars per account from approvedChars if available
+  const charCounts = {};
+  if(window.approvedChars) {
+    window.approvedChars.forEach(c => {
+      const acc = (c.playerAccount||'').toLowerCase();
+      if(acc) charCounts[acc] = (charCounts[acc]||0) + 1;
+    });
+  }
 
   const existing = document.getElementById('vincularModal');
   if(existing) existing.remove();
 
+  // Track selected account
+  window._vincularSelected = currentAccount || '';
+
   const modal = document.createElement('div');
   modal.id = 'vincularModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:2rem';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:1rem';
+
+  const renderCards = (filter='') => {
+    const f = filter.toLowerCase().trim();
+    const filtered = allAccounts.filter(a => !f || a.username.toLowerCase().includes(f));
+    if(!filtered.length) return `<div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--text-dim);text-align:center;padding:1.5rem">Nenhum player encontrado.</div>`;
+    return filtered.map(a => {
+      const u = a.username;
+      const isSelected = u.toLowerCase() === (window._vincularSelected||'').toLowerCase();
+      const isCurrent = u.toLowerCase() === (currentAccount||'').toLowerCase();
+      const count = charCounts[u.toLowerCase()] || 0;
+      return `
+        <div onclick="window._vincularSelected='${u}';document.querySelectorAll('.vplayer-card').forEach(c=>c.classList.remove('vp-sel'));this.classList.add('vp-sel');document.getElementById('vincularConfirmBtn').disabled=false;document.getElementById('vincularSelLabel').textContent='→ '+('${u}').toUpperCase()"
+          class="vplayer-card${isSelected?' vp-sel':''}"
+          style="display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0.8rem;border:1px solid ${isSelected?'var(--red)':'var(--border)'};background:${isSelected?'rgba(139,0,0,0.15)':isCurrent?'rgba(255,255,255,0.03)':'transparent'};cursor:pointer;transition:all 0.15s;border-radius:2px;margin-bottom:0.3rem"
+          onmouseover="if(!this.classList.contains('vp-sel')){this.style.borderColor='var(--silver)';this.style.background='rgba(255,255,255,0.05)'}"
+          onmouseout="if(!this.classList.contains('vp-sel')){this.style.borderColor='var(--border)';this.style.background='${isCurrent?'rgba(255,255,255,0.03)':'transparent'}'}">
+          <div style="width:32px;height:32px;border-radius:50%;background:${a.isAdmin?'rgba(139,0,0,0.3)':'rgba(255,255,255,0.06)'};border:1px solid ${a.isAdmin?'var(--red)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:0.6rem;color:${a.isAdmin?'var(--red-bright)':'var(--silver)'};flex-shrink:0">${u.charAt(0).toUpperCase()}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:${isSelected?'var(--red-bright)':'var(--silver-bright)'};letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.toUpperCase()}${a.isAdmin?' <span style="color:var(--red-bright);font-size:0.6rem">★ ADMIN</span>':''}${isCurrent?' <span style="color:#4caf50;font-size:0.6rem">● ATUAL</span>':''}</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);margin-top:0.1rem">${count} personagem${count!==1?'s':''}</div>
+          </div>
+          ${isSelected?'<div style="color:var(--red-bright);font-size:1rem">✓</div>':''}
+        </div>`;
+    }).join('');
+  };
+
   modal.innerHTML = `
-    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:440px;width:100%">
-      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.5rem">// VINCULAR PERSONAGEM //</div>
-      <h3 style="font-family:'Orbitron',monospace;color:#fff;margin-bottom:0.4rem;font-size:0.95rem;letter-spacing:3px">${charName.toUpperCase()}</h3>
-      <p style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-dim);letter-spacing:1px;margin-bottom:1.4rem">
-        Conta atual: <span style="color:var(--silver-bright)">${currentAccount||'— nenhuma —'}</span>
-      </p>
-
-      <div style="margin-bottom:1rem">
-        <label style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--silver);letter-spacing:2px;display:block;margin-bottom:0.5rem">SELECIONAR CONTA EXISTENTE</label>
-        <select id="vincularSelect" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.8rem;outline:none;margin-bottom:0.5rem">
-          <option value="">— escolha um usuário —</option>
-          ${allAccounts.map(u => `<option value="${u}" ${u===currentAccount?'selected':''}>${u.toUpperCase()}${admins.includes(u)?' ★':''}</option>`).join('')}
-        </select>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px">★ = admin</div>
+    <div style="background:var(--bg2);border:1px solid var(--red);padding:2rem;max-width:500px;width:100%;max-height:90vh;display:flex;flex-direction:column;gap:0">
+      <div style="margin-bottom:1.2rem">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:3px;margin-bottom:0.4rem">// VINCULAR PERSONAGEM //</div>
+        <h3 style="font-family:'Orbitron',monospace;color:#fff;font-size:0.95rem;letter-spacing:3px;margin-bottom:0.3rem">${charName.toUpperCase()}</h3>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--text-dim);letter-spacing:1px">
+          Conta atual: <span style="color:var(--silver-bright)">${currentAccount||'— nenhuma —'}</span>
+        </p>
       </div>
 
-      <div style="margin-bottom:1.4rem">
-        <label style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--silver);letter-spacing:2px;display:block;margin-bottom:0.5rem">OU DIGITAR MANUALMENTE</label>
-        <input type="text" id="vincularInput" placeholder="nome da conta..." style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.7rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.8rem;outline:none;text-transform:lowercase" oninput="this.value=this.value.toLowerCase()">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px;margin-top:0.3rem">O campo manual tem prioridade sobre o seletor.</div>
+      <div style="position:relative;margin-bottom:0.8rem">
+        <input id="vincularSearch" type="text" placeholder="🔍  buscar player..." autocomplete="off"
+          style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.65rem 1rem;font-family:'Share Tech Mono',monospace;font-size:0.78rem;outline:none;letter-spacing:1px"
+          onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'"
+          oninput="document.getElementById('vincularPlayerList').innerHTML=window._renderVincularCards(this.value)">
       </div>
 
-      <div id="vincularMsg" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.72rem;margin-bottom:0.8rem"></div>
+      <style>
+        .vp-sel { border-color: var(--red) !important; background: rgba(139,0,0,0.15) !important; }
+        .vp-sel > div:first-child { border-color: var(--red) !important; }
+      </style>
 
-      <div style="display:flex;gap:0.5rem">
-        <button onclick="document.getElementById('vincularModal').remove()" style="flex:1;padding:0.75rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
-        <button id="vincularBtn" onclick="confirmarVinculacao('${fichaDocId}','${charName.replace(/'/g,"\'")}','${currentAccount}')" style="flex:2;padding:0.75rem;background:rgba(139,0,0,0.2);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:2px;cursor:pointer">🔗 CONFIRMAR VÍNCULO</button>
+      <div id="vincularPlayerList" style="overflow-y:auto;max-height:320px;padding-right:2px;flex:1">
+        ${renderCards()}
+      </div>
+
+      <div style="margin-top:1rem;padding-top:0.8rem;border-top:1px solid var(--border)">
+        <div id="vincularSelLabel" style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:${currentAccount?'var(--red-bright)':'var(--text-dim)'};letter-spacing:1px;margin-bottom:0.8rem;min-height:1rem">
+          ${currentAccount ? '→ ' + currentAccount.toUpperCase() : 'Nenhum player selecionado'}
+        </div>
+        <div id="vincularMsg" style="display:none;font-family:'Share Tech Mono',monospace;font-size:0.7rem;margin-bottom:0.6rem"></div>
+        <div style="display:flex;gap:0.5rem">
+          <button onclick="document.getElementById('vincularModal').remove()" style="flex:1;padding:0.7rem;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">CANCELAR</button>
+          <button id="vincularConfirmBtn" onclick="confirmarVinculacao('${fichaDocId}','${charName.replace(/'/g,"\\'").replace(/"/g,'&quot;')}','${currentAccount}')"
+            ${!currentAccount?'disabled':''} 
+            style="flex:2;padding:0.7rem;background:rgba(139,0,0,0.2);border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s"
+            onmouseover="if(!this.disabled)this.style.background='rgba(139,0,0,0.35)'" onmouseout="this.style.background='rgba(139,0,0,0.2)'">
+            🔗 CONFIRMAR VÍNCULO
+          </button>
+        </div>
       </div>
     </div>`;
+
+  // Expose render fn for the oninput
+  window._renderVincularCards = renderCards;
+
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  setTimeout(() => document.getElementById('vincularSearch')?.focus(), 100);
 }
 
 async function confirmarVinculacao(fichaDocId, charName, oldAccount) {
-  const manual = (document.getElementById('vincularInput')?.value || '').trim().toLowerCase();
-  const select = (document.getElementById('vincularSelect')?.value || '').trim().toLowerCase();
-  const newAccount = manual || select;
+  const newAccount = (window._vincularSelected || '').trim().toLowerCase();
   const msgEl = document.getElementById('vincularMsg');
-  const btn = document.getElementById('vincularBtn');
+  const btn = document.getElementById('vincularConfirmBtn');
 
   if(!newAccount) {
     msgEl.textContent = '⚠ Selecione ou digite uma conta de destino.';
