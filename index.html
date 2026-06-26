@@ -3945,13 +3945,26 @@ function showCharProfile(id, opts = {}) {
           // Monta chips de pais (filiacaoIds = array novo, filiacao = texto legado)
           const ids = Array.isArray(c.filiacaoIds) && c.filiacaoIds.length ? c.filiacaoIds : [];
           if(!ids.length && !c.filiacao) return '';
-          if(!ids.length) return `<div class="profile-info-item"><span class="label">FILIAÇÃO</span><span class="value">${c.filiacao}</span></div>`;
+          if(!ids.length) return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.3rem"><span class="label">FILIAÇÃO</span><span class="value">${c.filiacao}</span>${c.filiacaoClassified?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:2px">🔒 CLASSIFIED</span>':''}${c.filiacaoEmObservacao?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:#ff9800;letter-spacing:2px">👁 EM OBSERVAÇÃO</span>':''}</div>`;
           const chips = ids.map(pid => {
             const pc = [...approvedChars,...CHARS_DATA].find(x=>(x.charId||x.id)===pid);
             const pname = pc ? (pc.name||pid).toUpperCase() : pid.toUpperCase();
             return `<span onclick="showCharProfile('${pid}')" style="cursor:pointer;display:inline-flex;align-items:center;padding:0.15rem 0.55rem;background:rgba(139,0,0,0.1);border:1px solid rgba(139,0,0,0.4);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver-bright);letter-spacing:1px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(139,0,0,0.4)';this.style.color='var(--silver-bright)'">${pname}</span>`;
           }).join(' ');
-          return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.4rem"><span class="label">FILIAÇÃO</span><span class="value" style="display:flex;flex-wrap:wrap;gap:0.3rem">${chips}</span></div>`;
+          return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.4rem"><span class="label">FILIAÇÃO</span><span class="value" style="display:flex;flex-wrap:wrap;gap:0.3rem">${chips}</span>${c.filiacaoClassified?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:2px">🔒 CLASSIFIED</span>':''}${c.filiacaoEmObservacao?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:#ff9800;letter-spacing:2px">👁 EM OBSERVAÇÃO</span>':''}</div>`;
+        })()}
+        ${(()=>{
+          if(c.lang!=='huevito') return '';
+          const ids = Array.isArray(c.tutoresIds) && c.tutoresIds.length ? c.tutoresIds : [];
+          if(!ids.length && !c.tutores) return '';
+          const badges = `${c.tutoresClassified?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:var(--red-bright);letter-spacing:2px">🔒 CLASSIFIED</span>':''}${c.tutoresEmObservacao?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;color:#ff9800;letter-spacing:2px">👁 EM OBSERVAÇÃO</span>':''}`;
+          if(!ids.length) return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.3rem"><span class="label">TUTOR(ES)</span><span class="value">${c.tutores}</span>${badges}</div>`;
+          const chips = ids.map(pid => {
+            const pc = [...approvedChars,...CHARS_DATA].find(x=>(x.charId||x.id)===pid);
+            const pname = pc ? (pc.name||pid).toUpperCase() : pid.toUpperCase();
+            return `<span onclick="showCharProfile('${pid}')" style="cursor:pointer;display:inline-flex;align-items:center;padding:0.15rem 0.55rem;background:rgba(79,195,247,0.08);border:1px solid rgba(79,195,247,0.4);font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver-bright);letter-spacing:1px;transition:all 0.2s" onmouseover="this.style.borderColor='#4fc3f7';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(79,195,247,0.4)';this.style.color='var(--silver-bright)'">${pname}</span>`;
+          }).join(' ');
+          return `<div class="profile-info-item" style="align-items:flex-start;flex-direction:column;gap:0.4rem"><span class="label">TUTOR(ES)</span><span class="value" style="display:flex;flex-wrap:wrap;gap:0.3rem">${chips}</span>${badges}</div>`;
         })()}
         ${c.classificacao?`<div class="profile-info-item"><span class="label">CLASSIFICAÇÃO</span><span class="value" style="color:#ff9800">${c.classificacao.toUpperCase()}</span></div>`:''} 
         ${(()=>{const st=getCharStatus(id);const cor=st==='ocupado'?'var(--red-bright)':st==='reservado'?'#ff9800':'#4caf50';const label=st==='ocupado'?'OCUPADA':st==='reservado'?'RESERVADO':'DISPONÍVEL';return `<div class="profile-info-item"><span class="label">VAGA</span><span class="value" style="color:${cor}">${label}</span></div>`;})()}
@@ -6249,8 +6262,30 @@ function adminEditarFicha(fichaDocId) {
             <label>🥚 FILIAÇÃO (Pais / Responsáveis) — exclusivo Huevitos <span style="font-weight:400;color:var(--text-dim);font-size:0.75rem">— clique para vincular personagens</span></label>
             <div id="adm_filiacao_tags" style="display:flex;flex-wrap:wrap;gap:0.4rem;min-height:36px;padding:0.5rem;background:var(--bg3);border:1px solid var(--border);margin-bottom:0.5rem"></div>
             <button type="button" onclick="openFiliacaoSelector()" style="padding:0.5rem 1.2rem;background:none;border:1px solid var(--red);color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(139,0,0,0.15)'" onmouseout="this.style.background='none'">+ VINCULAR PERSONAGEM</button>
+            <div style="display:flex;gap:1.5rem;margin-top:0.6rem">
+              <label style="display:flex;align-items:center;gap:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);cursor:pointer;letter-spacing:1px">
+                <input type="checkbox" id="adm_filiacao_classified" ${ficha.filiacaoClassified?'checked':''} style="accent-color:var(--red-bright)"> 🔒 CLASSIFIED
+              </label>
+              <label style="display:flex;align-items:center;gap:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#ff9800;cursor:pointer;letter-spacing:1px">
+                <input type="checkbox" id="adm_filiacao_observacao" ${ficha.filiacaoEmObservacao?'checked':''} style="accent-color:#ff9800"> 👁 EM OBSERVAÇÃO
+              </label>
+            </div>
             <input type="hidden" id="adm_filiacao" value="">
-          </div>`:'<input type="hidden" id="adm_filiacao" value="">'}
+          </div>
+          <div class="form-group full" id="adm_tutores_wrap">
+            <label>👤 TUTOR(ES) RESPONSÁVEL(EIS) — exclusivo Huevitos <span style="font-weight:400;color:var(--text-dim);font-size:0.75rem">— clique para vincular personagens</span></label>
+            <div id="adm_tutores_tags" style="display:flex;flex-wrap:wrap;gap:0.4rem;min-height:36px;padding:0.5rem;background:var(--bg3);border:1px solid var(--border);margin-bottom:0.5rem"></div>
+            <button type="button" onclick="openTutoresSelector()" style="padding:0.5rem 1.2rem;background:none;border:1px solid #4fc3f7;color:#4fc3f7;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(79,195,247,0.1)'" onmouseout="this.style.background='none'">+ VINCULAR TUTOR</button>
+            <div style="display:flex;gap:1.5rem;margin-top:0.6rem">
+              <label style="display:flex;align-items:center;gap:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--red-bright);cursor:pointer;letter-spacing:1px">
+                <input type="checkbox" id="adm_tutores_classified" ${ficha.tutoresClassified?'checked':''} style="accent-color:var(--red-bright)"> 🔒 CLASSIFIED
+              </label>
+              <label style="display:flex;align-items:center;gap:0.4rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#ff9800;cursor:pointer;letter-spacing:1px">
+                <input type="checkbox" id="adm_tutores_observacao" ${ficha.tutoresEmObservacao?'checked':''} style="accent-color:#ff9800"> 👁 EM OBSERVAÇÃO
+              </label>
+            </div>
+            <input type="hidden" id="adm_tutores" value="">
+          </div>`:'<input type="hidden" id="adm_filiacao" value=""><input type="hidden" id="adm_tutores" value="">'}
           <div class="form-group"><label>Nome do Player</label><input type="text" id="adm_player" value="${ficha.player||''}"></div>
           <div class="form-group"><label>Data de Nasc. Personagem</label><input type="text" id="adm_nascimento" value="${ficha.nascimento||''}"></div>
           <div class="form-group"><label>Idade Personagem</label><input type="text" id="adm_idade" value="${ficha.idade||''}"></div>
@@ -6299,6 +6334,9 @@ function adminEditarFicha(fichaDocId) {
   }
   window._admFiliacaoIds = new Set(initFilIds);
   renderFiliacaoTags();
+  // Init tutores
+  window._admTutoresIds = new Set(Array.isArray(ficha.tutoresIds) ? ficha.tutoresIds : []);
+  renderTutoresTags();
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
 
@@ -6430,6 +6468,130 @@ function filterFiliacaoSearch(q) {
   });
 }
 
+// ===== TUTORES — FUNÇÕES =====
+function renderTutoresTags() {
+  const container = document.getElementById('adm_tutores_tags');
+  if(!container) return;
+  const ids = window._admTutoresIds || new Set();
+  if(ids.size === 0) {
+    container.innerHTML = `<span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px">Nenhum tutor vinculado.</span>`;
+    return;
+  }
+  container.innerHTML = [...ids].map(id => {
+    const ch = [...approvedChars, ...CHARS_DATA].find(x=>(x.charId||x.id)===id);
+    const name = ch ? (ch.name||id).toUpperCase() : id.toUpperCase();
+    const lang = ch ? (ch.lang||'') : '';
+    const langColor = lang==='espanhol'?'#d4a017':lang==='portugues'?'#4fc3f7':lang==='ingles'?'#4caf50':lang==='frances'?'#c084a0':'var(--silver)';
+    return `<span style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.25rem 0.7rem;background:rgba(79,195,247,0.08);border:1px solid #4fc3f7;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--silver-bright);letter-spacing:1px">
+      <span style="color:${langColor}">${name}</span>
+      <button type="button" onclick="removeTutorId('${id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:0.9rem;padding:0;line-height:1" title="Remover">✕</button>
+    </span>`;
+  }).join('');
+}
+
+function removeTutorId(id) {
+  if(!window._admTutoresIds) return;
+  window._admTutoresIds.delete(id);
+  renderTutoresTags();
+}
+
+function openTutoresSelector() {
+  const existing = document.getElementById('tutoresSelectorModal');
+  if(existing) existing.remove();
+  const allChars = [...CHARS_DATA, ...approvedChars.filter(c=>!CHARS_DATA.find(d=>d.id===(c.charId||c.id)))];
+  const nonHuevito = allChars.filter(c=>c.lang && c.lang !== 'huevito' && c.lang !== 'cucurucho');
+  const seen = new Set();
+  const uniq = nonHuevito.filter(c => {
+    const cid = c.charId||c.id;
+    if(seen.has(cid)) return false;
+    seen.add(cid); return true;
+  });
+  const langs = [...new Set(uniq.map(c=>c.lang).filter(Boolean))].sort();
+  const sel = window._admTutoresIds || new Set();
+
+  const selectorModal = document.createElement('div');
+  selectorModal.id = 'tutoresSelectorModal';
+  selectorModal.style.cssText = 'position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:1rem';
+
+  const langFilters = langs.map(l => `<button class="tut-lang-btn" data-lang="${l}" onclick="filterTutoresLang('${l}',this)"
+    style="padding:0.3rem 0.8rem;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s">${l.toUpperCase()}</button>`).join('');
+
+  const charButtons = uniq.map(c => {
+    const cid = c.charId||c.id;
+    const isSel = sel.has(cid);
+    return `<button type="button" class="tut-char-btn" data-id="${cid}" data-lang="${c.lang||''}" data-name="${(c.name||'').toLowerCase()}"
+      onclick="toggleTutorChar('${cid}',this)"
+      style="padding:0.5rem 0.8rem;background:${isSel?'rgba(79,195,247,0.15)':'var(--bg3)'};border:1px solid ${isSel?'#4fc3f7':'var(--border)'};color:${isSel?'var(--silver-bright)':'var(--text-dim)'};font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s;text-align:left">
+      ${isSel?'✓ ':''}<span style="color:var(--silver)">${(c.name||c.id).toUpperCase()}</span><span style="font-size:0.55rem;color:var(--text-dim);margin-left:0.4rem">${(c.lang||'').toUpperCase()}</span>
+    </button>`;
+  }).join('');
+
+  selectorModal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid #4fc3f7;width:100%;max-width:700px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:1rem 1.5rem;border-bottom:1px solid #4fc3f7;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#4fc3f7;letter-spacing:3px;margin-bottom:0.25rem">// VINCULAR TUTOR //</div>
+          <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:#fff;letter-spacing:3px">SELECIONAR TUTOR(ES)</div>
+        </div>
+        <button onclick="document.getElementById('tutoresSelectorModal').remove()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:0.7rem">✕</button>
+      </div>
+      <div style="padding:0.8rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0">
+        <input type="text" id="tutoresBusca" placeholder="Buscar personagem..." oninput="filterTutoresSearch(this.value)"
+          style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.5rem 0.8rem;font-family:'Share Tech Mono',monospace;font-size:0.75rem;outline:none;margin-bottom:0.6rem"
+          onfocus="this.style.borderColor='#4fc3f7'" onblur="this.style.borderColor='var(--border)'">
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+          <button class="tut-lang-btn active-lang" data-lang="" onclick="filterTutoresLang('',this)"
+            style="padding:0.3rem 0.8rem;background:#4fc3f7;border:1px solid #4fc3f7;color:#000;font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:1px;cursor:pointer">TODOS</button>
+          ${langFilters}
+        </div>
+      </div>
+      <div id="tutoresCharList" style="overflow-y:auto;padding:1rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.5rem;flex:1">
+        ${charButtons}
+      </div>
+      <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);flex-shrink:0;display:flex;justify-content:flex-end">
+        <button onclick="document.getElementById('tutoresSelectorModal').remove()" style="padding:0.6rem 1.5rem;background:#4fc3f7;border:1px solid #4fc3f7;color:#000;font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer">✓ CONFIRMAR</button>
+      </div>
+    </div>`;
+  document.body.appendChild(selectorModal);
+  selectorModal.addEventListener('click', e => { if(e.target===selectorModal) selectorModal.remove(); });
+}
+
+function toggleTutorChar(id, btn) {
+  if(!window._admTutoresIds) window._admTutoresIds = new Set();
+  if(window._admTutoresIds.has(id)) {
+    window._admTutoresIds.delete(id);
+    btn.style.background = 'var(--bg3)';
+    btn.style.borderColor = 'var(--border)';
+    btn.style.color = 'var(--text-dim)';
+    btn.innerHTML = btn.innerHTML.replace(/^✓\s*/, '');
+  } else {
+    window._admTutoresIds.add(id);
+    btn.style.background = 'rgba(79,195,247,0.15)';
+    btn.style.borderColor = '#4fc3f7';
+    btn.style.color = 'var(--silver-bright)';
+    if(!btn.textContent.trim().startsWith('✓')) btn.prepend(document.createTextNode('✓ '));
+  }
+  renderTutoresTags();
+}
+
+function filterTutoresLang(lang, btn) {
+  document.querySelectorAll('.tut-lang-btn').forEach(b => {
+    b.style.background = 'var(--bg3)'; b.style.borderColor = 'var(--border)'; b.style.color = 'var(--text-dim)';
+  });
+  if(btn) { btn.style.background = '#4fc3f7'; btn.style.borderColor = '#4fc3f7'; btn.style.color = '#000'; }
+  document.querySelectorAll('.tut-char-btn').forEach(b => {
+    const match = !lang || b.dataset.lang === lang;
+    b.style.display = match ? '' : 'none';
+  });
+}
+
+function filterTutoresSearch(q) {
+  const lq = q.toLowerCase();
+  document.querySelectorAll('.tut-char-btn').forEach(b => {
+    b.style.display = (!lq || b.dataset.name.includes(lq)) ? '' : 'none';
+  });
+}
+
 function adminEditAttr(attr, delta) {
   if(!window._admEditAttrs) return;
   const cur = window._admEditAttrs[attr] || 1;
@@ -6471,6 +6633,15 @@ async function salvarAdminEdit(fichaDocId) {
       return ch ? (ch.name||id) : id;
     }).join(', ') || ficha.filiacao || '',
     filiacaoIds: [...(window._admFiliacaoIds||new Set())],
+    filiacaoClassified: document.getElementById('adm_filiacao_classified')?.checked || false,
+    filiacaoEmObservacao: document.getElementById('adm_filiacao_observacao')?.checked || false,
+    tutores: [...(window._admTutoresIds||new Set())].map(id => {
+      const ch = [...approvedChars, ...CHARS_DATA].find(x=>(x.charId||x.id)===id||(x.id)===id);
+      return ch ? (ch.name||id) : id;
+    }).join(', ') || '',
+    tutoresIds: [...(window._admTutoresIds||new Set())],
+    tutoresClassified: document.getElementById('adm_tutores_classified')?.checked || false,
+    tutoresEmObservacao: document.getElementById('adm_tutores_observacao')?.checked || false,
     player: document.getElementById('adm_player')?.value.trim() || ficha.player || '',
     nascimento: document.getElementById('adm_nascimento')?.value.trim() || '',
     idade: document.getElementById('adm_idade')?.value.trim() || '',
