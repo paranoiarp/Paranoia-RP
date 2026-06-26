@@ -1293,7 +1293,7 @@
   // Inicializar EmailJS — configure sua PUBLIC KEY em emailjs.com
   // Substitua 'YOUR_PUBLIC_KEY' pela sua chave após criar conta
   if(typeof emailjs !== 'undefined') {
-    emailjs.init({ publicKey: 'YOUR_PUBLIC_KEY' });
+    emailjs.init({ publicKey: 'n0dHktzwBGkLcZ7Q7' });
     window._emailjsReady = true;
   }
 </script>
@@ -5452,7 +5452,7 @@ window._sendEmailNotif = async function(toEmail, playerAccount, type, charName, 
   if(!window._emailjsReady) return;
   const labels = {aprovada:'Ficha Aprovada',rejeitada:'Ficha Rejeitada',vida:'Vida Alterada',status:'Status Alterado',calendario:'Evento no Calendário',ficha:'Atualização na Ficha'};
   try {
-    await emailjs.send('SERVICE_ID', 'TEMPLATE_ID', {
+    await emailjs.send('service_wjwwerb', 'template_209vs4m', {
       to_email: toEmail,
       to_name: playerAccount,
       subject: `[Paranoia RP] ${labels[type]||'Notificação'} — ${charName||''}`,
