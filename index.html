@@ -3300,7 +3300,21 @@
       </div>
       <div id="pendingHistoricoList"><div class="empty-state">NENHUMA ENTRADA PENDENTE</div></div>
     </div>
-    <div id="personagens-admin" class="admin-content"><div id="approvedList">
+    <div id="personagens-admin" class="admin-content">
+    <div id="adminCharFilters" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.2rem">
+      <button onclick="setAdminCharFilter('todos',this)" class="filter-btn active" style="font-size:0.7rem;padding:0.35rem 0.8rem">TODOS</button>
+      <button onclick="setAdminCharFilter('vivo',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🟢 VIVOS</button>
+      <button onclick="setAdminCharFilter('morto',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🔴 MORTOS</button>
+      <button onclick="setAdminCharFilter('desaparecido',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🟡 DESAPARECIDOS</button>
+      <button onclick="setAdminCharFilter('huevito',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🥚 HUEVITOS</button>
+      <button onclick="setAdminCharFilter('ingles',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🇺🇸 INGLÊS</button>
+      <button onclick="setAdminCharFilter('espanhol',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🇪🇸 ESPANHOL</button>
+      <button onclick="setAdminCharFilter('portugues',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🇧🇷 PORTUGUÊS</button>
+      <button onclick="setAdminCharFilter('frances',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🇫🇷 FRANCÊS</button>
+      <button onclick="setAdminCharFilter('coreano',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🇰🇷 COREANO</button>
+      <button onclick="setAdminCharFilter('cucurucho',this)" class="filter-btn" style="font-size:0.7rem;padding:0.35rem 0.8rem">🎭 THE FEDERATION</button>
+    </div>
+    <div id="approvedList">
     <div class="pending-card" id="apc_BwjZBmqwbkXDaFrAe2VD">
       <div class="pending-info">
         <h4>SLIMECICLE</h4>
@@ -5011,18 +5025,33 @@ async function confirmEditRgId(fichaDocId) {
   }
 }
 
+let _adminCharFilter = 'todos';
+function setAdminCharFilter(val, btn) {
+  _adminCharFilter = val;
+  document.querySelectorAll('#adminCharFilters .filter-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderApprovedAdmin();
+}
+
 function renderApprovedAdmin() {
   const list = document.getElementById('approvedList');
   if(!list) return;
   if(!approvedChars.length) { list.innerHTML = '<div class="empty-state">NENHUM PERSONAGEM APROVADO</div>'; return; }
   const langOrder = ['huevito','ingles','espanhol','portugues','frances','coreano','cucurucho'];
   const langLabels = {huevito:'🥚 HUEVITOS',ingles:'🇺🇸 INGLÊS',espanhol:'🇪🇸 ESPANHOL',portugues:'🇧🇷 PORTUGUÊS',frances:'🇫🇷 FRANCÊS',coreano:'🇰🇷 COREANO',cucurucho:'🎭 THE FEDERATION'};
+  const statusFiltros = ['vivo','morto','desaparecido'];
+  const f = _adminCharFilter || 'todos';
+  let chars = approvedChars;
+  if(f !== 'todos') {
+    if(statusFiltros.includes(f)) chars = chars.filter(c => (c.gameStatus||'vivo') === f);
+    else chars = chars.filter(c => (c.lang||'') === f);
+  }
   const grupos = {};
   langOrder.forEach(l => grupos[l] = []);
-  approvedChars.forEach(f => {
-    const lang = f.lang || 'outros';
-    if(grupos[lang]) grupos[lang].push(f);
-    else { if(!grupos['outros']) grupos['outros'] = []; grupos['outros'].push(f); }
+  chars.forEach(c => {
+    const lang = c.lang || 'outros';
+    if(grupos[lang]) grupos[lang].push(c);
+    else { if(!grupos['outros']) grupos['outros'] = []; grupos['outros'].push(c); }
   });
   const sectionHeader = (label, count) => `<div style="margin:1.4rem 0 0.5rem;padding:0.5rem 1rem;background:var(--bg3);border-left:3px solid var(--red);display:flex;align-items:center;gap:0.8rem"><span style="font-family:'Orbitron',monospace;font-size:0.82rem;letter-spacing:3px;color:var(--silver-bright)">${label}</span><span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);letter-spacing:1px">${count} PERSONAGEM${count!==1?'NS':''}</span></div>`;
   const renderCard = (f) => {
@@ -5069,12 +5098,13 @@ function renderApprovedAdmin() {
     </div>`;
   };
   const allLangs = [...langOrder, ...(grupos['outros']?.length ? ['outros'] : [])];
-  list.innerHTML = allLangs.map(lang => {
-    const chars = grupos[lang];
-    if(!chars || !chars.length) return '';
+  const html = allLangs.map(lang => {
+    const cs = grupos[lang];
+    if(!cs || !cs.length) return '';
     const label = langLabels[lang] || lang.toUpperCase();
-    return sectionHeader(label, chars.length) + chars.map(renderCard).join('');
+    return sectionHeader(label, cs.length) + cs.map(renderCard).join('');
   }).join('');
+  list.innerHTML = html || '<div class="empty-state">NENHUM PERSONAGEM ENCONTRADO</div>';
 }
 
 // ===== ADMIN: MODAL "GERENCIAR" — agrupa as ações da ficha =====
