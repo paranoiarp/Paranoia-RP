@@ -8018,9 +8018,10 @@ async function gerarCardPNG(id) {
   // ── CANVAS — altura dinâmica ──
   const W=960;
   const nSkillsEst=c.skills?Math.min(c.skills.length,8):0;
+  const nDynBlocks=(c.filiacaoIds&&c.filiacaoIds.length?1:0)+(c.tutoresIds&&c.tutoresIds.length?1:0)+(c.tuteladosIds&&c.tuteladosIds.length?1:0);
   const leftColH=68+14+218+34+18+140+28+26+24;
-  const rightColH=68+14+54+17+102+15+24+70+24+(Math.ceil(nSkillsEst/4)*32+16)+60+24;
-  const H=Math.max(leftColH,rightColH)+20;
+  const rightColH=68+14+54+17+102+15+24+70+24+(Math.ceil(nSkillsEst/4)*32+16)+60+24+100+(nDynBlocks*46);
+  const H=Math.max(leftColH,rightColH)+60;
   const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
