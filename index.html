@@ -8490,7 +8490,7 @@ async function submitCalEntry() {
 
   try {
     const { collection, addDoc } = window._fbModules;
-    await addDoc(collection(db, 'calendarEntries'), entry);
+    await addDoc(collection(window._db, 'calendarEntries'), entry);
     closeCalModal();
     showToast('✓ Entrada adicionada ao calendário!', 'success');
     // Notificar todos os players com personagem aprovado
