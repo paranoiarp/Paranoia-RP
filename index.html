@@ -3677,6 +3677,15 @@ window.addEventListener('popstate', (e) => {
   }
 });
 
+// ── Variáveis do calendário (declaradas cedo para evitar temporal dead zone) ──
+let calEntries = [];
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calView = 'grid';
+let calActiveDayPopup = null;
+const CAL_MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CAL_DAYS_PT = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+
 // ── Ao carregar a página: respeitar a URL atual ──
 (function initFromURL() {
   const params = new URLSearchParams(window.location.search);
@@ -8223,14 +8232,6 @@ buildNavPersonagensMenu();
 
 
 // ===== CALENDÁRIO =====
-let calEntries = [];
-let calYear = new Date().getFullYear();
-let calMonth = new Date().getMonth(); // 0-indexed
-let calView = 'grid';
-let calActiveDayPopup = null;
-
-const CAL_MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const CAL_DAYS_PT = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
 
 // Carrega entradas do Firestore em tempo real
 function initCalendario() {
@@ -8257,7 +8258,6 @@ function calChangeMonth(delta) {
 }
 
 function switchCalView(view, btn) {
-  if(typeof calView === 'undefined') return;
   calView = view;
   document.querySelectorAll('.cal-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
@@ -8267,7 +8267,6 @@ function switchCalView(view, btn) {
 }
 
 function renderCalendar() {
-  if(typeof CAL_MONTHS_PT === 'undefined' || typeof calMonth === 'undefined') return;
   document.getElementById('calMonthLabel').textContent = CAL_MONTHS_PT[calMonth] + ' ' + calYear;
   // Mostra botão de adicionar se logado
   const addBtn = document.getElementById('calAddBtn');
