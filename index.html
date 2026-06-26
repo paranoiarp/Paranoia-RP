@@ -1964,7 +1964,7 @@
     <li id="nav-ficha-li" style="display:none"><a href="javascript:void(0)" onclick="showPage('ficha')" id="nav-ficha">Enviar Ficha</a></li>
     <li><a href="javascript:void(0)" onclick="showPage('calendario')" id="nav-calendario">Calendário</a></li>
     <li><a href="javascript:void(0)" onclick="showPage('minha-area')" id="nav-minha-area" style="color:var(--silver-bright)">Minha Área</a></li>
-    <li><a href="javascript:void(0)" onclick="showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
+    <li><a href="javascript:void(0)" onclick="window._adminLogado ? showPage('admin-panel') : showPage('admin-gate')" id="nav-admin" style="color:var(--red-bright)">Admin</a></li>
   </ul>
   <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
     <button id="nav-notif-btn" onclick="toggleNotifPanel()" style="display:none;position:relative;background:none;border:none;cursor:pointer;padding:0.3rem;font-size:1.2rem;line-height:1" title="Notificações">
@@ -3634,8 +3634,8 @@ function showPage(id, opts = {}) {
   if(id==='admin-panel') { renderPending(); renderApprovedAdmin(); }
   if(id==='calendario') { if(typeof renderCalendar==='function') renderCalendar(); }
   if(id==='player-panel') { if(!window._playerLogado) { showPage('minha-area'); return; } loadPlayerPanel(); }
-  if(id==='minha-area' && window._adminLogado) { showPage('admin-panel'); return; }
   if(id==='minha-area' && window._playerLogado) { showPage('player-panel'); return; }
+  if(id==='minha-area' && window._adminLogado) { showPage('admin-panel'); return; }
   if(id==='ficha') {
     if(!window._playerLogado) { showPage('minha-area'); return; }
     const notice = document.getElementById('fichaPlayerNotice');
@@ -8460,7 +8460,7 @@ async function submitCalEntry() {
   const dataIngame = document.getElementById('calDataIngame').value.trim();
   const personagem = document.getElementById('calPersonagem').value.trim();
   const tipo = document.getElementById('calTipo').value;
-  const horario = document.getElementById('calHorario').value.trim();
+  const horario = document.getElementById('calHorario').value || '';
 
   if(!titulo || !conteudo || !dataReal) {
     showToast('⚠ Preencha título, conteúdo e data real.', 'error');
@@ -8498,7 +8498,7 @@ async function submitCalEntry() {
       const players = [...new Set(approvedChars.map(c => c.playerAccount).filter(Boolean))];
       await Promise.all(players.map(p =>
         window._sendPlayerNotif(p, 'calendario', titulo,
-          `Novo evento no calendário: ${dataReal || ''}${personagem ? ' — ' + personagem : ''}`)
+          `Novo evento no calendário: ${dataReal || ''}${horario ? ' às ' + horario : ''}${personagem ? ' — ' + personagem : ''}`)
       ));
     }
   } catch(err) {
