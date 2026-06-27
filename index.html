@@ -8170,8 +8170,8 @@ async function gerarCardPNG(id) {
   // NOME — colado ao topo
   ctx.font='bold 38px "Orbitron", monospace';
   ctx.fillStyle= isClassifiedCard ? '#4fc3f7' : '#ffffff';
-  let nomeFit= isClassifiedCard ? '██████████' : (c.name||'?').toUpperCase();
-  if(!isClassifiedCard){ while(ctx.measureText(nomeFit).width>RW-8&&nomeFit.length>2) nomeFit=nomeFit.slice(0,-1); if(nomeFit.length<(c.name||'').length) nomeFit+='…'; }
+  let nomeFit= (c.name||'?').toUpperCase();
+  while(ctx.measureText(nomeFit).width>RW-8&&nomeFit.length>2) nomeFit=nomeFit.slice(0,-1); if(nomeFit.length<(c.name||'').length) nomeFit+='…';
   ctx.fillText(nomeFit,RX,CY+38);
   CY+=54;
 
