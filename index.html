@@ -7984,7 +7984,7 @@ async function gerarCardPNG(id) {
 
   const isHuevito = c.lang === 'huevito';
   // Card censurado para classified quando não-admin
-  const isClassifiedCard = !window._adminLogado && (c.gameStatus || c.status || '') === 'classified';
+  const isClassifiedCard = (c.gameStatus || c.status || '') === 'classified';
 
   // ── IDENTIFICADOR ──
   const LANG_SIGLAS = {ingles:'ING',espanhol:'ESP',portugues:'POR',frances:'FRA',coreano:'KOR',cucurucho:'FED',huevito:'HUE'};
