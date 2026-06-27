@@ -8054,7 +8054,7 @@ async function gerarCardPNG(id) {
   const HEADER_H = 68;
   ctx.fillStyle='#0d0000';
   ctx.fillRect(0,0,W,HEADER_H);
-  ctx.fillStyle='#8b0000'; ctx.fillRect(0,HEADER_H-2,W,2);
+  ctx.fillStyle='#1a3a5c'; ctx.fillRect(0,HEADER_H-2,W,2);
 
   // Logo Paranoia
   const parLogo = await loadImg('https://paranoiarp.github.io/Paranoia-RP/Paranoia%20Logo.png');
@@ -8075,7 +8075,7 @@ async function gerarCardPNG(id) {
   // Nº RG — direita
   ctx.textAlign='right';
   ctx.font='bold 16px "Orbitron", monospace';
-  ctx.fillStyle='#cc0000';
+  ctx.fillStyle='#4fc3f7';
   ctx.fillText('Nº ' + RG_ID, W-18, 34);
   ctx.font='bold 9px "Share Tech Mono", monospace';
   ctx.fillStyle='#aaaaaa';
@@ -8085,7 +8085,7 @@ async function gerarCardPNG(id) {
   // ── 4. FOTO ──
   const FOTO_X=18, FOTO_Y=HEADER_H+14;
   const FOTO_SIZE=218;
-  ctx.strokeStyle='#8b0000'; ctx.lineWidth=2;
+  ctx.strokeStyle='#1a3a5c'; ctx.lineWidth=2;
   ctx.strokeRect(FOTO_X-2,FOTO_Y-2,FOTO_SIZE+4,FOTO_SIZE+4);
   ctx.fillStyle='#111';
   ctx.fillRect(FOTO_X,FOTO_Y,FOTO_SIZE,FOTO_SIZE);
@@ -8169,13 +8169,13 @@ async function gerarCardPNG(id) {
 
   // NOME — colado ao topo
   ctx.font='bold 38px "Orbitron", monospace';
-  ctx.fillStyle= isClassifiedCard ? '#cc0000' : '#ffffff';
+  ctx.fillStyle= isClassifiedCard ? '#4fc3f7' : '#ffffff';
   let nomeFit= isClassifiedCard ? '██████████' : (c.name||'?').toUpperCase();
   if(!isClassifiedCard){ while(ctx.measureText(nomeFit).width>RW-8&&nomeFit.length>2) nomeFit=nomeFit.slice(0,-1); if(nomeFit.length<(c.name||'').length) nomeFit+='…'; }
   ctx.fillText(nomeFit,RX,CY+38);
   CY+=54;
 
-  ctx.fillStyle='#8b0000'; ctx.fillRect(RX,CY,RW,1); CY+=16;
+  ctx.fillStyle='#1a3a5c'; ctx.fillRect(RX,CY,RW,1); CY+=16;
 
   // ── Resolver filiação para o card ──
   let filiacaoCardStr = '—';
@@ -8283,7 +8283,7 @@ async function gerarCardPNG(id) {
 
   // ATRIBUTOS — label
   ctx.font='bold 16px "Share Tech Mono", monospace';
-  ctx.fillStyle='#8b0000'; ctx.fillText('ATRIBUTOS',RX,CY); CY+=22;
+  ctx.fillStyle='#4fc3f7'; ctx.fillText('ATRIBUTOS',RX,CY); CY+=22;
 
   if(c.attrs && !isClassifiedCard){
     const attrList=Object.entries(c.attrs);
@@ -8292,7 +8292,7 @@ async function gerarCardPNG(id) {
       const bx=RX+i*(boxW+3);
       ctx.fillStyle='#0d1017'; ctx.fillRect(bx,CY,boxW,58);
       ctx.strokeStyle='#1e2030'; ctx.lineWidth=1; ctx.strokeRect(bx,CY,boxW,58);
-      ctx.fillStyle='#8b0000'; ctx.fillRect(bx,CY,boxW,3);
+      ctx.fillStyle='#1a3a5c'; ctx.fillRect(bx,CY,boxW,3);
       ctx.font='bold 13px "Share Tech Mono", monospace';
       ctx.fillStyle='#cc2200'; ctx.textAlign='center';
       ctx.fillText(k,bx+boxW/2,CY+20);
@@ -8308,7 +8308,7 @@ async function gerarCardPNG(id) {
   if(c.skills&&c.skills.length && !isClassifiedCard){
     CY+=12;
     ctx.font='bold 16px "Share Tech Mono", monospace';
-    ctx.fillStyle='#8b0000'; ctx.fillText('PERÍCIAS',RX,CY); CY+=22;
+    ctx.fillStyle='#4fc3f7'; ctx.fillText('PERÍCIAS',RX,CY); CY+=22;
     const COLS=4;
     const skillW=Math.floor(RW/COLS)-4;
     const skillH=28;
@@ -8319,14 +8319,14 @@ async function gerarCardPNG(id) {
       const row=Math.floor(i/COLS);
       const bx=RX+col*(skillW+4);
       const by=CY+row*(skillH+4);
-      ctx.fillStyle='rgba(0,60,0,0.35)';
-      ctx.strokeStyle='#2a6a2a'; ctx.lineWidth=1;
+      ctx.fillStyle='rgba(0,40,80,0.35)';
+      ctx.strokeStyle='#1a4a7a'; ctx.lineWidth=1;
       ctx.fillRect(bx,by,skillW,skillH);
       ctx.strokeRect(bx,by,skillW,skillH);
       ctx.font='bold 13px "Share Tech Mono", monospace';
-      ctx.fillStyle='#66bb6a';
+      ctx.fillStyle='#4fc3f7';
       ctx.fillText('✓',bx+7,by+19);
-      ctx.fillStyle='#88dd88';
+      ctx.fillStyle='#4fc3f7';
       let txt=s;
       while(ctx.measureText(txt).width>skillW-30&&txt.length>2) txt=txt.slice(0,-1);
       if(txt.length<s.length) txt+='…';
@@ -8341,11 +8341,11 @@ async function gerarCardPNG(id) {
     CY += 10;
     const bW = RW, bH = 110;
     ctx.fillStyle = 'rgba(100,0,0,0.18)';
-    ctx.strokeStyle = '#cc0000'; ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#1a3a5c'; ctx.lineWidth = 1.5;
     ctx.fillRect(RX, CY, bW, bH);
     ctx.strokeRect(RX, CY, bW, bH);
     ctx.font = 'bold 13px "Share Tech Mono", monospace';
-    ctx.fillStyle = '#cc0000'; ctx.textAlign = 'center';
+    ctx.fillStyle = '#4fc3f7'; ctx.textAlign = 'center';
     ctx.fillText('██ ACESSO RESTRITO ██', RX + bW/2, CY + 28);
     ctx.font = 'bold 10px "Share Tech Mono", monospace';
     ctx.fillStyle = '#884444';
@@ -8357,7 +8357,7 @@ async function gerarCardPNG(id) {
     ctx.textAlign = 'left';
     // Selo de cadeado (🔒) textual
     ctx.font = '32px serif'; ctx.textAlign = 'center';
-    ctx.fillStyle = '#cc0000';
+    ctx.fillStyle = '#4fc3f7';
     ctx.fillText('🔒', RX + bW/2, CY + bH + 36);
     ctx.textAlign = 'left';
     CY += bH + 56;
@@ -8368,7 +8368,7 @@ async function gerarCardPNG(id) {
 
   // Gerar string de data com glitch no ano para players, classified para huevitos
   function glitchYear() {
-    const glitchChars = ['█','▓','▒','░','?','#','@','X','!'];
+    const glitchChars = ['?','#','@','X','!','%','&','*','~'];
     const r = () => glitchChars[Math.floor(Math.random()*glitchChars.length)];
     return r()+r()+r()+r();
   }
@@ -8384,14 +8384,14 @@ async function gerarCardPNG(id) {
     ctx.fillStyle='#666666';
     ctx.fillText('EMITIDO EM ', RX, CY+12);
     const wEmit = ctx.measureText('EMITIDO EM ').width;
-    ctx.fillStyle='#cc3333';
+    ctx.fillStyle='#4fc3f7';
     ctx.fillText('██/██/████', RX+wEmit, CY+12);
   } else {
     // Player: data com glitch no ano — parte fixa cinza, ano vermelho piscando
     ctx.fillStyle='#888888';
     ctx.fillText('EMITIDO EM 01/05/', RX, CY+12);
     const wFixed = ctx.measureText('EMITIDO EM 01/05/').width;
-    ctx.fillStyle='#cc3333';
+    ctx.fillStyle='#4fc3f7';
     ctx.fillText(glitchYear(), RX+wFixed, CY+12);
   }
 
